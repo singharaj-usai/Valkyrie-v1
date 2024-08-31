@@ -1,9 +1,16 @@
 $(document).ready(function() {
-    function validateForm(form) {
+    function validateForm(form, isSignup) {
         const username = $('#username').val();
         const password = $('#password').val();
+        const confirmPassword = isSignup ? $('#confirm-password').val() : password;
+
         let isValid = true;
         let errorMessages = [];
+
+        if (username.trim() === '') {
+            isValid = false;
+            errorMessages.push("Username cannot be empty.");
+        }
 
         if (username.length < 3 || username.length > 18) {
             isValid = false;
@@ -28,10 +35,15 @@ $(document).ready(function() {
             isValid = false;
             errorMessages.push("Username contains inappropriate words.");
         }
-        
-        if (password.length < 6) {
+
+        if (password.trim() === '') {
             isValid = false;
-            errorMessages.push("Password must be at least 6 characters long.");
+            errorMessages.push("Password cannot be empty.");
+        }
+        
+        if (isSignup && password !== confirmPassword) {
+            isValid = false;
+            errorMessages.push("Passwords do not match.");
         }
 
         if (!isValid) {
@@ -91,14 +103,15 @@ $(document).ready(function() {
 
     $('#signup-form').on('submit', function(e) {
         e.preventDefault();
-        if (validateForm(this)) {
+        if (validateForm(this, true)) {
             const username = $('#username').val();
             const password = $('#password').val();
+            const confirmPassword = $('#confirm-password').val();
 
             $.ajax({
                 url: '/api/signup',
                 method: 'POST',
-                data: { username, password },
+                data: { username, password, confirmPassword },
                 success: function(response) {
                     showAlert('success', 'Sign up successful! Please log in.');
                     setTimeout(() => {
@@ -119,7 +132,7 @@ $(document).ready(function() {
 
     $('#login-form').on('submit', function(e) {
         e.preventDefault();
-        if (validateForm(this)) {
+        if (validateForm(this, false)) {
             const username = $('#username').val();
             const password = $('#password').val();
 

@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
 });
 
 const User = mongoose.model('User', userSchema);
@@ -126,10 +126,6 @@ app.post('/api/signup', validateUser, async (req, res) => {
 
     try {
         const { username, password } = req.body;
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(400).send('Username already exists');
-        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ username, password: hashedPassword });
         await user.save();
