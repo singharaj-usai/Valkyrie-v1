@@ -79,4 +79,17 @@ router.post('/logout', (req, res) => {
     });
 });
 
+// Search users endpoint
+router.get('/search', async (req, res) => {
+    try {
+        const { username } = req.query;
+        const regex = new RegExp(username, 'i'); // 'i' flag for case-insensitive search
+        const users = await User.find({ username: regex }, 'username');
+        res.json(users);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).send('Error searching users');
+    }
+});
+
 module.exports = router;
