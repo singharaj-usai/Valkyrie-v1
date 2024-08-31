@@ -24,6 +24,12 @@ $(document).ready(function() {
         return isValid;
     }
 
+    // Load navbar
+    $.get('/navbar.html', function(data) {
+        $('#navbar-container').html(data);
+        updateAuthUI();
+      });
+
         // Check if user is already logged in
     function checkAuth() {
         const username = localStorage.getItem("username");

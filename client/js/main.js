@@ -7,9 +7,18 @@ const App = {
     authContainerId: "auth-container",
   },
 
+    // Load navbar
+    loadNavbar: function() {
+        $.get('/navbar.html', function(data) {
+          $('#navbar-container').html(data);
+          App.updateAuthUI();
+        });
+      },
+    
   // Initialize the application
   init: function () {
     $(document).ready(() => {
+        this.loadNavbar();
         this.checkAuth();
 
 
@@ -84,6 +93,8 @@ const App = {
       .replace(/'/g, "&#039;");
   },
 
+
+  
   // Update authentication UI
   updateAuthUI: function () {
     // Simulating authentication status (replace with actual auth check)
