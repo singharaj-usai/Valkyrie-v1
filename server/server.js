@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const { body, validationResult } = require('express-validator');
 const path = require('path');
+const moment = require('moment-timezone');
 
 
 
@@ -26,6 +27,14 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    signupDate: {
+        type: Date,
+        default: () => moment().tz('America/New_York').toDate()
+    },
+    lastLoggedIn: {
+        type: Date,
+        default: null
     },
 });
 
@@ -127,7 +136,12 @@ app.post('/api/signup', validateUser, async (req, res) => {
     try {
         const { username, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, password: hashedPassword });
+        const user = new User({
+            username,
+            password: hashedPassword,
+            signupDate: moment().tz('America/New_York').toDate()
+        });
+        
         await user.save();
         res.status(201).send('User created successfully');
     } catch (error) {
@@ -147,9 +161,17 @@ app.post('/api/login', async (req, res) => {
         if (!isValidPassword) {
             return res.status(400).send('Invalid username or password');
         }
-        req.session.userId = user._id;
-        res.json({ username: user.username });
-    } catch (error) {
+        
+        // Update last logged in time
+        user.lastLoggedIn = moment().tz('America/New_York').toDate();
+        await user.save();
+
+        res.json({ 
+            username: user.username,
+            signupDate: user.signupDate,
+            lastLoggedIn: user.lastLoggedIn
+        });
+        } catch (error) {
         res.status(500).send('Error logging in');
     }
 });
