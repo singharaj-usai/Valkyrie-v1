@@ -67,6 +67,12 @@ app.use((req, res, next) => {
     }
 });
 
+
+// Serve navbar
+app.get('/navbar.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/navbar.html'));
+});
+
 // Serve login page
 app.get('/login.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/login.html'));
