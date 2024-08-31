@@ -91,14 +91,14 @@ app.get('/search-results.html', (req, res) => {
 // Validation middleware
 const validateUser = [
     body('username')
-        .isLength({ min: 3, max: 14 }).withMessage('Username must be between 3 and 14 characters')
+        .isLength({ min: 3, max: 18 }).withMessage('Username must be between 3 and 18 characters')
         .custom(async (value) => {
             const user = await User.findOne({ username: value });
             if (user) {
                 throw new Error('Username is already in use');
             }
         }),
-    body('password').isLength({ min: 4 }).withMessage('Password must be at least 4 characters long')
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ];
 
 // Search users endpoint

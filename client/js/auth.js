@@ -10,9 +10,9 @@ $(document).ready(function() {
             errorMessages.push("Username must be between 3 and 18 characters.");
         }
 
-        if (password.length < 4) {
+        if (password.length < 6) {
             isValid = false;
-            errorMessages.push("Password must be at least 4 characters long.");
+            errorMessages.push("Password must be at least 6 characters long.");
         }
 
         if (!isValid) {
