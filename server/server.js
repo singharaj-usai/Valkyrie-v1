@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const { body, validationResult } = require('express-validator');
+const path = require('path');
+
+
 
 
 const app = express();
@@ -37,6 +40,42 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+// Middleware to check if user is authenticated
+const isAuthenticated = (req, res, next) => {
+    if (req.session.userId) {
+        return res.redirect('/');
+    }
+    next();
+};
+
+// Middleware to check if user is not authenticated
+const isNotAuthenticated = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.redirect('/login.html');
+    }
+    next();
+};
+
+// Apply authentication check to all routes
+app.use((req, res, next) => {
+    const publicRoutes = ['/login.html', '/signup.html', '/api/login', '/api/signup'];
+    if (publicRoutes.includes(req.path)) {
+        isAuthenticated(req, res, next);
+    } else {
+        isNotAuthenticated(req, res, next);
+    }
+});
+
+// Serve login page
+app.get('/login.html', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/login.html'));
+});
+
+// Serve signup page
+app.get('/signup.html', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/signup.html'));
+});
 
 // Validation middleware
 const validateUser = [

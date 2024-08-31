@@ -16,9 +16,23 @@
         #auth-container > * {
             margin-left: 10px;
         }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
+    <div id="loading">Loading...</div>
+    <div id="content" style="display: none;">
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">

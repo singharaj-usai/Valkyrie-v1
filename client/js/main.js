@@ -10,12 +10,36 @@ const App = {
   // Initialize the application
   init: function () {
     $(document).ready(() => {
-      this.fetchData();
-      this.updateAuthUI();
-      this.updateDataContainer();
+        this.checkAuth();
+
 
     });
   },
+
+ // Check authentication status
+ checkAuth: function () {
+    const username = localStorage.getItem("username");
+    const currentPath = window.location.pathname;
+    if (username) {
+      if (currentPath === '/login.html' || currentPath === '/signup.html') {
+        window.location.href = '/';
+      } else {
+        $('#loading').hide();
+        $('#content').show();
+        this.fetchData();
+        this.updateAuthUI();
+        this.updateDataContainer();
+      }
+    } else {
+      if (currentPath !== '/login.html' && currentPath !== '/signup.html') {
+        window.location.href = '/login.html';
+      } else {
+        $('#loading').hide();
+        $('#content').show();
+      }
+    }
+  },
+    
 
   // Fetch data from the API
   fetchData: function () {

@@ -24,6 +24,30 @@ $(document).ready(function() {
         return isValid;
     }
 
+        // Check if user is already logged in
+    function checkAuth() {
+        const username = localStorage.getItem("username");
+        const currentPath = window.location.pathname;
+        if (username) {
+            if (currentPath === '/login.html' || currentPath === '/signup.html') {
+                window.location.href = '/';
+            } else {
+                $('#loading').hide();
+                $('#content').show();
+            }
+        } else {
+            if (currentPath !== '/login.html' && currentPath !== '/signup.html') {
+                window.location.href = '/login.html';
+            } else {
+                $('#loading').hide();
+                $('#content').show();
+            }
+        }
+    }
+
+    // Call checkAuth when the page loads
+    checkAuth();
+
     function showAlert(type, message) {
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible" role="alert">
