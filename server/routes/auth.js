@@ -28,6 +28,11 @@ const validateUser = [
         }),
     body('password')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+       // .matches(/\d/).withMessage('Password must contain at least one number')
+       // .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+       // .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+       // .matches(/[!@#$%^&*(),.?":{}|<>]/).withMessage('Password must contain at least one special character'),
+
     body('confirmPassword').custom((value, { req }) => {
         if (value !== req.body.password) {
             throw new Error('Password confirmation does not match password');
