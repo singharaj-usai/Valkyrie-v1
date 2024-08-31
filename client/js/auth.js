@@ -10,6 +10,25 @@ $(document).ready(function() {
             errorMessages.push("Username must be between 3 and 18 characters.");
         }
 
+        if (username.includes(" ")) {
+            isValid = false;
+            errorMessages.push("Username must not contain spaces.");
+        }
+
+        if (/^[a-zA-Z0-9][\w\.]$/.test(username)) {
+            isValid = false;
+            errorMessages.push("Username must only contain letters and numbers.");
+        }
+
+        // Array of bad words to check against
+        const badWords = ['fuck', 'shit', 'ass', 'bitch', 'cunt', 'damn', 'hell', 'whore', 'dick', 'piss', 'pussy'];
+        
+        // Check if username contains any bad words
+        if (badWords.some(word => username.toLowerCase().includes(word))) {
+            isValid = false;
+            errorMessages.push("Username contains inappropriate words.");
+        }
+        
         if (password.length < 6) {
             isValid = false;
             errorMessages.push("Password must be at least 6 characters long.");
