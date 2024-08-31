@@ -20,7 +20,7 @@ const validateUser = [
 ];
 
 // Signup endpoint
-router.post('/signup', validateUser, async (req, res) => {
+router.post('/register', validateUser, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });

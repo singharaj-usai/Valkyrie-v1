@@ -12,8 +12,8 @@ router.get('/login.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../../client/login.html'));
 });
 
-router.get('/signup.html', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../../client/signup.html'));
+router.get('/register.html', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../../client/register.html'));
 });
 
 router.get('/search-results.html', (req, res) => {

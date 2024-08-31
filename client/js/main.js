@@ -39,7 +39,7 @@ const App = {
     const username = localStorage.getItem("username");
     const currentPath = window.location.pathname;
     if (username) {
-      if (currentPath === '/login.html' || currentPath === '/signup.html') {
+      if (currentPath === '/login.html' || currentPath === '/register.html') {
         window.location.href = '/';
       } else {
         $('#loading').hide();
@@ -49,7 +49,7 @@ const App = {
         this.updateDataContainer();
       }
     } else {
-      if (currentPath !== '/login.html' && currentPath !== '/signup.html') {
+      if (currentPath !== '/login.html' && currentPath !== '/register.html') {
         window.location.href = '/login.html';
       } else {
         $('#loading').hide();
@@ -119,7 +119,7 @@ const App = {
     } else {
       authHtml = `
                 <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
-                <a href="/signup.html" class="btn btn-primary">Sign Up</a>
+                <a href="/register.html" class="btn btn-primary">Sign Up</a>
             `;
     }
 

@@ -66,14 +66,14 @@ $(document).ready(function() {
         const username = localStorage.getItem("username");
         const currentPath = window.location.pathname;
         if (username) {
-            if (currentPath === '/login.html' || currentPath === '/signup.html') {
+            if (currentPath === '/login.html' || currentPath === '/register.html') {
                 window.location.href = '/';
             } else {
                 $('#loading').hide();
                 $('#content').show();
             }
         } else {
-            if (currentPath !== '/login.html' && currentPath !== '/signup.html') {
+            if (currentPath !== '/login.html' && currentPath !== '/register.html') {
                 window.location.href = '/login.html';
             } else {
                 $('#loading').hide();
@@ -109,7 +109,7 @@ $(document).ready(function() {
             const confirmPassword = $('#confirm-password').val();
 
             $.ajax({
-                url: '/api/signup',
+                url: '/api/register',
                 method: 'POST',
                 data: { username, password, confirmPassword },
                 success: function(response) {
