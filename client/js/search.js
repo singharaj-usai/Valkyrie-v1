@@ -3,7 +3,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/search',
             method: 'GET',
-            data: { username: searchTerm },
+            data: { username: searchTerm || '' },
             success: function(users) {
                 displaySearchResults(users);
             },
@@ -39,7 +39,7 @@ $(document).ready(function() {
     // Check if we're on the search results page
     if (window.location.pathname === '/search-results.html') {
         const urlParams = new URLSearchParams(window.location.search);
-        const searchTerm = urlParams.get('q');
+        const searchTerm = urlParams.get('q') || '';
         $('#search-input').val(searchTerm);
         performSearch(searchTerm);
     }
