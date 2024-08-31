@@ -10,14 +10,32 @@ const router = express.Router();
 const validateUser = [
     body('username')
         .isLength({ min: 3, max: 18 }).withMessage('Username must be between 3 and 18 characters')
+        .matches(/^[a-zA-Z0-9]+$/).withMessage('Username must contain only letters and numbers')
         .custom(async (value) => {
             const user = await User.findOne({ username: value });
             if (user) {
                 throw new Error('Username is already in use');
             }
         }),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+    body('email')
+        .isEmail().withMessage('Invalid email address')
+        .normalizeEmail()
+        .custom(async (value) => {
+            const user = await User.findOne({ email: value });
+            if (user) {
+                throw new Error('Email is already in use');
+            }
+        }),
+    body('password')
+        .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+    body('confirmPassword').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('Password confirmation does not match password');
+        }
+        return true;
+    })
 ];
+
 
 // Signup endpoint
 router.post('/register', validateUser, async (req, res) => {
@@ -27,16 +45,18 @@ router.post('/register', validateUser, async (req, res) => {
     }
 
     try {
-        const { username, password } = req.body;
+        const { username, email, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             username,
+            email,
             password: hashedPassword,
             signupDate: moment().tz('America/New_York').toDate()
         });
         await user.save();
         res.status(201).send('User created successfully');
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).send('Error creating user');
     }
 });

@@ -105,13 +105,14 @@ $(document).ready(function() {
         e.preventDefault();
         if (validateForm(this, true)) {
             const username = $('#username').val();
+                    const email = $('#email').val();
             const password = $('#password').val();
             const confirmPassword = $('#confirm-password').val();
 
             $.ajax({
                 url: '/api/register',
                 method: 'POST',
-                data: { username, password, confirmPassword },
+                data: { username, email, password, confirmPassword },
                 success: function(response) {
                     showAlert('success', 'Sign up successful! Please log in.');
                     setTimeout(() => {
