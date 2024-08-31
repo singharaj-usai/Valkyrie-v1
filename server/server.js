@@ -59,9 +59,9 @@ const isNotAuthenticated = (req, res, next) => {
 
 // Apply authentication check to all routes
 app.use((req, res, next) => {
-    const publicRoutes = ['/login.html', '/signup.html', '/api/login', '/api/signup'];
+    const publicRoutes = ['/login.html', '/signup.html', '/api/login', '/api/signup', '/api/search', '/search-results.html'];
     if (publicRoutes.includes(req.path)) {
-        isAuthenticated(req, res, next);
+        next();
     } else {
         isNotAuthenticated(req, res, next);
     }
@@ -83,6 +83,11 @@ app.get('/signup.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/signup.html'));
 });
 
+// Serve search results page
+app.get('/search-results.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/search-results.html'));
+});
+
 // Validation middleware
 const validateUser = [
     body('username')
@@ -95,6 +100,22 @@ const validateUser = [
         }),
     body('password').isLength({ min: 4 }).withMessage('Password must be at least 4 characters long')
 ];
+
+// Search users endpoint
+app.get('/api/search', async (req, res) => {
+    try {
+        const searchTerm = req.query.username;
+        let users;
+        if (searchTerm) {
+            users = await User.find({ username: { $regex: searchTerm, $options: 'i' } }, 'username');
+        } else {
+            users = await User.find({}, 'username');
+        }
+        res.json(users);
+    } catch (error) {
+        res.status(500).send('Error searching users');
+    }
+});
 
 // Signup endpoint
 app.post('/api/signup', validateUser, async (req, res) => {
