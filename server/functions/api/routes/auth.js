@@ -129,7 +129,7 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(400).send("Invalid username");
     }
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = password === user.password; //await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(400).send("Invalid password");
     }
