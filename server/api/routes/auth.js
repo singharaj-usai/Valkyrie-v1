@@ -3,8 +3,12 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const moment = require('moment-timezone');
+const csrf = require('csurf');
 
 const router = express.Router();
+
+// Setup CSRF protection
+const csrfProtection = csrf({ cookie: true });
 
 // Validation middleware
 const validateUser = [
@@ -103,6 +107,13 @@ router.post('/logout', (req, res) => {
         res.send('Logged out successfully');
     });
 });
+
+// New route to get CSRF token
+router.get('/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+  });
+  
+  
 
 // Search users endpoint
 router.get('/search', async (req, res) => {
