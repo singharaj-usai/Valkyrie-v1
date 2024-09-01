@@ -24,8 +24,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: () => moment().tz("America/New_York").toDate(),
   },
+  signupIp: {
+    type: String,
+    required: true,
+  },
   lastLoggedIn: {
     type: Date,
+    default: null,
+  },
+  lastLoginIp: {
+    type: String,
     default: null,
   },
 });

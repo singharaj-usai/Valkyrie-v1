@@ -4,11 +4,23 @@ const { body, validationResult } = require("express-validator");
 const User = require("../models/User");
 const moment = require("moment-timezone");
 const csrf = require("csurf");
+const requestIp = require('request-ip');
 
 const router = express.Router();
 
 // Setup CSRF protection
 const csrfProtection = csrf({ cookie: true });
+
+// Helper function to get IP address
+function getClientIp(req) {
+  // For testing purposes, check for a custom header first
+  const testIp = req.header('X-Test-IP');
+  if (testIp) {
+    return testIp;
+  }
+  return requestIp.getClientIp(req);
+}
+
 
 // Validation middleware
 const validateUser = [
@@ -59,11 +71,14 @@ router.post("/register", validateUser, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+    const clientIp = requestIp.getClientIp(req);
+
     const user = new User({
       username,
       email,
       password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
+      signupIp: clientIp,
     });
     await user.save();
     res.status(201).send("User created successfully");
@@ -86,7 +101,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).send("Invalid username or password");
     }
 
+    const clientIp = requestIp.getClientIp(req);
     user.lastLoggedIn = moment().tz("America/New_York").toDate();
+    user.lastLoginIp = clientIp;
     await user.save();
 
     req.session.userId = user._id;
@@ -111,10 +128,7 @@ router.post("/logout", (req, res) => {
   });
 });
 
-// New route to get CSRF token
-router.get("/csrf-token", (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
+
 
 // Search users endpoint
 router.get("/search", async (req, res) => {
