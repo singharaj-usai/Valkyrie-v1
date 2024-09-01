@@ -1,9 +1,9 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const connectDB = require('./config/database');
-const authRoutes = require('./routes/auth');
-const pageRoutes = require('./routes/pages');
+const connectDB = require('./api/config/database');
+const authRoutes = require('./api/routes/auth');
+const pageRoutes = require('./api/routes/pages');
 
 const app = express();
 const port = 3000;

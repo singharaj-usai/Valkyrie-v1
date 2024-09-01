@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
-const User = require('../../models/UserUser');
+const User = require('../models/User');
 const moment = require('moment-timezone');
 
 const router = express.Router();
