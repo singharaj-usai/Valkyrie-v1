@@ -109,7 +109,7 @@ router.post("/register", validateUser, async (req, res) => {
     const user = new User({
       username,
       email,
-      password: hashedPassword,
+      password,//: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
     });
@@ -127,11 +127,11 @@ router.post("/login", async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(400).send("Invalid username or password");
+      return res.status(400).send("Invalid username");
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(400).send("Invalid username or password");
+      return res.status(400).send("Invalid password");
     }
 
     const clientIp = requestIp.getClientIp(req);
