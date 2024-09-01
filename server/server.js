@@ -3,9 +3,9 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const csrf = require('csurf');
 const path = require('path');
-const connectDB = require('./api/config/database');
-const authRoutes = require('./api/routes/auth');
-const pageRoutes = require('./api/routes/pages');
+const connectDB = require('./functions/api/config/database');
+const authRoutes = require('./functions/api/routes/auth');
+const pageRoutes = require('./functions/api/routes/pages');
 
 const app = express();
 const port = 3000;
@@ -39,6 +39,8 @@ app.use((err, req, res, next) => {
 // Routes
 app.use('/api', authRoutes);
 app.use('/', pageRoutes);
+
+
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
