@@ -121,6 +121,20 @@ $(document).ready(function () {
     });
   }
 
+    // Helper function to set CSRF token in AJAX headers
+    function setCSRFToken(securityToken) {
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-Token': securityToken
+          }
+        });
+      }
+    
+      // Get CSRF token when page loads
+      getCsrfToken().then(function(response) {
+        setCSRFToken(response.csrfToken);
+      });
+
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, true)) {
