@@ -34,6 +34,14 @@ const validateUser = [
       if (user) {
         throw new Error("Username is already in use");
       }
+    })
+    .custom((value) => {
+      const inappropriateWords = ['nlgga', 'nigga', 'sex', 'raping', 'tits', 'wtf', 'vag', 'diemauer', 'brickopolis', '.com', '.cf', 'dicc', 'nude', 'kesner', 'nobe', 'idiot', 'dildo', 'cheeks', 'anal', 'boob', 'horny', 'tit', 'fucking', 'gay', 'rape', 'rapist', 'incest', 'beastiality', 'cum', 'maggot', 'bloxcity', 'bullshit', 'fuck', 'penis', 'dick', 'vagina', 'faggot', 'fag', 'nigger', 'asshole', 'shit', 'bitch', 'anal', 'stfu', 'cunt', 'pussy', 'hump', 'meatspin', 'redtube', 'porn', 'kys', 'xvideos', 'hentai', 'gangbang', 'milf', 'whore', 'cock', 'masturbate']; // Add more inappropriate words as needed
+      const lowercaseValue = value.toLowerCase();
+      if (inappropriateWords.some(word => lowercaseValue.includes(word))) {
+        throw new Error("Username contains inappropriate language");
+      }
+      return true;
     }),
   body("email")
     .isEmail()

@@ -29,17 +29,64 @@ $(document).ready(function () {
 
     // Array of bad words to check against
     const badWords = [
+      "nlgga",
+      "nigga",
+      "sex",
+      "raping",
+      "tits",
+      "wtf",
+      "vag",
+      "diemauer",
+      "brickopolis",
+      ".com",
+      ".cf",
+      "dicc",
+      "nude",
+      "kesner",
+      "nobe",
+      "idiot",
+      "dildo",
+      "cheeks",
+      "anal",
+      "boob",
+      "horny",
+      "tit",
+      "fucking",
+      "gay",
+      "rape",
+      "rapist",
+      "incest",
+      "beastiality",
+      "cum",
+      "maggot",
+      "bloxcity",
+      "bullshit",
       "fuck",
-      "shit",
-      "ass",
-      "bitch",
-      "cunt",
-      "damn",
-      "hell",
-      "whore",
+      "penis",
       "dick",
-      "piss",
+      "vagina",
+      "faggot",
+      "fag",
+      "nigger",
+      "asshole",
+      "shit",
+      "bitch",
+      "anal",
+      "stfu",
+      "cunt",
       "pussy",
+      "hump",
+      "meatspin",
+      "redtube",
+      "porn",
+      "kys",
+      "xvideos",
+      "hentai",
+      "gangbang",
+      "milf",
+      "whore",
+      "cock",
+      "masturbate",
     ];
 
     // Check if username contains any bad words
@@ -121,78 +168,75 @@ $(document).ready(function () {
     });
   }
 
-    // Helper function to set CSRF token in AJAX headers
+  // Helper function to set CSRF token in AJAX headers
   function setCSRFToken(securityToken) {
     $.ajaxSetup({
       headers: {
-        'X-CSRF-Token': securityToken
-      }
+        "X-CSRF-Token": securityToken,
+      },
     });
   }
 
   // Get CSRF token when page loads
-  getCsrfToken().then(function(response) {
+  getCsrfToken().then(function (response) {
     setCSRFToken(response.csrfToken);
   });
 
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, true)) {
-        const username = $("#username").val();
-        const email = $("#email").val();
-        const password = $("#password").val();
-        const confirmPassword = $("#confirm-password").val();
+      const username = $("#username").val();
+      const email = $("#email").val();
+      const password = $("#password").val();
+      const confirmPassword = $("#confirm-password").val();
 
-        $.ajax({
-          url: "/api/register",
-          method: "POST",
-          data: {
-            username,
-            email,
-            password,
-            confirmPassword,
-          },
-          success: function (response) {
-            showAlert("success", "Sign up successful! Please log in.");
-            setTimeout(() => {
-              window.location.href = "/login.html";
-            }, 2000);
-          },
-          error: function (xhr, status, error) {
-            if (xhr.responseJSON && xhr.responseJSON.errors) {
-              const errorMessages = xhr.responseJSON.errors
-                .map((err) => err.msg)
-                .join("<br>");
-              showAlert("danger", "Error signing up:<br>" + errorMessages);
-            } else {
-              showAlert("danger", "Error signing up: " + xhr.responseText);
-            }
-          },
-        });
-      
+      $.ajax({
+        url: "/api/register",
+        method: "POST",
+        data: {
+          username,
+          email,
+          password,
+          confirmPassword,
+        },
+        success: function (response) {
+          showAlert("success", "Sign up successful! Please log in.");
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 2000);
+        },
+        error: function (xhr, status, error) {
+          if (xhr.responseJSON && xhr.responseJSON.errors) {
+            const errorMessages = xhr.responseJSON.errors
+              .map((err) => err.msg)
+              .join("<br>");
+            showAlert("danger", "Error signing up:<br>" + errorMessages);
+          } else {
+            showAlert("danger", "Error signing up: " + xhr.responseText);
+          }
+        },
+      });
     }
   });
 
   $("#login-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, false)) {
+      const username = $("#username").val();
+      const password = $("#password").val();
 
-        const username = $("#username").val();
-        const password = $("#password").val();
-
-        $.ajax({
-          url: "/api/login",
-          method: "POST",
-          data: { username, password },
-          success: function (response) {
-            localStorage.setItem("username", response.username);
-            window.location.href = "/";
-          },
-          error: function (xhr, status, error) {
-            showAlert("danger", "Error logging in: " + xhr.responseText);
-          },
-        });
-      
+      $.ajax({
+        url: "/api/login",
+        method: "POST",
+        data: { username, password },
+        success: function (response) {
+          localStorage.setItem("username", response.username);
+          window.location.href = "/";
+        },
+        error: function (xhr, status, error) {
+          showAlert("danger", "Error logging in: " + xhr.responseText);
+        },
+      });
     }
   });
 });
