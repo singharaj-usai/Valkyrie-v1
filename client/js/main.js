@@ -7,57 +7,58 @@ const App = {
     authContainerId: "auth-container",
   },
 
-    // Load navbar
-    loadNavbar: function() {
-        $.get('/navbar.html', function(data) {
-          $('#navbar-container').html(data);
-          App.updateAuthUI();
-        });
-      },
-    
-  // Initialize the application
-  init: function () {
-    $(document).ready(() => {
-        this.loadNavbar();
-        this.checkAuth();
-        this.initSearch();
+  // Load navbar
+  loadNavbar: function () {
+    $.get("/navbar.html", function (data) {
+      $("#navbar-container").html(data);
+      App.updateAuthUI();
     });
   },
 
-  initSearch: function() {
-    $(document).on('submit', '.navbar-form', function(e) {
+  // Initialize the application
+  init: function () {
+    $(document).ready(() => {
+      this.loadNavbar();
+      this.checkAuth();
+      this.initSearch();
+    });
+  },
+
+  initSearch: function () {
+    $(document).on("submit", ".navbar-form", function (e) {
       e.preventDefault();
-      const searchTerm = $('#search-input').val().trim();
+      const searchTerm = $("#search-input").val().trim();
       if (searchTerm) {
-        window.location.href = `/search-results.html?q=${encodeURIComponent(searchTerm)}`;
+        window.location.href = `/search-results.html?q=${encodeURIComponent(
+          searchTerm
+        )}`;
       }
     });
   },
 
- // Check authentication status
- checkAuth: function () {
+  // Check authentication status
+  checkAuth: function () {
     const username = localStorage.getItem("username");
     const currentPath = window.location.pathname;
     if (username) {
-      if (currentPath === '/login.html' || currentPath === '/register.html') {
-        window.location.href = '/';
+      if (currentPath === "/login.html" || currentPath === "/register.html") {
+        window.location.href = "/";
       } else {
-        $('#loading').hide();
-        $('#content').show();
+        $("#loading").hide();
+        $("#content").show();
         this.fetchData();
         this.updateAuthUI();
         this.updateDataContainer();
       }
     } else {
-      if (currentPath !== '/login.html' && currentPath !== '/register.html') {
-        window.location.href = '/login.html';
+      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+        window.location.href = "/login.html";
       } else {
-        $('#loading').hide();
-        $('#content').show();
+        $("#loading").hide();
+        $("#content").show();
       }
     }
   },
-    
 
   // Fetch data from the API
   fetchData: function () {
@@ -90,8 +91,6 @@ const App = {
     $(`#${this.config.dataContainerId}`).html(html);
   },
 
-
-
   // Escape HTML to prevent XSS
   escapeHtml: function (unsafe) {
     return unsafe
@@ -102,8 +101,6 @@ const App = {
       .replace(/'/g, "&#039;");
   },
 
-
-  
   // Update authentication UI
   updateAuthUI: function () {
     // Simulating authentication status (replace with actual auth check)
