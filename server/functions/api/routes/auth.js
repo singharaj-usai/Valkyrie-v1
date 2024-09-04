@@ -95,7 +95,7 @@ const validateUser = [
 ];
 
 // Step 1: Validate user input
-router.post("/register-validate", validateUser, async (req, res) => {
+router.post("/register-validate", validateUser, (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
