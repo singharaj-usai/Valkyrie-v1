@@ -117,8 +117,7 @@ router.post("/register", validateUser, async (req, res) => {
     res.status(201).send("User created successfully");
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).send("Error creating user");
-  }
+    res.status(500).json({ error: "Error creating user", details: error.message });  }
 });
 
 // Login endpoint

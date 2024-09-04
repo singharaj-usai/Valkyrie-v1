@@ -241,6 +241,8 @@ $(document).ready(function () {
               .map((err) => err.msg)
               .join("<br>");
             showAlert("danger", "Error signing up:<br>" + errorMessages);
+          } else if (xhr.responseJSON && xhr.responseJSON.error) {
+            showAlert("danger", "Error signing up: " + xhr.responseJSON.error + "<br>Details: " + xhr.responseJSON.details);
           } else {
             showAlert("danger", "Error signing up: " + xhr.responseText);
           }
