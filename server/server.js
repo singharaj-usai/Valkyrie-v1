@@ -6,11 +6,9 @@ const path = require('path');
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
-const Counter = require('./functions/api/models/Counter');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
 
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -22,9 +20,10 @@ app.use(async (req, res, next) => {
     try {
       await connectDB(MONGODB_URI);
       isConnected = true;
+      console.log('Connected to MongoDB');
     } catch (error) {
       console.error('Error connecting to database:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ error: 'Internal Server Error', details: 'Database connection failed' });
     }
   }
   next();
@@ -32,35 +31,31 @@ app.use(async (req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('client', { extensions: ['html'] }));
 app.use(cookieParser());
 
-const MongoStore = require('connect-mongo');
-
 app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-      }
-    }));
-    
-// Error handler for CSRF token errors
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
+
 app.use((err, req, res, next) => {
-    if (err.code !== 'EBADCSRFTOKEN') return next(err);
-    res.status(403).json({ error: 'Invalid CSRF token' });
-  });
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error', details: err.message || 'Unknown error' });
+});
 
-
-// Routes
 app.use('/api', authRoutes);
 app.use('/', pageRoutes);
 
-
-
-app.listen(port, () => {
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-});
+  });
+}
+
+module.exports = app;
