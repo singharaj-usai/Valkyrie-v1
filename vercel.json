@@ -19,11 +19,5 @@
         "src": "/(.*)",
         "dest": "client/$1"
       }
-    ],
-    "functions": {
-      "server/server.js": {
-        "memory": 1024,
-        "maxDuration": 10
-      }
+    ]
     }
-  }

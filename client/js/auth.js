@@ -222,21 +222,18 @@ $(document).ready(function () {
 
       $.ajax({
         url: "/api/register",
-        method: "POST",
-        data: {
-          username,
-          email,
-          password,
-          confirmPassword,
-        },
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        timeout: 15000, // 15 seconds timeout
         success: function (response) {
-          showAlert("success", "Sign up successful! Please log in.");
-          setTimeout(() => {
-            window.location.href = "/login.html";
-          }, 2000);
+          showAlert("success", "Registration successful! You can now log in.");
+          $("#signup-form")[0].reset();
         },
         error: function (xhr, status, error) {
-          if (xhr.responseJSON && xhr.responseJSON.errors) {
+          if (status === "timeout") {
+            showAlert("danger", "The request timed out. Please try again.");
+          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
             const errorMessages = xhr.responseJSON.errors
               .map((err) => err.msg)
               .join("<br>");
