@@ -94,6 +94,37 @@ const validateUser = [
   }),
 ];
 
+router.post("/register", validateUser, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { username, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const clientIp = requestIp.getClientIp(req);
+
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      signupDate: moment().tz("America/New_York").toDate(),
+      signupIp: clientIp,
+    });
+
+    await user.save();
+    res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    if (error.code === 11000) {
+      res.status(409).json({ error: "Username or email already exists" });
+    } else {
+      res.status(500).json({ error: "Error creating user", details: error.message || "Unknown error" });
+    }
+  }
+});
+
 router.post("/register-create", async (req, res) => {
   try {
     const { username, email, password } = req.body;

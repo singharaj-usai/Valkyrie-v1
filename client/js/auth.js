@@ -215,6 +215,34 @@ $(document).ready(function () {
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, true)) {
+      const username = $("#username").val();
+      const email = $("#email").val();
+      const password = $("#password").val();
+      const confirmPassword = $("#confirm-password").val();
+  
+      $.ajax({
+        url: "/api/register",
+        method: "POST",
+        data: {
+          username,
+          email,
+          password,
+          confirmPassword,
+        },
+        success: function (response) {
+          showAlert("success", "Sign up successful! Please log in.");
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 2000);
+        },
+        error: handleRegistrationError
+      });
+    }
+  });
+
+  $("#signup-form").on("submit", function (e) {
+    e.preventDefault();
+    if (validateForm(this, true)) {
       const formData = {
         username: $("#username").val(),
         email: $("#email").val(),
