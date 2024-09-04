@@ -8,7 +8,7 @@ const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
@@ -17,6 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('client'));
 app.use(cookieParser());
+
+const MongoStore = require('connect-mongo');
 
 app.use(session({
     secret: 'your-secret-key',

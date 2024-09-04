@@ -19,15 +19,15 @@ $(document).ready(function () {
   function displaySearchResults(users) {
     let html = '<ul class="list-group">';
     if (users.length === 0) {
-      html = "<p>No users found.</p>";
+        html = "<p>No users found.</p>";
     } else {
-      users.forEach((user) => {
-        html += `<li class="list-group-item">${escapeHtml(user.username)}</li>`;
-      });
-      html += "</ul>";
+        users.forEach((user) => {
+            html += `<li class="list-group-item"><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></li>`;
+        });
+        html += "</ul>";
     }
     $("#search-results").html(html);
-  }
+}
 
   function escapeHtml(unsafe) {
     return unsafe

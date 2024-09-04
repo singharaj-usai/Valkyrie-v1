@@ -176,4 +176,19 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// User profile endpoint
+router.get('/user/:username', async (req, res) => {
+  try {
+      const { username } = req.params;
+      const user = await User.findOne({ username }, 'username signupDate lastLoggedIn');
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
+      res.json(user);
+  } catch (error) {
+      console.error('User profile error:', error);
+      res.status(500).send('Error fetching user profile');
+  }
+});
+
 module.exports = router;
