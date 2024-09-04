@@ -215,38 +215,54 @@ $(document).ready(function () {
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, true)) {
-      const username = $("#username").val();
-      const email = $("#email").val();
-      const password = $("#password").val();
-      const confirmPassword = $("#confirm-password").val();
-
+      const formData = {
+        username: $("#username").val(),
+        email: $("#email").val(),
+        password: $("#password").val(),
+        confirmPassword: $("#confirm-password").val()
+      };
+  
+      // Step 1: Validate user input
       $.ajax({
-        url: "/api/register",
+        url: "/api/register-validate",
         type: "POST",
         data: JSON.stringify(formData),
         contentType: "application/json",
-        timeout: 15000, // 15 seconds timeout
+        timeout: 10000,
         success: function (response) {
-          showAlert("success", "Registration successful! You can now log in.");
-          $("#signup-form")[0].reset();
+          // Step 2: Create user
+          $.ajax({
+            url: "/api/register-create",
+            type: "POST",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            timeout: 10000,
+            success: function (response) {
+              showAlert("success", "Registration successful! You can now log in.");
+              $("#signup-form")[0].reset();
+            },
+            error: handleRegistrationError
+          });
         },
-        error: function (xhr, status, error) {
-          if (status === "timeout") {
-            showAlert("danger", "The request timed out. Please try again.");
-          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-            const errorMessages = xhr.responseJSON.errors
-              .map((err) => err.msg)
-              .join("<br>");
-            showAlert("danger", "Error signing up:<br>" + errorMessages);
-          } else if (xhr.responseJSON && xhr.responseJSON.error) {
-            showAlert("danger", "Error signing up: " + xhr.responseJSON.error + "<br>Details: " + xhr.responseJSON.details);
-          } else {
-            showAlert("danger", "Error signing up: " + xhr.responseText);
-          }
-        },
+        error: handleRegistrationError
       });
     }
   });
+  
+  function handleRegistrationError(xhr, status, error) {
+    if (status === "timeout") {
+      showAlert("danger", "The request timed out. Please try again.");
+    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+      const errorMessages = xhr.responseJSON.errors
+        .map((err) => err.msg)
+        .join("<br>");
+      showAlert("danger", "Error signing up:<br>" + errorMessages);
+    } else if (xhr.responseJSON && xhr.responseJSON.error) {
+      showAlert("danger", "Error signing up: " + xhr.responseJSON.error + "<br>Details: " + xhr.responseJSON.details);
+    } else {
+      showAlert("danger", "Error signing up: " + xhr.responseText);
+    }
+  }
 
   $("#login-form").on("submit", function (e) {
     e.preventDefault();
