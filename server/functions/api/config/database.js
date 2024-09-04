@@ -16,6 +16,8 @@ const connectDB = async (uri) => {
         });
         cachedDb = client;
         console.log('MongoDB connected');
+        require('../models/Counter');
+require('../models/User');
         return client;
     } catch (error) {
         console.error('MongoDB connection error:', error);
