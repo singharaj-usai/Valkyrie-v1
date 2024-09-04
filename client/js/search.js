@@ -3,7 +3,7 @@ $(document).ready(function () {
     $.ajax({
       url: "/api/search",
       method: "GET",
-      data: { username: searchTerm || "" },
+      data: { username: searchTerm },
       success: function (users) {
         displaySearchResults(users);
       },

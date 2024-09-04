@@ -28,11 +28,7 @@ const App = {
     $(document).on("submit", ".navbar-form", function (e) {
       e.preventDefault();
       const searchTerm = $("#search-input").val().trim();
-      if (searchTerm) {
-        window.location.href = `/search-results.html?q=${encodeURIComponent(
-          searchTerm
-        )}`;
-      }
+      window.location.href = `/search-results.html?q=${encodeURIComponent(searchTerm)}`;
     });
   },
 
