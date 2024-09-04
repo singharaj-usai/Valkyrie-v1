@@ -8,15 +8,15 @@ const connectDB = async (uri) => {
     }
 
     try {
-        const db = await mongoose.connect(uri, {
+        const client = await mongoose.connect(uri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            bufferCommands: false,
-            serverSelectionTimeoutMS: 5000
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
         });
-        cachedDb = db;
+        cachedDb = client;
         console.log('MongoDB connected');
-        return db;
+        return client;
     } catch (error) {
         console.error('MongoDB connection error:', error);
         throw error;

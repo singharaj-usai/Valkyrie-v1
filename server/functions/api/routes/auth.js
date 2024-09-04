@@ -117,11 +117,16 @@ router.post("/register-create", async (req, res) => {
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
     });
+
     await user.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({ error: "Error creating user", details: error.message });
+    if (error.code === 11000) {
+      res.status(409).json({ error: "Username or email already exists" });
+    } else {
+      res.status(500).json({ error: "Error creating user", details: error.message });
+    }
   }
 });
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "server/server.js",
-    "scripts": {
+  "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
@@ -32,7 +32,8 @@
     "mongoose": "^8.6.0",
     "mysql2": "^3.11.0",
     "path": "^0.12.7",
-    "request-ip": "^3.3.0"
+    "request-ip": "^3.3.0",
+    "sequelize": "^6.37.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.4",

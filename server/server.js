@@ -14,13 +14,19 @@ const port = process.env.PORT || 3000;
 
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
-let dbConnection;
+
+let isConnected = false;
 
 app.use(async (req, res, next) => {
-  if (!dbConnection) {
-    dbConnection = await connectDB(MONGODB_URI);
+  if (!isConnected) {
+    try {
+      await connectDB(MONGODB_URI);
+      isConnected = true;
+    } catch (error) {
+      console.error('Error connecting to database:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
-  req.dbConnection = dbConnection;
   next();
 });
 
