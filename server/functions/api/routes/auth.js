@@ -109,15 +109,16 @@ router.post("/register", validateUser, async (req, res) => {
     const user = new User({
       username,
       email,
-      password,//: hashedPassword,
+      password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
     });
     await user.save();
-    res.status(201).send("User created successfully");
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({ error: "Error creating user", details: error.message });  }
+    res.status(500).json({ error: "Error creating user", details: error.message });
+  }
 });
 
 // Login endpoint
@@ -128,7 +129,7 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(400).send("Invalid username");
     }
-    const isValidPassword = password === user.password; //await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password); //password === user.password; //await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(400).send("Invalid password");
     }

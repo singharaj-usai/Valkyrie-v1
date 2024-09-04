@@ -14,7 +14,15 @@ const port = process.env.PORT || 3000;
 // Connect to MongoDB
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
-connectDB(MONGODB_URI);
+let dbConnection;
+
+app.use(async (req, res, next) => {
+    if (!dbConnection) {
+        dbConnection = await connectDB(MONGODB_URI);
+    }
+    req.dbConnection = dbConnection;
+    next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
