@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const moment = require("moment-timezone");
 
 const userSchema = new mongoose.Schema({
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   userId: {
     type: Number,
     unique: true,

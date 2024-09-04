@@ -125,6 +125,16 @@ router.post("/register", validateUser, async (req, res) => {
   }
 });
 
+// Step 1: Validate user input
+router.post("/register-validate", validateUser, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  res.status(200).json({ message: "Validation successful" });
+});
+
+// Step 2: Create user
 router.post("/register-create", async (req, res) => {
   try {
     const { username, email, password } = req.body;

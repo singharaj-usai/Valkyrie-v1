@@ -215,31 +215,32 @@ $(document).ready(function () {
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
     if (validateForm(this, true)) {
-      const username = $("#username").val();
-      const email = $("#email").val();
-      const password = $("#password").val();
-      const confirmPassword = $("#confirm-password").val();
+      const formData = {
+        username: $("#username").val(),
+        email: $("#email").val(),
+        password: $("#password").val(),
+        confirmPassword: $("#confirm-password").val()
+      };
   
-      $.ajax({
-        url: "/api/register",
-        method: "POST",
-        data: {
-          username,
-          email,
-          password,
-          confirmPassword,
-        },
-        success: function (response) {
-          showAlert("success", "Sign up successful! Please log in.");
-          setTimeout(() => {
-            window.location.href = "/login.html";
-          }, 2000);
-        },
-        error: handleRegistrationError
-      });
-    }
-  });
+    // Store form data in localStorage
+    localStorage.setItem('tempUserData', JSON.stringify(formData));
 
+
+    // Step 1: Validate user input
+    $.ajax({
+      url: "/api/register-validate",
+      type: "POST",
+      data: JSON.stringify(formData),
+      contentType: "application/json",
+      timeout: 10000,
+      success: function (response) {
+        // Redirect to a confirmation page
+        window.location.href = '/confirm-registration.html';
+      },
+      error: handleRegistrationError
+    });
+  }
+});
   
   function handleRegistrationError(xhr, status, error) {
     if (status === "timeout") {

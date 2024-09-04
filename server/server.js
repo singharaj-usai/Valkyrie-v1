@@ -58,6 +58,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
+const adminRoutes = require('./functions/api/routes/admin');
+app.use('/api/admin', adminRoutes);
+
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

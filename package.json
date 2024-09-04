@@ -9,7 +9,8 @@
     "dev": "nodemon server/server.js",
     "build": "echo 'No build script needed'",
     "vercel-build": "echo 'Build step not required'",
-    "deploy": "vercel"
+    "deploy": "vercel",
+    "create-admin": "node server/scripts/createAdmin.js"
   },
   "engines": {
     "node": "18.x"
