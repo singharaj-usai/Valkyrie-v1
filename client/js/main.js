@@ -150,5 +150,25 @@ const App = {
   },
 };
 
+// Load footer
+$.get("/footer.html", function (data) {
+  $("body").append(data);
+  updateUserCount();
+});
+
+function updateUserCount() {
+  $.ajax({
+    url: "/api/user-count",
+    method: "GET",
+    success: function (response) {
+      $("#user-count").text(response.count);
+    },
+    error: function (xhr, status, error) {
+      console.error("Error fetching user count:", error);
+      $("#user-count").text("Error");
+    }
+  });
+}
+
 // Initialize the application
 App.init();

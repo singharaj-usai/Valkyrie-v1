@@ -6,16 +6,19 @@ const path = require('path');
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
+const Counter = require('./functions/api/models/Counter');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
-connectDB();
+require('dotenv').config();
+const MONGODB_URI = process.env.MONGODB_URI;
+connectDB(MONGODB_URI);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('client'));
+app.use(express.static('client', { extensions: ['html'] }));
 app.use(cookieParser());
 
 const MongoStore = require('connect-mongo');

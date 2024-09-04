@@ -196,4 +196,15 @@ router.get('/user/:username', async (req, res) => {
   }
 });
 
+// Get number of registered users
+router.get("/user-count", async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+    res.status(500).send("Error fetching user count");
+  }
+});
+
 module.exports = router;
