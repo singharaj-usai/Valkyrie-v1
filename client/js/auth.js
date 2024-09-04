@@ -240,34 +240,6 @@ $(document).ready(function () {
     }
   });
 
-  $("#signup-form").on("submit", function (e) {
-    e.preventDefault();
-    if (validateForm(this, true)) {
-      const formData = {
-        username: $("#username").val(),
-        email: $("#email").val(),
-        password: $("#password").val(),
-        confirmPassword: $("#confirm-password").val()
-      };
-  
-      // Store form data in localStorage
-      localStorage.setItem('tempUserData', JSON.stringify(formData));
-  
-      // Step 1: Validate user input
-      $.ajax({
-        url: "/api/register-validate",
-        type: "POST",
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-        timeout: 10000,
-        success: function (response) {
-          // Redirect to a confirmation page
-          window.location.href = '/confirm-registration.html';
-        },
-        error: handleRegistrationError
-      });
-    }
-  });
   
   function handleRegistrationError(xhr, status, error) {
     if (status === "timeout") {
