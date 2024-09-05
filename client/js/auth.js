@@ -23,11 +23,11 @@ $(document).ready(function () {
       errorMessages.push("Username must not contain spaces.");
     }
 
-    if (/^[a-zA-Z0-9][\w\.]$/.test(username)) {
+    if (!/^[a-zA-Z0-9]+$/.test(username)) {
       isValid = false;
       errorMessages.push("Username must only contain letters and numbers.");
     }
-
+    
     // Array of bad words to check against
     const badWords = [
       "nlgga",

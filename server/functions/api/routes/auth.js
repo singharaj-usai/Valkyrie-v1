@@ -33,11 +33,12 @@ const validateUser = [
     .withMessage("Username must be between 3 and 18 characters")
     .matches(/^[a-zA-Z0-9]+$/)
     .withMessage("Username must contain only letters and numbers")
-    .custom(async (value) => {
-      const user = await User.findOne({ username: value });
-      if (user) {
-        throw new Error("Username is already in use");
+    .custom((value) => {
+      const lowercaseValue = value.toLowerCase();
+      if (inappropriateWords.some(word => lowercaseValue.includes(word))) {
+        throw new Error("Username contains inappropriate language");
       }
+      return true;
     })
     .custom((value) => {
       const inappropriateWords = ['nlgga', 'nigga', 'sex', 'raping', 'tits', 'wtf', 'vag', 'diemauer', 'brickopolis', '.com', '.cf', 'dicc', 'nude', 'kesner', 'nobe', 'idiot', 'dildo', 'cheeks', 'anal', 'boob', 'horny', 'tit', 'fucking', 'gay', 'rape', 'rapist', 'incest', 'beastiality', 'cum', 'maggot', 'bloxcity', 'bullshit', 'fuck', 'penis', 'dick', 'vagina', 'faggot', 'fag', 'nigger', 'asshole', 'shit', 'bitch', 'anal', 'stfu', 'cunt', 'pussy', 'hump', 'meatspin', 'redtube', 'porn', 'kys', 'xvideos', 'hentai', 'gangbang', 'milf', 'whore', 'cock', 'masturbate']; // Add more inappropriate words as needed
