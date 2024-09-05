@@ -1,3 +1,28 @@
+<style>
+    #user-submenu {
+        top: 50px;
+        z-index: 999;
+        border-top: none;
+        border-radius: 0;
+        margin-bottom: 0;
+        background-color: #f8f8f8;
+        border-bottom: 1px solid #e7e7e7;
+    }
+
+    #user-submenu .navbar-nav > li > a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    body {
+        padding-top: 100px;
+    }
+
+    .navbar-fixed-top + .navbar-fixed-top {
+        top: 50px;
+    }
+</style>
+
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
@@ -34,5 +59,16 @@
                 </div>
             </div>
         </div>
+    </div>
+</nav>
+<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top" style="display: none;">
+    <div class="container">
+        <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/user-profile.html">Profile</a></li>
+            <li><a href="#">Places</a></li>
+            <li><a href="#">Friend Requests</a></li>
+            <li><a href="#">Messages</a></li>
+        </ul>
     </div>
 </nav>

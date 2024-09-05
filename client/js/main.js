@@ -127,6 +127,7 @@ const App = {
           `);
           this.initClaimCurrency();
           this.initLogout();
+          $('#user-submenu').show();
         },
         error: (xhr, status, error) => {
           console.error("Error fetching user info:", error);
@@ -138,6 +139,7 @@ const App = {
         <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
         <a href="/register.html" class="btn btn-primary">Sign Up</a>
       `);
+      $('#user-submenu').hide();
     }
   },
 
