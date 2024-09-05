@@ -3,7 +3,7 @@ $(document).ready(function () {
     const sessionToken = localStorage.getItem('sessionToken');
 
     if (username && sessionToken) {
-        $('#profile-username').text(username);
+        $('#profile-username').text(`Welcome, ${username}!`);
         fetchUserBlurb();
     } else {
         window.location.href = '/login.html';
