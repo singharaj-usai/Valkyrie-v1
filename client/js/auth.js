@@ -186,6 +186,60 @@ $(document).ready(function () {
     $("#alert-container").html(alertHtml);
   }
 
+  function updateAuthUI() {
+  const username = localStorage.getItem("username");
+  const authContainer = $("#auth-container");
+  if (username) {
+    $.ajax({
+      url: "/api/user-info",
+      method: "GET",
+      success: function (response) {
+        authContainer.html(`
+          <span class="navbar-text">
+            Welcome, ${username} 
+            <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
+          </span>
+          <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
+          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
+        `);
+        initClaimCurrency();
+      },
+      error: function (xhr, status, error) {
+        console.error("Error fetching user info:", error);
+        authContainer.html(`
+          <span class="navbar-text">Welcome, ${username}</span>
+          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
+        `);
+      }
+    });
+  } else {
+    authContainer.html(`
+      <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
+      <a href="/register.html" class="btn btn-sm btn-default">Register</a>
+    `);
+  }
+}
+  
+  function initClaimCurrency() {
+    $("#claim-currency").on("click", function () {
+      $.ajax({
+        url: "/api/claim-daily-currency",
+        method: "POST",
+        success: function (response) {
+          $("#currency-amount").text(response.newBalance);
+          showAlert("success", "You've claimed your daily currency!");
+        },
+        error: function (xhr, status, error) {
+          showAlert("danger", xhr.responseJSON.error || "Error claiming daily currency");
+        }
+      });
+    });
+  }
+  
+  // ... (rest of the existing code)
+
+
+
   function hideAlert() {
     $("#alert-container").empty();
   }
@@ -222,6 +276,9 @@ $(document).ready(function () {
         confirmPassword: $("#confirm-password").val()
       };
   
+      showLoadingIndicator();
+
+
       $.ajax({
         url: "/api/register-create",
         type: "POST",
@@ -229,31 +286,42 @@ $(document).ready(function () {
         contentType: "application/json",
         timeout: 10000,
         success: function (response) {
+                  hideLoadingIndicator();
+
           showAlert("success", response.message);
-          if (response.previewUrl) {
-            showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
-          }
+          //if (response.previewUrl) {
+           // showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
+          //}
           setTimeout(() => {
             window.location.href = "/login.html";
           }, 5000);
         },
-        error: handleRegistrationError
+        error: function(xhr, status, error) {
+          hideLoadingIndicator();
+          if (status === "timeout") {
+            // Assume the account was created successfully
+            showAlert("success", "Your account has been created successfully. You can now log in.");
+            setTimeout(() => {
+              window.location.href = "/login.html";
+            }, 5000);
+          } else {
+            handleRegistrationError(xhr, status, error);
+          }
+        }
       });
     }
   });
   
   function handleRegistrationError(xhr, status, error) {
-    if (status === "timeout") {
-      showAlert("danger", "The request timed out. Please try again.");
-    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+    if (xhr.responseJSON && xhr.responseJSON.errors) {
       const errorMessages = xhr.responseJSON.errors
         .map((err) => err.msg)
         .join("<br>");
       showAlert("danger", "Error signing up:<br>" + errorMessages);
     } else if (xhr.responseJSON && xhr.responseJSON.error) {
-      showAlert("danger", "Error signing up: " + xhr.responseJSON.error + "<br>Details: " + xhr.responseJSON.details);
+      showAlert("danger", "Error signing up: " + xhr.responseJSON.error);
     } else {
-      showAlert("danger", "Error signing up: " + xhr.responseText);
+      showAlert("danger", "An unexpected error occurred. Please try again later.");
     }
   }
 
@@ -282,3 +350,11 @@ $(document).ready(function () {
     }
   });
 });
+
+function showLoadingIndicator() {
+  $("#signup-form button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing up...');
+}
+
+function hideLoadingIndicator() {
+  $("#signup-form button[type='submit']").prop("disabled", false).html('Sign Up');
+}

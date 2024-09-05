@@ -47,9 +47,17 @@ const userSchema = new mongoose.Schema({
   },
   isVerified: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   verificationToken: String,
+  currency: {
+    type: Number,
+    default: 10
+  },
+  lastCurrencyClaimDate: {
+    type: Date,
+    default: null
+  }
 });
 
 userSchema.pre('save', async function(next) {

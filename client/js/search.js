@@ -27,7 +27,7 @@ $(document).ready(function () {
         html += "</ul>";
     }
     $("#search-results").html(html);
-}
+  }
 
   function escapeHtml(unsafe) {
     return unsafe
@@ -38,11 +38,20 @@ $(document).ready(function () {
       .replace(/'/g, "&#039;");
   }
 
-  // Check if we're on the search results page
+  // Handle search form submission
+  $("#search-form").on("submit", function (e) {
+    e.preventDefault();
+    const searchTerm = $("#search-input").val();
+    performSearch(searchTerm);
+  });
+
+  // Check if we're on the search results page and perform initial search
   if (window.location.pathname === "/search-results.html") {
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("q") || "";
     $("#search-input").val(searchTerm);
-    performSearch(searchTerm);
+    if (searchTerm) {
+      performSearch(searchTerm);
+    }
   }
 });

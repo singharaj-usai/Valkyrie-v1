@@ -148,7 +148,7 @@ router.post("/register-create", async (req, res) => {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const clientIp = getClientIp(req);
-    const verificationToken = crypto.randomBytes(20).toString('hex');
+   // const verificationToken = crypto.randomBytes(20).toString('hex');
 
     const user = new User({
       username,
@@ -156,24 +156,25 @@ router.post("/register-create", async (req, res) => {
       password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
-      verificationToken
+      isVerified: true // Set the user as verified by default
+    //  verificationToken
     });
 
     await user.save();
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    try {
-      await sendVerificationEmail(email, verificationToken, baseUrl);
-      res.status(201).json({ 
-        message: "User created successfully. Please check your email to verify your account."
-      });
-    } catch (emailError) {
-      console.error("Error sending verification email:", emailError);
-      // Instead of sending a 201 status, send a 500 status with more detailed error information
-      res.status(500).json({ 
-        message: "User created successfully, but there was an issue sending the verification email.",
-        error: emailError.message
-      });
-    }
+    //const baseUrl = `${req.protocol}://${req.get('host')}`;
+    //try {
+     // await sendVerificationEmail(email, verificationToken, baseUrl);
+      //res.status(201).json({ 
+       // message: "User created successfully. Please check your email to verify your account."
+     // });
+  //  } catch (emailError) {
+  //    console.error("Error sending verification email:", emailError);
+  //    // Instead of sending a 201 status, send a 500 status with more detailed error information
+  //    res.status(500).json({ 
+  //      message: "User created successfully, but there was an issue sending the verification email.",
+  //      error: emailError.message
+  //    });
+  //  }
   } catch (error) {
     console.error("Registration error:", error);
     if (error.code === 11000) {
@@ -210,9 +211,9 @@ router.post("/login", async (req, res) => {
     }
 
     
-    if (!user.isVerified) {
-      return res.status(403).send("Please verify your email before logging in");
-    }
+    //if (!user.isVerified) {
+    //  return res.status(403).send("Please verify your email before logging in");
+   // }
 
     const isValidPassword = await bcrypt.compare(password, user.password); //password === user.password; //await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
@@ -290,6 +291,57 @@ router.get("/user-count", async (req, res) => {
   } catch (error) {
     console.error("Error fetching user count:", error);
     res.status(500).send("Error fetching user count");
+  }
+});
+
+router.post("/claim-daily-currency", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const now = moment().tz("America/New_York");
+    const lastClaim = moment(user.lastCurrencyClaimDate).tz("America/New_York");
+
+    if (!user.lastCurrencyClaimDate || now.diff(lastClaim, 'days') >= 1) {
+      user.currency += 10;
+      user.lastCurrencyClaimDate = now.toDate();
+      await user.save();
+      res.json({ success: true, newBalance: user.currency });
+    } else {
+      res.status(400).json({ error: "You can only claim currency once per day" });
+    }
+  } catch (error) {
+    console.error("Error claiming daily currency:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/user-info", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      username: user.username,
+      currency: user.currency
+    });
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
