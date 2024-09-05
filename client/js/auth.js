@@ -187,38 +187,34 @@ $(document).ready(function () {
   }
 
   function updateAuthUI() {
-  const username = localStorage.getItem("username");
-  const authContainer = $("#auth-container");
-  if (username) {
-    $.ajax({
-      url: "/api/user-info",
-      method: "GET",
-      success: function (response) {
-        authContainer.html(`
-          <span class="navbar-text">
-            Welcome, ${username} 
-            <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
-          </span>
-          <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
-          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
-        `);
-        initClaimCurrency();
-      },
-      error: function (xhr, status, error) {
-        console.error("Error fetching user info:", error);
-        authContainer.html(`
-          <span class="navbar-text">Welcome, ${username}</span>
-          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
-        `);
-      }
-    });
-  } else {
-    authContainer.html(`
-      <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
-      <a href="/register.html" class="btn btn-sm btn-default">Register</a>
-    `);
+    const username = localStorage.getItem("username");
+    const authContainer = $("#auth-container");
+    if (username) {
+      $.ajax({
+        url: "/api/user-info",
+        method: "GET",
+        success: function (response) {
+          authContainer.html(`
+            <span class="navbar-text">
+              Welcome, ${username} 
+              <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
+            </span>
+            <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
+            <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
+          `);
+          initClaimCurrency();
+        },
+        error: function (xhr, status, error) {
+          console.error("Error fetching user info:", error);
+        }
+      });
+    } else {
+      authContainer.html(`
+        <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
+        <a href="/register.html" class="btn btn-sm btn-default">Register</a>
+      `);
+    }
   }
-}
   
   function initClaimCurrency() {
     $("#claim-currency").on("click", function () {
@@ -313,7 +309,9 @@ $(document).ready(function () {
   });
   
   function handleRegistrationError(xhr, status, error) {
-    if (xhr.responseJSON && xhr.responseJSON.errors) {
+    if (status === "timeout") {
+      showAlert("danger", "The request timed out. Please try again or check your internet connection.");
+    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
       const errorMessages = xhr.responseJSON.errors
         .map((err) => err.msg)
         .join("<br>");

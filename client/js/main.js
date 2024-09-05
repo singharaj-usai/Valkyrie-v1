@@ -99,25 +99,84 @@ const App = {
 
   // Update authentication UI
   updateAuthUI: function () {
-    // Simulating authentication status (replace with actual auth check)
     const username = localStorage.getItem("username");
-    let authHtml = "";
+    const authContainer = $(`#${this.config.authContainerId}`);
     if (username) {
-      authHtml = `
-                <span class="navbar-text me-3">Welcome, ${this.escapeHtml(
-                  username
-                )}</span>
-                <button class="btn btn-outline-primary" onclick="App.logout()">Logout</button>
-            `;
+      $.ajax({
+        url: "/api/user-info",
+        method: "GET",
+        success: (response) => {
+          authContainer.html(`
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle navbar-text" data-toggle="dropdown" role="button" aria-expanded="false">
+              ${this.escapeHtml(username)} <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span> <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="/user-profile.html?username=${encodeURIComponent(username)}">Profile</a></li>
+              <li><a href="#" id="claim-currency">Claim Daily</a></li>
+                <li class="divider"></li>
+              <li><a href="#" id="settings">Settings</a></li>
+              <li class="divider"></li>
+              <li><a href="#" id="logout">Logout</a></li>
+            </ul>
+          </li>
+        `);
+          this.initClaimCurrency();
+          this.initLogout();
+        },
+        error: (xhr, status, error) => {
+          console.error("Error fetching user info:", error);
+          this.logout();
+        }
+      });
     } else {
-      authHtml = `
-                <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
+      authContainer.html(`
+             <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
                 <a href="/register.html" class="btn btn-primary">Sign Up</a>
-            `;
+      `);
     }
-
-    $(`#${this.config.authContainerId}`).html(authHtml);
   },
+
+  initClaimCurrency: function () {
+    $("#claim-currency").on("click", (e) => {
+      e.preventDefault();
+      $.ajax({
+        url: "/api/claim-daily-currency",
+        method: "POST",
+        success: (response) => {
+          $("#currency-amount").text(response.newBalance);
+          this.showAlert("success", "You've claimed your daily currency!");
+        },
+        error: (xhr, status, error) => {
+          this.showAlert("danger", xhr.responseJSON.error || "Error claiming daily currency");
+        }
+      });
+    });
+  },
+
+  initLogout: function () {
+    $("#logout").on("click", (e) => {
+      e.preventDefault();
+      this.logout();
+    });
+  },
+
+  logout: function () {
+    $.ajax({
+      url: "/api/logout",
+      method: "POST",
+      success: () => {
+        localStorage.removeItem("username");
+        this.updateAuthUI();
+        this.updateDataContainer();
+        window.location.href = "/login.html";
+      },
+      error: (xhr, status, error) => {
+        console.error("Error logging out:", error);
+      },
+    });
+  },
+  
   // Update data container
   updateDataContainer: function () {
     const username = localStorage.getItem("username");
