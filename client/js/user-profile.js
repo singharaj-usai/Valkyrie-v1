@@ -18,10 +18,6 @@ $(document).ready(function () {
                 "Authorization": `Bearer ${sessionToken}`
             },
             success: function (user) {
-                // If the user object doesn't have a blurb, try to get it from localStorage
-                if (!user.blurb) {
-                    user.blurb = localStorage.getItem("userBlurb") || '';
-                }
                 currentUser = user;
                 displayUserProfile(user);
             },
@@ -93,8 +89,6 @@ $(document).ready(function () {
                     success: function(response) {
                         currentUser.blurb = response.blurb;
                         displayUserProfile(currentUser);
-                        // Add this line to update the blurb in localStorage
-                        localStorage.setItem("userBlurb", response.blurb);
                     },
                     error: function(xhr, status, error) {
                         alert('Error updating blurb: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));

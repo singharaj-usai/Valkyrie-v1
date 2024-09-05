@@ -274,7 +274,7 @@ router.get("/search", async (req, res) => {
 router.get('/user/:username', async (req, res) => {
   try {
       const { username } = req.params;
-      const user = await User.findOne({ username }, 'username signupDate lastLoggedIn');
+      const user = await User.findOne({ username }, 'username signupDate lastLoggedIn blurb');
       if (!user) {
           return res.status(404).send('User not found');
       }
