@@ -240,12 +240,15 @@ router.post("/login", async (req, res) => {
 });
 
 // Logout endpoint
-router.post("/logout", (req, res) => {
+router.post("/logout", async (req, res) => {
+  if (req.user) {
+    await User.findByIdAndUpdate(req.user._id, { isOnline: false });
+  }
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).send("Error logging out");
     }
-    res.send("Logged out successfully");
+    res.json({ message: 'Logged out successfully' });
   });
 });
 

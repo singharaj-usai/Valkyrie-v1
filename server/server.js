@@ -37,6 +37,9 @@ app.use(async (req, res, next) => {
   }
 });
 
+const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
+app.use(updateUserStatus);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

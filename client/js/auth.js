@@ -27,7 +27,7 @@ $(document).ready(function () {
       isValid = false;
       errorMessages.push("Username must only contain letters and numbers.");
     }
-    
+
     // Array of bad words to check against
     const badWords = [
       "nlgga",
@@ -307,7 +307,31 @@ $(document).ready(function () {
       });
     }
   });
+
   
+  function logout() {
+    $.ajax({
+      url: "/api/logout",
+      method: "POST",
+      success: function (response) {
+        localStorage.removeItem("username");
+        localStorage.removeItem("sessionToken");
+        showAlert("success", "Logged out successfully");
+        setTimeout(() => {
+          window.location.href = "/login.html";
+        }, 1000);
+      },
+      error: function (xhr, status, error) {
+        showAlert("danger", "Error logging out: " + xhr.responseText);
+      }
+    });
+  }
+
+  // Add event listener for logout button
+  $(document).on("click", "#logout-button", function(e) {
+    e.preventDefault();
+    logout();
+  });
   function handleRegistrationError(xhr, status, error) {
     if (status === "timeout") {
       showAlert("danger", "The request timed out. Please try again or check your internet connection.");
@@ -347,6 +371,8 @@ $(document).ready(function () {
         },
       });
     }
+
+    
   });
 });
 
