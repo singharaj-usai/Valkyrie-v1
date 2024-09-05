@@ -254,17 +254,19 @@ router.post("/logout", (req, res) => {
 router.get("/search", async (req, res) => {
   try {
     const { username } = req.query;
-    let users;
-    if (username) {
-      const regex = new RegExp(username, "i"); // 'i' flag for case-insensitive search
-      users = await User.find({ username: regex }, "username");
-    } else {
-      users = await User.find({}, "username");
-    }
-    res.json(users);
+    const users = await User.find({ 
+      username: new RegExp(username, 'i') 
+    }).select('username signupDate lastLoggedIn blurb');
+
+    res.json(users.map(user => ({
+      username: user.username,
+      signupDate: user.signupDate,
+      lastLoggedIn: user.lastLoggedIn,
+      blurb: user.blurb
+    })));
   } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).send("Error searching users");
+    console.error("Error searching users:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

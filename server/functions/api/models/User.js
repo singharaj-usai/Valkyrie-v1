@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
   verificationToken: String,
   currency: {
     type: Number,
-    default: 10
+    default: 0
   },
   lastCurrencyClaimDate: {
     type: Date,

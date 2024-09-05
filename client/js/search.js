@@ -17,15 +17,24 @@ $(document).ready(function () {
   }
 
   function displaySearchResults(users) {
-    let html = '<ul class="list-group">';
     if (users.length === 0) {
-        html = "<p>No users found.</p>";
-    } else {
-        users.forEach((user) => {
-            html += `<li class="list-group-item"><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></li>`;
-        });
-        html += "</ul>";
+      $("#search-results").html("<p>No users found.</p>");
+      return;
     }
+  
+    let html = '<table class="table table-striped">';
+    html += '<thead><tr><th>Username</th><th>Blurb</th><th>Last Logged In</th></tr></thead>';
+    html += '<tbody>';
+  
+    users.forEach((user) => {
+      html += `<tr>
+        <td><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
+        <td>${user.blurb ? escapeHtml(user.blurb.substring(0, 50) + (user.blurb.length > 50 ? '...' : '')) : 'No blurb'}</td>
+      <td>${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</td>
+    </tr>`;
+    });
+  
+    html += '</tbody></table>';
     $("#search-results").html(html);
   }
 
