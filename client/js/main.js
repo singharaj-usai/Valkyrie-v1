@@ -199,23 +199,7 @@ const App = {
     $(`#${this.config.dataContainerId}`).html(dataHtml);
   },
 
-  // Logout function (to be implemented)
-  logout: function () {
-    $.ajax({
-      url: "/api/logout",
-      method: "POST",
-      success: function () {
-        localStorage.removeItem("username");
-        App.updateAuthUI();
-        App.updateDataContainer();
 
-        window.location.href = "/login.html"; // Redirect to login page after logout
-      },
-      error: function (xhr, status, error) {
-        console.error("Error logging out:", error);
-      },
-    });
-  },
 };
 
 // Load footer
