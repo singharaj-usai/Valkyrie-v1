@@ -9,6 +9,15 @@
         border-bottom: 1px solid #e7e7e7;
     }
 
+    #user-submenu .navbar-nav {
+        float: none;
+    }
+
+    #user-submenu .navbar-nav > li {
+        float: none;
+        display: inline-block;
+    }
+
     #user-submenu .navbar-nav > li > a {
         padding-top: 10px;
         padding-bottom: 10px;
@@ -20,6 +29,16 @@
 
     .navbar-fixed-top + .navbar-fixed-top {
         top: 50px;
+    }
+
+    @media (max-width: 767px) {
+        #user-submenu {
+            display: none !important;
+        }
+
+        body {
+            padding-top: 50px;
+        }
     }
 </style>
 
@@ -51,6 +70,13 @@
                         <li><a href="#">Others</a></li>
                     </ul>
                 </li>
+                
+                <!-- User submenu items for mobile -->
+                <li class="visible-xs"><a href="/">Home</a></li>
+                <li class="visible-xs"><a href="/user-profile.html">My Profile</a></li>
+                <li class="visible-xs"><a href="#">Places</a></li>
+                <li class="visible-xs"><a href="#">Friend Requests</a></li>
+                <li class="visible-xs"><a href="#">Messages</a></li>
             </ul>
            
             <div class="nav navbar-nav navbar-right">
@@ -61,13 +87,13 @@
         </div>
     </div>
 </nav>
-<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top" style="display: none;">
+<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top hidden-xs" style="display: none;">
     <div class="container">
         <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
             <li><a href="/user-profile.html">Profile</a></li>
             <li><a href="#">Places</a></li>
-            <li><a href="#">Friend Requests</a></li>
+            <li><a href="#">Friends</a></li>
             <li><a href="#">Messages</a></li>
         </ul>
     </div>

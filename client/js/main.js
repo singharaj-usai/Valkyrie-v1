@@ -116,7 +116,7 @@ const App = {
                 ${this.escapeHtml(username)} <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span> <span class="caret"></span>
               </a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="/user-profile.html?username=${encodeURIComponent(username)}">Profile</a></li>
+                <li><a href="/user-profile.html">Profile</a></li>
                 <li><a href="#" id="claim-currency">Claim Daily</a></li>
                 <li class="divider"></li>
                 <li><a href="#" id="settings">Settings</a></li>

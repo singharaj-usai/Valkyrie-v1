@@ -1,12 +1,12 @@
 $(document).ready(function () {
     const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('username');
+    const username = urlParams.get('username') || localStorage.getItem('username');
     let currentUser;
 
     if (username) {
         fetchUserProfile(username);
     } else {
-        $('#user-profile').html('<p>No user specified.</p>');
+        $('#user-profile').html('<p>No user specified and you are not logged in.</p>');
     }
 
     function fetchUserProfile(username) {
