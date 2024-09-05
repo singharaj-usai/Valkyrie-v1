@@ -12,7 +12,8 @@
     "deploy": "vercel",
     "create-admin": "node server/scripts/createAdmin.js",
     "reset-user-ids": "node server/scripts/resetUserIds.js",
-    "generate-test-users": "node server/scripts/generateTestUsers.js"
+    "generate-test-users": "node server/scripts/generateTestUsers.js",
+    "clear-users": "node server/scripts/clearUsers.js"
   },
   "engines": {
     "node": "18.x"
