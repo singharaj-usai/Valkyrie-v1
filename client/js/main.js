@@ -100,27 +100,31 @@ const App = {
   // Update authentication UI
   updateAuthUI: function () {
     const username = localStorage.getItem("username");
+    const sessionToken = localStorage.getItem("sessionToken");
     const authContainer = $(`#${this.config.authContainerId}`);
-    if (username) {
+    if (username && sessionToken) {
       $.ajax({
         url: "/api/user-info",
         method: "GET",
+        headers: {
+          "Authorization": `Bearer ${sessionToken}`
+        },
         success: (response) => {
           authContainer.html(`
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle navbar-text" data-toggle="dropdown" role="button" aria-expanded="false">
-              ${this.escapeHtml(username)} <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span> <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="/user-profile.html?username=${encodeURIComponent(username)}">Profile</a></li>
-              <li><a href="#" id="claim-currency">Claim Daily</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle navbar-text" data-toggle="dropdown" role="button" aria-expanded="false">
+                ${this.escapeHtml(username)} <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span> <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="/user-profile.html?username=${encodeURIComponent(username)}">Profile</a></li>
+                <li><a href="#" id="claim-currency">Claim Daily</a></li>
                 <li class="divider"></li>
-              <li><a href="#" id="settings">Settings</a></li>
-              <li class="divider"></li>
-              <li><a href="#" id="logout">Logout</a></li>
-            </ul>
-          </li>
-        `);
+                <li><a href="#" id="settings">Settings</a></li>
+                <li class="divider"></li>
+                <li><a href="#" id="logout">Logout</a></li>
+              </ul>
+            </li>
+          `);
           this.initClaimCurrency();
           this.initLogout();
         },
@@ -131,8 +135,8 @@ const App = {
       });
     } else {
       authContainer.html(`
-             <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
-                <a href="/register.html" class="btn btn-primary">Sign Up</a>
+        <a href="/login.html" class="btn btn-outline-primary me-2">Login</a>
+        <a href="/register.html" class="btn btn-primary">Sign Up</a>
       `);
     }
   },
@@ -162,11 +166,16 @@ const App = {
   },
 
   logout: function () {
+    const sessionToken = localStorage.getItem("sessionToken");
     $.ajax({
       url: "/api/logout",
       method: "POST",
+      headers: {
+        "Authorization": `Bearer ${sessionToken}`
+      },
       success: () => {
         localStorage.removeItem("username");
+        localStorage.removeItem("sessionToken");
         this.updateAuthUI();
         this.updateDataContainer();
         window.location.href = "/login.html";

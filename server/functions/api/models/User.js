@@ -57,7 +57,12 @@ const userSchema = new mongoose.Schema({
   lastCurrencyClaimDate: {
     type: Date,
     default: null
-  }
+  },
+  blurb: {
+  type: String,
+  default: '',
+  maxlength: 500
+},
 });
 
 userSchema.pre('save', async function(next) {

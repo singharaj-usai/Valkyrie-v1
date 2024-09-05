@@ -290,7 +290,7 @@ $(document).ready(function () {
           //}
           setTimeout(() => {
             window.location.href = "/login.html";
-          }, 5000);
+          }, 1000);
         },
         error: function(xhr, status, error) {
           hideLoadingIndicator();
@@ -330,19 +330,20 @@ $(document).ready(function () {
       const password = $("#password").val();
 
       $.ajax({
-        url: "/api/login",
-        method: "POST",
-        data: { username, password },
-        success: function (response) {
-          localStorage.setItem("username", response.username);
-          window.location.href = "/";
-        },
-        error: function (xhr, status, error) {
-          if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
-            showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
-          } else {
-            showAlert("danger", "Error logging in: " + xhr.responseText);
-          }
+      url: "/api/login",
+      method: "POST",
+      data: { username, password },
+      success: function (response) {
+        localStorage.setItem("username", response.username);
+        localStorage.setItem("sessionToken", response.sessionToken);
+        window.location.href = "/";
+      },
+      error: function (xhr, status, error) {
+        if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
+          showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
+        } else {
+          showAlert("danger", "Error logging in: " + xhr.responseText);
+        }
         },
       });
     }
