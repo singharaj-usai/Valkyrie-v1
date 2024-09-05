@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const moment = require("moment-timezone");
+require('./Counter'); // Add this line to ensure Counter model is registered
 
 const userSchema = new mongoose.Schema({
   isAdmin: {
@@ -44,6 +45,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: String,
 });
 
 userSchema.pre('save', async function(next) {
@@ -57,5 +63,14 @@ userSchema.pre('save', async function(next) {
   }
   next();
 });
+
+userSchema.statics.resetCounter = async function() {
+  const Counter = mongoose.model('Counter');
+  await Counter.findOneAndUpdate(
+    { _id: 'userId' },
+    { $set: { seq: 0 } },
+    { upsert: true, new: true }
+  );
+};
 
 module.exports = mongoose.model("User", userSchema);

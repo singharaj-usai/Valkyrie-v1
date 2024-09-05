@@ -1,13 +1,32 @@
-<footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <span class="text-muted">&copy; 2023 My Node.js App. All rights reserved.</span>
-        </div>
-        <div class="col-md-6 text-end">
-          <span class="text-muted">Registered Users: <span id="user-count">Loading...</span></span>
-        </div>
+<footer class="footer mt-auto py-3 bg-light custom-shadow">
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-12">
+        <h4 class="text-muted">Alphablox</h4>
+      </div>
+      <div class="col-12 mb-2">
+        <span class="text-muted">All rights belong to their respective owners</span>
+      </div>
+      <div class="col-12 mb-2">
+        <a href="/terms-of-service.html" class="text-primary ">Terms of Service</a>
+        <span class="mx-2">|</span>
+        <span class="text-muted">&copy; 2023 My Node.js App. All rights reserved.</span>
+      </div>
+      <div class="col-12">
+        <span class="text-muted">Registered Users: <span id="user-count">Loading...</span></span>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
   
+  .custom-shadow {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+</style>

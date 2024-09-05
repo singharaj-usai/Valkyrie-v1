@@ -10,7 +10,8 @@
     "build": "echo 'No build script needed'",
     "vercel-build": "echo 'Build step not required'",
     "deploy": "vercel",
-    "create-admin": "node server/scripts/createAdmin.js"
+    "create-admin": "node server/scripts/createAdmin.js",
+    "reset-user-ids": "node server/scripts/resetUserIds.js"
   },
   "engines": {
     "node": "18.x"
@@ -19,19 +20,24 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
+    "@sendgrid/mail": "^8.1.3",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "csurf": "^1.11.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "express-validator": "^7.2.0",
+    "mailgun-js": "^0.22.0",
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.6.0",
     "mysql2": "^3.11.0",
+    "nodemailer": "^6.9.15",
     "path": "^0.12.7",
     "request-ip": "^3.3.0",
     "sequelize": "^6.37.3"

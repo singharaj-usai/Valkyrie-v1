@@ -15,7 +15,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 let isConnected = false;
 
-app.use(async (req, res, next) => {
+async function connectToDatabase() {
   if (!isConnected) {
     try {
       await connectDB(MONGODB_URI);
@@ -23,10 +23,18 @@ app.use(async (req, res, next) => {
       console.log('Connected to MongoDB');
     } catch (error) {
       console.error('Error connecting to database:', error);
-      return res.status(500).json({ error: 'Internal Server Error', details: 'Database connection failed' });
+      throw error;
     }
   }
-  next();
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error', details: 'Database connection failed' });
+  }
 });
 
 app.use(express.json());
@@ -61,9 +69,26 @@ app.get('/', (req, res) => {
 const adminRoutes = require('./functions/api/routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const User = require('./functions/api/models/User');
+
+async function resetUserIdsIfNeeded() {
+  try {
+    await connectToDatabase();
+    const count = await User.countDocuments();
+    if (count === 0) {
+      await User.resetCounter();
+      console.log('User ID counter has been reset.');
+    }
+  } catch (error) {
+    console.error('Error resetting user IDs:', error);
+  }
+}
+
+// Call this function after the server starts
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
+  app.listen(port, async () => {
     console.log(`Server running at http://localhost:${port}`);
+    await resetUserIdsIfNeeded();
   });
 }
 

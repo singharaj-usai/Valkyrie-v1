@@ -222,25 +222,25 @@ $(document).ready(function () {
         confirmPassword: $("#confirm-password").val()
       };
   
-    // Store form data in localStorage
-    localStorage.setItem('tempUserData', JSON.stringify(formData));
-
-
-    // Step 1: Validate user input
-    $.ajax({
-      url: "/api/register-validate",
-      type: "POST",
-      data: JSON.stringify(formData),
-      contentType: "application/json",
-      timeout: 10000,
-      success: function (response) {
-        // Redirect to a confirmation page
-        window.location.href = '/confirm-registration.html';
-      },
-      error: handleRegistrationError
-    });
-  }
-});
+      $.ajax({
+        url: "/api/register-create",
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        timeout: 10000,
+        success: function (response) {
+          showAlert("success", response.message);
+          if (response.previewUrl) {
+            showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
+          }
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 5000);
+        },
+        error: handleRegistrationError
+      });
+    }
+  });
   
   function handleRegistrationError(xhr, status, error) {
     if (status === "timeout") {
@@ -272,7 +272,11 @@ $(document).ready(function () {
           window.location.href = "/";
         },
         error: function (xhr, status, error) {
-          showAlert("danger", "Error logging in: " + xhr.responseText);
+          if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
+            showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
+          } else {
+            showAlert("danger", "Error logging in: " + xhr.responseText);
+          }
         },
       });
     }

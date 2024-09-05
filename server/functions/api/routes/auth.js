@@ -5,11 +5,15 @@ const User = require("../models/User");
 const moment = require("moment-timezone");
 const csrf = require("csurf");
 const requestIp = require('request-ip');
+const crypto = require('crypto');
+const { sendVerificationEmail } = require('../utils/emailService');
 
 const router = express.Router();
 
 // Setup CSRF protection
 const csrfProtection = csrf({ cookie: true });
+
+
 
 // Helper function to get IP address
 function getClientIp(req) {
@@ -104,6 +108,8 @@ router.post("/register", validateUser, async (req, res) => {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const clientIp = requestIp.getClientIp(req);
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+
 
     const user = new User({
       username,
@@ -111,10 +117,12 @@ router.post("/register", validateUser, async (req, res) => {
       password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
+      verificationToken
     });
 
     await user.save();
-    res.status(201).json({ message: "User created successfully" });
+    await sendVerificationEmail(email, verificationToken, req);
+    res.status(201).json({ message: "User created successfully. Please check your email to verify your account." });
   } catch (error) {
     console.error("Registration error:", error);
     if (error.code === 11000) {
@@ -139,7 +147,8 @@ router.post("/register-create", async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const clientIp = requestIp.getClientIp(req);
+    const clientIp = getClientIp(req);
+    const verificationToken = crypto.randomBytes(20).toString('hex');
 
     const user = new User({
       username,
@@ -147,10 +156,24 @@ router.post("/register-create", async (req, res) => {
       password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
+      verificationToken
     });
 
     await user.save();
-    res.status(201).json({ message: "User created successfully" });
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    try {
+      await sendVerificationEmail(email, verificationToken, baseUrl);
+      res.status(201).json({ 
+        message: "User created successfully. Please check your email to verify your account."
+      });
+    } catch (emailError) {
+      console.error("Error sending verification email:", emailError);
+      // Instead of sending a 201 status, send a 500 status with more detailed error information
+      res.status(500).json({ 
+        message: "User created successfully, but there was an issue sending the verification email.",
+        error: emailError.message
+      });
+    }
   } catch (error) {
     console.error("Registration error:", error);
     if (error.code === 11000) {
@@ -158,6 +181,22 @@ router.post("/register-create", async (req, res) => {
     } else {
       res.status(500).json({ error: "Error creating user", details: error.message || "Unknown error" });
     }
+  }
+});
+
+router.get("/verify-email/:token", async (req, res) => {
+  try {
+    const user = await User.findOne({ verificationToken: req.params.token });
+    if (!user) {
+      return res.status(400).send("Invalid or expired verification token");
+    }
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+    res.redirect('/login.html?verified=true');
+  } catch (error) {
+    console.error("Email verification error:", error);
+    res.status(500).send("Error verifying email");
   }
 });
 
@@ -169,10 +208,17 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(400).send("Invalid username");
     }
+
+    
+    if (!user.isVerified) {
+      return res.status(403).send("Please verify your email before logging in");
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password); //password === user.password; //await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(400).send("Invalid password");
     }
+
 
     const clientIp = requestIp.getClientIp(req);
     user.lastLoggedIn = moment().tz("America/New_York").toDate();
