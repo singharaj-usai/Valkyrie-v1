@@ -261,18 +261,21 @@ router.get("/search", async (req, res) => {
     const users = await User.find({ 
       username: new RegExp(username, 'i') 
     }).select('username signupDate lastLoggedIn blurb');
-
+    //res.status(500).send("Error searching users");
     res.json(users.map(user => ({
       username: user.username,
       signupDate: user.signupDate,
       lastLoggedIn: user.lastLoggedIn,
-      blurb: user.blurb
+      blurb: user.blurb,
+      isOnline: user.isOnline,
+      lastActiveAt: user.lastActiveAt,
     })));
   } catch (error) {
     console.error("Error searching users:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // User profile endpoint
 router.get('/user/:username', async (req, res) => {

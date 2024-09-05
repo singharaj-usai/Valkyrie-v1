@@ -23,7 +23,7 @@ $(document).ready(function () {
     }
   
     let html = '<table class="table table-striped">';
-    html += '<thead><tr><th>Avatar</th><th>Username</th><th>Blurb</th><th>Last Logged In</th><th>Status</th></tr></thead>';
+    html += '<thead><tr><th>Avatar</th><th>Username</th><th>Blurb</th><th>Last Logged In</th></tr></thead>';
     html += '<tbody>';
   
     users.forEach((user) => {
@@ -32,7 +32,6 @@ $(document).ready(function () {
         <td><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
         <td>${user.blurb ? escapeHtml(user.blurb.substring(0, 50) + (user.blurb.length > 50 ? '...' : '')) : 'No blurb'}</td>
         <td>${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</td>
-        <td>${user.isOnline ? '<span class="text-success">Online</span>' : '<span class="text-secondary">Offline</span>'}</td>
       </tr>`;
     });
   
