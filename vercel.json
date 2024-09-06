@@ -11,15 +11,15 @@
         "use": "@vercel/static"
       }
     ],
-    "rewrites": [
+    "routes": [
       {
-          "source": "/api/(.*)",
-          "destination": "/server/server.js"
+        "src": "/api/(.*)",
+        "dest": "server/server.js"
       },
       {
-          "source": "/(.*)",
-          "destination": "/client/$1"
+        "src": "/(.*)",
+        "dest": "client/$1"
       }
-  ],
-    "cleanUrls": true
+    ]
+    
     }
