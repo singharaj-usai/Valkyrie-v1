@@ -154,16 +154,17 @@ $(document).ready(function () {
   function checkAuth() {
     const username = localStorage.getItem("username");
     const currentPath = window.location.pathname;
+    
     if (username) {
-      if (currentPath === "/login.html" || currentPath === "/register.html") {
-        window.location.href = "/";
+      if (currentPath === "/login" || currentPath === "/login.html" || currentPath === "/register" || currentPath === "/register.html") {
+        window.location.replace('/');
       } else {
         $("#loading").hide();
         $("#content").show();
       }
     } else {
-      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
-        window.location.href = "/login.html";
+      if (currentPath !== "/login" && currentPath !== "/login.html" && currentPath !== "/register" && currentPath !== "/register.html") {
+        window.location.replace('/login');
       } else {
         $("#loading").hide();
         $("#content").show();
@@ -318,7 +319,7 @@ $(document).ready(function () {
         localStorage.removeItem("sessionToken");
         showAlert("success", "Logged out successfully");
         setTimeout(() => {
-          window.location.href = "/login.html";
+          window.location.replace('/login');
         }, 1000);
       },
       error: function (xhr, status, error) {
@@ -360,7 +361,7 @@ $(document).ready(function () {
       success: function (response) {
         localStorage.setItem("username", response.username);
         localStorage.setItem("sessionToken", response.sessionToken);
-        window.location.href = "/";
+        window.location.replace('/');
       },
       error: function (xhr, status, error) {
         if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {

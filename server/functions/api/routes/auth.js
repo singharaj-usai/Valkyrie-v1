@@ -228,10 +228,13 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     req.session.userId = user._id;
+    const sessionToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
     res.json({
       username: user.username,
       signupDate: user.signupDate,
       lastLoggedIn: user.lastLoggedIn,
+      sessionToken: sessionToken
     });
   } catch (error) {
     console.error("Login error:", error);
