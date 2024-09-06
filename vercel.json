@@ -1,5 +1,6 @@
 {
     "version": 2,
+    
     "builds": [
       {
         "src": "server/server.js",
@@ -19,5 +20,6 @@
         "src": "/(.*)",
         "dest": "client/$1"
       }
-    ]
+    ],
+    "cleanUrls": true
     }
