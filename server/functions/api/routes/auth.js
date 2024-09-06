@@ -6,6 +6,7 @@ const moment = require("moment-timezone");
 const csrf = require("csurf");
 const requestIp = require('request-ip');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { sendVerificationEmail } = require('../utils/emailService');
 
 const router = express.Router();
@@ -228,8 +229,9 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     req.session.userId = user._id;
-    const sessionToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
+    const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key_for_development';
+    const sessionToken = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '1d' });
+    
     res.json({
       username: user.username,
       signupDate: user.signupDate,
