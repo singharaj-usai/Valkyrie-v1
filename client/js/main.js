@@ -35,17 +35,38 @@ const App = {
   // Check authentication status
   checkAuth: function () {
     const username = localStorage.getItem("username");
+    const sessionToken = localStorage.getItem("sessionToken");
     const currentPath = window.location.pathname;
-    if (username) {
-      if (currentPath === "/login.html" || currentPath === "/register.html") {
-        window.location.href = "/";
-      } else {
-        $("#loading").hide();
-        $("#content").show();
-        this.fetchData();
-        this.updateAuthUI();
-        this.updateDataContainer();
-      }
+  
+    if (username && sessionToken) {
+      $.ajax({
+        url: "/api/validate-session",
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${sessionToken}`
+        },
+        success: () => {
+          if (currentPath === "/login.html" || currentPath === "/register.html") {
+            window.location.href = "/";
+          } else {
+            $("#loading").hide();
+            $("#content").show();
+            this.fetchData();
+            this.updateAuthUI();
+            this.updateDataContainer();
+          }
+        },
+        error: () => {
+          localStorage.removeItem("username");
+          localStorage.removeItem("sessionToken");
+          if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+            window.location.href = "/login.html";
+          } else {
+            $("#loading").hide();
+            $("#content").show();
+          }
+        }
+      });
     } else {
       if (currentPath !== "/login.html" && currentPath !== "/register.html") {
         window.location.href = "/login.html";

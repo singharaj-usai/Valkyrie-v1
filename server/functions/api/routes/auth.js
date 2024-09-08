@@ -203,6 +203,27 @@ router.get("/verify-email/:token", async (req, res) => {
   }
 });
 
+router.get("/validate-session", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_for_development');
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    res.status(200).json({ message: "Session is valid" });
+  } catch (error) {
+    console.error("Session validation error:", error);
+    res.status(401).json({ error: "Invalid session" });
+  }
+});
+
 // Login endpoint
 router.post("/login", async (req, res) => {
   try {
