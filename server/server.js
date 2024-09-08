@@ -3,6 +3,8 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const csrf = require('csurf');
 const path = require('path');
+const MongoStore = require('connect-mongo')(session);
+
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
@@ -48,6 +50,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  store: new MongoStore({
+    url: process.env.MONGODB_URI || 'mongodb://localhost/my-app',
+    ttl: 24 * 60 * 60 // 1 day
+  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
