@@ -109,6 +109,9 @@ const App = {
         headers: {
           "Authorization": `Bearer ${sessionToken}`
         },
+        xhrFields: {
+          withCredentials: true
+        },
         success: (response) => {
           authContainer.html(`
             <li class="dropdown">

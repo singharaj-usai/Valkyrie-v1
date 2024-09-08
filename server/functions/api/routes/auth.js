@@ -229,6 +229,16 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     req.session.userId = user._id;
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    
     const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key_for_development';
     const sessionToken = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '1d' });
     
