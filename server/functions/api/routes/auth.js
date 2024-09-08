@@ -263,6 +263,13 @@ router.post("/login", async (req, res) => {
     const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key_for_development';
     const sessionToken = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '1d' });
     
+    res.cookie('sessionToken', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
     res.json({
       username: user.username,
       signupDate: user.signupDate,

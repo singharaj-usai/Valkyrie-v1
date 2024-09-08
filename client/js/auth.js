@@ -359,8 +359,16 @@ $(document).ready(function () {
         method: "POST",
         data: { username, password },
         success: function (response) {
-          Cookies.set("sessionToken", response.sessionToken, { expires: 1 }); // Expires in 1 day
-          Cookies.set("username", response.username, { expires: 1 });
+          Cookies.set("sessionToken", response.sessionToken, { 
+            expires: 1,
+            secure: window.location.protocol === "https:",
+            sameSite: window.location.protocol === "https:" ? 'none' : 'lax'
+          });
+          Cookies.set("username", response.username, { 
+            expires: 1,
+            secure: window.location.protocol === "https:",
+            sameSite: window.location.protocol === "https:" ? 'none' : 'lax'
+          });
           showAlert("success", "Logged in successfully. Redirecting...");
           setTimeout(() => {
             window.location.href = '/';
