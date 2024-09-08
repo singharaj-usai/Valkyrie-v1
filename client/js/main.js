@@ -120,8 +120,8 @@ const App = {
 
   // Update authentication UI
   updateAuthUI: function () {
-    const username = localStorage.getItem("username");
-    const sessionToken = localStorage.getItem("sessionToken");
+    const username = Cookies.get("username");
+    const sessionToken = Cookies.get("sessionToken");
     const authContainer = $(`#${this.config.authContainerId}`);
     if (username && sessionToken) {
       $.ajax({
@@ -187,7 +187,9 @@ const App = {
   initLogout: function () {
     $("#logout").on("click", (e) => {
       e.preventDefault();
-      this.logout();
+      Cookies.remove("username");
+      Cookies.remove("sessionToken");
+      window.location.href = '/login.html';
     });
   },
 

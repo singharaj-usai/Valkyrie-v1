@@ -355,23 +355,23 @@ $(document).ready(function () {
       const password = $("#password").val();
 
       $.ajax({
-      url: "/api/login",
-      method: "POST",
-      data: { username, password },
-      success: function (response) {
-        localStorage.setItem("username", response.username);
-        localStorage.setItem("sessionToken", response.sessionToken);
-        showAlert("success", "Logged in successfully. Redirecting...");
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1000);
-      },
-      error: function (xhr, status, error) {
-        if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
-          showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
-        } else {
-          showAlert("danger", "Error logging in: " + xhr.responseText);
-        }
+        url: "/api/login",
+        method: "POST",
+        data: { username, password },
+        success: function (response) {
+          Cookies.set("sessionToken", response.sessionToken, { expires: 1 }); // Expires in 1 day
+          Cookies.set("username", response.username, { expires: 1 });
+          showAlert("success", "Logged in successfully. Redirecting...");
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1000);
+        },
+        error: function (xhr, status, error) {
+          if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
+            showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
+          } else {
+            showAlert("danger", "Error logging in: " + xhr.responseText);
+          }
         },
       });
     }
