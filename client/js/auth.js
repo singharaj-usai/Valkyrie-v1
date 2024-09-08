@@ -361,7 +361,10 @@ $(document).ready(function () {
       success: function (response) {
         localStorage.setItem("username", response.username);
         localStorage.setItem("sessionToken", response.sessionToken);
-        window.location.replace('/');
+        showAlert("success", "Logged in successfully. Redirecting...");
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
       },
       error: function (xhr, status, error) {
         if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
