@@ -1,7 +1,6 @@
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const csrf = require('csurf');
 const path = require('path');
 const MongoStore = require('connect-mongo');
 

@@ -67,21 +67,36 @@
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script src="./js/auth.js"></script>
     <script>
-      $(document).ready(function() {
-        if (Cookies.get("sessionToken")) {
-            window.location.href = '/';
-            } else {
+        $(document).ready(function() {
+          const token = localStorage.getItem("token");
+          if (token) {
+            $.ajax({
+              url: "/api/validate-session",
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              },
+              success: function(response) {
+                window.location.href = '/';
+              },
+              error: function() {
+                localStorage.removeItem("token");
+                localStorage.removeItem("username");
                 $('#loading').hide();
                 $('#content').show();
-            }
-            const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('verified') === 'true') {
-        $('#verified-message').show();
-    }   
+              }
+            });
+          } else {
+            $('#loading').hide();
+            $('#content').show();
+          }
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('verified') === 'true') {
+            $('#verified-message').show();
+          }   
         });
-    </script>
+      </script>
 </body>
 </html>

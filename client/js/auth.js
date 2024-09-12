@@ -147,24 +147,45 @@ $(document).ready(function () {
   // Load navbar
   $.get("/navbar.html", function (data) {
     $("#navbar-container").html(data);
-    updateAuthUI();
+    checkAuth();
   });
 
   // Check if user is already logged in
   function checkAuth() {
+    const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
     const currentPath = window.location.pathname;
-    
-    if (username) {
-      if (currentPath === "/login" || currentPath === "/login.html" || currentPath === "/register" || currentPath === "/register.html") {
-        window.location.replace('/');
-      } else {
-        $("#loading").hide();
-        $("#content").show();
-      }
+  
+    if (token && username) {
+      $.ajax({
+        url: "/api/validate-session",
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        success: function(response) {
+          if (currentPath === "/login.html" || currentPath === "/register.html") {
+            window.location.href = '/';
+          } else {
+            $("#loading").hide();
+            $("#content").show();
+            updateAuthUI();
+          }
+        },
+        error: function() {
+          localStorage.removeItem("token");
+          localStorage.removeItem("username");
+          if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+            window.location.href = '/login.html';
+          } else {
+            $("#loading").hide();
+            $("#content").show();
+          }
+        }
+      });
     } else {
-      if (currentPath !== "/login" && currentPath !== "/login.html" && currentPath !== "/register" && currentPath !== "/register.html") {
-        window.location.replace('/login');
+      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+        window.location.href = '/login.html';
       } else {
         $("#loading").hide();
         $("#content").show();
@@ -189,11 +210,15 @@ $(document).ready(function () {
 
   function updateAuthUI() {
     const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
     const authContainer = $("#auth-container");
-    if (username) {
+    if (username && token) {
       $.ajax({
         url: "/api/user-info",
         method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
         success: function (response) {
           authContainer.html(`
             <span class="navbar-text">
@@ -216,6 +241,7 @@ $(document).ready(function () {
       `);
     }
   }
+
   
   function initClaimCurrency() {
     $("#claim-currency").on("click", function () {
@@ -242,26 +268,28 @@ $(document).ready(function () {
   }
 
   // Function to get CSRF token
-  function getCsrfToken() {
-    return $.ajax({
-      url: "/api/csrf-token",
-      method: "GET",
-    });
-  }
+ // function getCsrfToken() {
+ //   return $.ajax({
+  //    url: "/api/csrf-token",
+   //   method: "GET",
+   // });
+ // }
 
   // Helper function to set CSRF token in AJAX headers
-  function setCSRFToken(securityToken) {
-    $.ajaxSetup({
-      headers: {
-        "X-CSRF-Token": securityToken,
-      },
-    });
-  }
-
+ // function setCSRFToken(securityToken) {
+  //  $.ajaxSetup({
+    //  headers: {
+     //   "X-CSRF-Token": securityToken,
+     // },
+    //});
+  //}
+  
   // Get CSRF token when page loads
-  getCsrfToken().then(function (response) {
-    setCSRFToken(response.csrfToken);
-  });
+ // getCsrfToken().then(function (response) {
+  //  setCSRFToken(response.csrfToken);
+//  });
+
+  
 
   $("#signup-form").on("submit", function (e) {
     e.preventDefault();
@@ -311,15 +339,19 @@ $(document).ready(function () {
 
   
   function logout() {
+    const token = localStorage.getItem("token");
     $.ajax({
       url: "/api/logout",
       method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
       success: function (response) {
         localStorage.removeItem("username");
-        localStorage.removeItem("sessionToken");
+        localStorage.removeItem("token");
         showAlert("success", "Logged out successfully");
         setTimeout(() => {
-          window.location.replace('/login');
+          window.location.replace('/login.html');
         }, 1000);
       },
       error: function (xhr, status, error) {
@@ -353,38 +385,24 @@ $(document).ready(function () {
     if (validateForm(this, false)) {
       const username = $("#username").val();
       const password = $("#password").val();
-
+  
       $.ajax({
         url: "/api/login",
         method: "POST",
         data: { username, password },
         success: function (response) {
-          Cookies.set("sessionToken", response.sessionToken, { 
-            expires: 1,
-            secure: window.location.protocol === "https:",
-            sameSite: window.location.protocol === "https:" ? 'none' : 'lax'
-          });
-          Cookies.set("username", response.username, { 
-            expires: 1,
-            secure: window.location.protocol === "https:",
-            sameSite: window.location.protocol === "https:" ? 'none' : 'lax'
-          });
+          localStorage.setItem("token", response.token);
+          localStorage.setItem("username", response.username);
           showAlert("success", "Logged in successfully. Redirecting...");
           setTimeout(() => {
             window.location.href = '/';
           }, 1000);
         },
         error: function (xhr, status, error) {
-          if (xhr.status === 403 && xhr.responseText === "Please verify your email before logging in") {
-            showAlert("warning", "Please verify your email before logging in. Check your inbox for the verification link.");
-          } else {
-            showAlert("danger", "Error logging in: " + xhr.responseText);
-          }
+          showAlert("danger", "Error logging in: " + xhr.responseJSON.message);
         },
       });
     }
-
-    
   });
 });
 

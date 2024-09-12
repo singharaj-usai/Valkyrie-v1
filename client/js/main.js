@@ -34,16 +34,16 @@ const App = {
 
   // Check authentication status
   checkAuth: function () {
+    const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
-    const sessionToken = localStorage.getItem("sessionToken");
     const currentPath = window.location.pathname;
   
-    if (username && sessionToken) {
+    if (token && username) {
       $.ajax({
         url: "/api/validate-session",
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${sessionToken}`
+          "Authorization": `Bearer ${token}`
         },
         success: () => {
           if (currentPath === "/login.html" || currentPath === "/register.html") {
@@ -57,8 +57,8 @@ const App = {
           }
         },
         error: () => {
+          localStorage.removeItem("token");
           localStorage.removeItem("username");
-          localStorage.removeItem("sessionToken");
           if (currentPath !== "/login.html" && currentPath !== "/register.html") {
             window.location.href = "/login.html";
           } else {
@@ -121,17 +121,14 @@ const App = {
   // Update authentication UI
   updateAuthUI: function () {
     const username = Cookies.get("username");
-    const sessionToken = Cookies.get("sessionToken");
-    const authContainer = $(`#${this.config.authContainerId}`);
-    if (username && sessionToken) {
+    const token = localStorage.getItem("token");
+    const authContainer = $("#auth-container");
+    if (username && token) {
       $.ajax({
         url: "/api/user-info",
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${sessionToken}`
-        },
-        xhrFields: {
-          withCredentials: true
+          "Authorization": `Bearer ${token}`
         },
         success: (response) => {
           authContainer.html(`
@@ -187,25 +184,21 @@ const App = {
   initLogout: function () {
     $("#logout").on("click", (e) => {
       e.preventDefault();
-      Cookies.remove("username");
-      Cookies.remove("sessionToken");
-      window.location.href = '/login.html';
+      this.logout();
     });
   },
-
+  
   logout: function () {
-    const sessionToken = localStorage.getItem("sessionToken");
+    const token = localStorage.getItem("token");
     $.ajax({
       url: "/api/logout",
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${sessionToken}`
+        "Authorization": `Bearer ${token}`
       },
       success: () => {
         localStorage.removeItem("username");
-        localStorage.removeItem("sessionToken");
-        this.updateAuthUI();
-        this.updateDataContainer();
+        localStorage.removeItem("token");
         window.location.href = "/login.html";
       },
       error: (xhr, status, error) => {

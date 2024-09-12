@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { body, validationResult } = require("express-validator");
 const User = require("../models/User");
 const moment = require("moment-timezone");
-const csrf = require("csurf");
+//const csrf = require("csurf");
 const requestIp = require('request-ip');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -12,7 +12,7 @@ const { sendVerificationEmail } = require('../utils/emailService');
 const router = express.Router();
 
 // Setup CSRF protection
-const csrfProtection = csrf({ cookie: true });
+//const csrfProtection = csrf({ cookie: true });
 
 
 
@@ -217,7 +217,7 @@ router.get("/validate-session", async (req, res) => {
       return res.status(401).json({ error: "Invalid token" });
     }
 
-    res.status(200).json({ message: "Session is valid" });
+    res.status(200).json({ message: "Session is valid", username: user.username });
   } catch (error) {
     console.error("Session validation error:", error);
     res.status(401).json({ error: "Invalid session" });
@@ -230,7 +230,7 @@ router.post("/login", async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(400).send("Invalid username");
+      return res.status(400).json({ message: "Invalid username" });
     }
 
     
@@ -240,7 +240,7 @@ router.post("/login", async (req, res) => {
 
     const isValidPassword = await bcrypt.compare(password, user.password); //password === user.password; //await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(400).send("Invalid password");
+      return res.status(400).json({ message: "Invalid password" });
     }
 
 
@@ -249,32 +249,18 @@ router.post("/login", async (req, res) => {
     user.lastLoginIp = clientIp;
     await user.save();
 
-    req.session.userId = user._id;
-    await new Promise((resolve, reject) => {
-      req.session.save((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-    
-    const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key_for_development';
-    const sessionToken = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '1d' });
-    
-    res.cookie('sessionToken', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    });
+   
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.JWT_SECRET || 'fallback_secret_key_for_development',
+      { expiresIn: '1d' }
+    );
 
     res.json({
+      token,
       username: user.username,
       signupDate: user.signupDate,
-      lastLoggedIn: user.lastLoggedIn,
-      sessionToken: sessionToken
+      lastLoggedIn: user.lastLoggedIn
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -295,6 +281,11 @@ router.post("/logout", async (req, res) => {
   });
 });
 
+
+//router.get("/csrf-token", (req, res) => {
+//  const csrfToken = req.csrfToken();
+//  res.json({ csrfToken });
+//});
 
 
 // Search users endpoint
