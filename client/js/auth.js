@@ -14,6 +14,7 @@ const App = {
       this.checkAuth();
       this.initSearch();
       this.initForms();
+      this.initLogout();
       this.loadFooter();
     });
   },
@@ -118,7 +119,8 @@ const App = {
             <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
             <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
           `);
-          initClaimCurrency();
+          this.initClaimCurrency();
+          this.initLogout();
         },
         error: function (xhr, status, error) {
           console.error("Error fetching user info:", error);
@@ -416,7 +418,7 @@ const App = {
   },
 
   initLogout: function () {
-    $("#logout").on("click", (e) => {
+    $(document).on("click", "#logout", (e) => {
       e.preventDefault();
       this.logout();
     });
