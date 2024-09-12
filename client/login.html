@@ -41,18 +41,15 @@
                         <input type="password" class="form-control" id="password" required minlength="6">
                     </div>
                     <div class="row">
-                     
                         <div class="col-xs-5">
                             <button type="submit" class="btn btn-success btn-block">Login</button>
                         </div>
-                        
                         <div class="col-xs-2 text-center">
                             <p style="margin-top: 6px;">or</p>
                         </div>
                         <div class="col-xs-5">
                             <a href="./register.html" class="btn btn-primary btn-block">Sign Up</a>
                         </div>
-
                     </div>  
                     <div class="form-group">
                         <p class="text-muted">This site is protected by reCAPTCHA and the Google
@@ -60,7 +57,7 @@
                             <a href="https://policies.google.com/terms">Terms of Service</a> apply.
                         </p>
                     </div>             
-                 </form>
+                </form>
             </div>
         </div>
     </div>
@@ -69,34 +66,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="./js/auth.js"></script>
     <script>
-        $(document).ready(function() {
-          const token = localStorage.getItem("token");
-          if (token) {
-            $.ajax({
-              url: "/api/validate-session",
-              method: "GET",
-              headers: {
-                "Authorization": `Bearer ${token}`
-              },
-              success: function(response) {
-                window.location.href = '/';
-              },
-              error: function() {
-                localStorage.removeItem("token");
-                localStorage.removeItem("username");
-                $('#loading').hide();
-                $('#content').show();
-              }
-            });
-          } else {
-            $('#loading').hide();
-            $('#content').show();
-          }
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('verified') === 'true') {
-            $('#verified-message').show();
-          }   
-        });
-      </script>
+      $(document).ready(function() {
+        App.init();
+        App.initForms();
+      });
+    </script>
 </body>
 </html>

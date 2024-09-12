@@ -368,7 +368,19 @@ router.post("/claim-daily-currency", async (req, res) => {
 
 router.get("/user-info", async (req, res) => {
   try {
-    const userId = req.session.userId;
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_for_development');
+    } catch (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const userId = decoded.userId;
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }

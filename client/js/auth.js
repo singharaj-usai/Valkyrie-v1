@@ -1,6 +1,240 @@
-$(document).ready(function () {
-  function validateForm(form, isSignup) {
-    const username = $("#username").val();
+// Main application object
+const App = {
+  // Configuration
+  config: {
+    apiUrl: "/api/data",
+    dataContainerId: "data-container",
+    authContainerId: "auth-container",
+  },
+
+  // Initialize the application
+  init: function () {
+    $(document).ready(() => {
+      this.loadNavbar();
+      this.checkAuth();
+      this.initSearch();
+      this.initForms();
+      this.loadFooter();
+    });
+  },
+
+  // Load navbar
+  loadNavbar: function () {
+    $.get("/navbar.html", (data) => {
+      $("#navbar-container").html(data);
+      this.updateAuthUI();
+    });
+  },
+
+  // Check authentication status
+  checkAuth: function () {
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    const currentPath = window.location.pathname;
+
+    if (token && username) {
+      $.ajax({
+        url: "/api/validate-session",
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        success: () => {
+          if (["/login.html", "/register.html"].includes(currentPath)) {
+            window.location.href = "/";
+          } else {
+            $("#loading").hide();
+            $("#content").show();
+            this.fetchData();
+            this.updateAuthUI();
+            this.updateDataContainer();
+          }
+        },
+        error: () => {
+          this.logout();
+          if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+            window.location.href = "/login.html";
+          }
+        },
+      });
+    } else {
+      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
+        window.location.href = "/login.html";
+      } else {
+        $("#loading").hide();
+        $("#content").show();
+      }
+    }
+  },
+
+  // Fetch data from the API
+  fetchData: function () {
+    $.ajax({
+      url: this.config.apiUrl,
+      method: "GET",
+      success: this.handleDataSuccess.bind(this),
+      error: this.handleDataError,
+    });
+  },
+
+  // Handle successful data fetch
+  handleDataSuccess: function (data) {
+    const html = this.generateHtml(data);
+    this.renderHtml(html);
+  },
+
+  // Render HTML to the DOM
+  renderHtml: function (html) {
+    $(`#${this.config.dataContainerId}`).html(html);
+  },
+
+  // Escape HTML to prevent XSS
+  escapeHtml: function (unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  },
+
+  // Update authentication UI
+  updateAuthUI: function () {
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const authContainer = $("#auth-container");
+
+    if (username && token) {
+      $.ajax({
+        url: "/api/user-info",
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+        success: function (response) {
+          authContainer.html(`
+            <span class="navbar-text">
+              Welcome, ${username} 
+              <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
+            </span>
+            <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
+            <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
+          `);
+          initClaimCurrency();
+        },
+        error: function (xhr, status, error) {
+          console.error("Error fetching user info:", error);
+        }
+      });
+    } else {
+      authContainer.html(`
+        <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
+        <a href="/register.html" class="btn btn-sm btn-default">Register</a>
+      `);
+    }
+  },
+
+  // Handle user logout
+  logout: function () {
+    const token = localStorage.getItem("token");
+    $.ajax({
+      url: "/api/logout",
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
+      success: () => {
+        localStorage.removeItem("username");
+        localStorage.removeItem("token");
+        window.location.href = "/login.html";
+      },
+      error: (xhr) => {
+        console.error("Error logging out:", xhr.responseText);
+      },
+    });
+  },
+
+  // Initialize search functionality
+  initSearch: function () {
+    $(document).on("submit", ".navbar-form", (e) => {
+      e.preventDefault();
+      const searchTerm = $("#search-input").val().trim();
+      window.location.href = `/search-results.html?q=${encodeURIComponent(searchTerm)}`;
+    });
+  },
+
+  // Initialize form validations
+  initForms: function () {
+    $("#signup-form").on("submit", (e) => {
+      e.preventDefault();
+      if (this.validateForm(true)) {
+        const formData = {
+          username: $("#username").val(),
+          email: $("#email").val(),
+          password: $("#password").val(),
+          confirmPassword: $("#confirm-password").val()
+        };
+  
+      showLoadingIndicator();
+
+
+      $.ajax({
+        url: "/api/register-create",
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        timeout: 10000,
+        success: function (response) {
+                  hideLoadingIndicator();
+
+          showAlert("success", response.message);
+          //if (response.previewUrl) {
+           // showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
+          //}
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 1000);
+        },
+        error: function(xhr, status, error) {
+          hideLoadingIndicator();
+          if (status === "timeout") {
+            // Assume the account was created successfully
+            showAlert("success", "Your account has been created successfully. You can now log in.");
+            setTimeout(() => {
+              window.location.href = "/login.html";
+            }, 1000);
+          } else {
+            handleRegistrationError(xhr, status, error);
+          }
+        }
+      });
+    }
+  });
+
+  $("#login-form").on("submit", (e) => {
+    e.preventDefault();
+    if (this.validateForm(false)) {
+      const username = $("#username").val();
+      const password = $("#password").val();
+  
+      $.ajax({
+        url: "/api/login",
+        method: "POST",
+        data: { username, password },
+        success: (response) => {
+          localStorage.setItem("token", response.token);
+          localStorage.setItem("username", response.username);
+          this.showAlert("success", "Logged in successfully. Redirecting...");
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 3000);
+        },
+        error: function (xhr, status, error) {
+          this.showAlert("danger", "Error logging in: " + (xhr.responseJSON ? xhr.responseJSON.message : "Unknown error"));
+        },
+      });
+    }
+  });
+  },
+
+  validateForm: function (isSignup) {
+   const username = $("#username").val();
     const email = $("#email").val();
     const password = $("#password").val();
     const confirmPassword = isSignup ? $("#confirm-password").val() : password;
@@ -136,280 +370,82 @@ $(document).ready(function () {
     }
 
     if (!isValid) {
-      showAlert("danger", errorMessages.join("<br>"));
+      this.showAlert("danger", errorMessages.join("<br>"));
     } else {
-      hideAlert();
+      this.hideAlert();
     }
 
     return isValid;
-  }
+  },
 
-  // Load navbar
-  $.get("/navbar.html", function (data) {
-    $("#navbar-container").html(data);
-    checkAuth();
-  });
-
-  // Check if user is already logged in
-  function checkAuth() {
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-    const currentPath = window.location.pathname;
-  
-    if (token && username) {
-      $.ajax({
-        url: "/api/validate-session",
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        success: function(response) {
-          if (currentPath === "/login.html" || currentPath === "/register.html") {
-            window.location.href = '/';
-          } else {
-            $("#loading").hide();
-            $("#content").show();
-            updateAuthUI();
-          }
-        },
-        error: function() {
-          localStorage.removeItem("token");
-          localStorage.removeItem("username");
-          if (currentPath !== "/login.html" && currentPath !== "/register.html") {
-            window.location.href = '/login.html';
-          } else {
-            $("#loading").hide();
-            $("#content").show();
-          }
-        }
-      });
-    } else {
-      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
-        window.location.href = '/login.html';
-      } else {
-        $("#loading").hide();
-        $("#content").show();
-      }
-    }
-  }
-
-  // Call checkAuth when the page loads
-  checkAuth();
-
-  function showAlert(type, message) {
+  showAlert: function (type, message) {
     const alertHtml = `
-            <div class="alert alert-${type} alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                ${message}
-            </div>
-        `;
+      <div class="alert alert-${type} alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        ${message}
+      </div>
+    `;
     $("#alert-container").html(alertHtml);
-  }
+  },
 
-  function updateAuthUI() {
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
-    const authContainer = $("#auth-container");
-    if (username && token) {
-      $.ajax({
-        url: "/api/user-info",
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        success: function (response) {
-          authContainer.html(`
-            <span class="navbar-text">
-              Welcome, ${username} 
-              <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
-            </span>
-            <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
-            <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
-          `);
-          initClaimCurrency();
-        },
-        error: function (xhr, status, error) {
-          console.error("Error fetching user info:", error);
-        }
-      });
-    } else {
-      authContainer.html(`
-        <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
-        <a href="/register.html" class="btn btn-sm btn-default">Register</a>
-      `);
-    }
-  }
-
+  hideAlert: function () {
+    $("#alert-container").empty();
+  },
   
-  function initClaimCurrency() {
-    $("#claim-currency").on("click", function () {
+  logout: function () {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    window.location.href = "/login.html";
+  },
+
+  initClaimCurrency: function () {
+    $("#claim-currency").on("click", (e) => {
+      e.preventDefault();
       $.ajax({
         url: "/api/claim-daily-currency",
         method: "POST",
-        success: function (response) {
+        success: (response) => {
           $("#currency-amount").text(response.newBalance);
-          showAlert("success", "You've claimed your daily currency!");
+          this.showAlert("success", "Daily currency claimed!");
         },
-        error: function (xhr, status, error) {
-          showAlert("danger", xhr.responseJSON.error || "Error claiming daily currency");
-        }
+        error: (xhr) => {
+          this.showAlert("danger", xhr.responseText || "Error claiming currency.");
+        },
       });
     });
-  }
+  },
+
+  initLogout: function () {
+    $("#logout").on("click", (e) => {
+      e.preventDefault();
+      this.logout();
+    });
+  },
   
-  // ... (rest of the existing code)
+  loadFooter: function() {
+    $.get("/footer.html", (data) => {
+      $("body").append(data);
+      this.updateUserCount();
+    });
+  },
 
-
-
-  function hideAlert() {
-    $("#alert-container").empty();
-  }
-
-  // Function to get CSRF token
- // function getCsrfToken() {
- //   return $.ajax({
-  //    url: "/api/csrf-token",
-   //   method: "GET",
-   // });
- // }
-
-  // Helper function to set CSRF token in AJAX headers
- // function setCSRFToken(securityToken) {
-  //  $.ajaxSetup({
-    //  headers: {
-     //   "X-CSRF-Token": securityToken,
-     // },
-    //});
-  //}
-  
-  // Get CSRF token when page loads
- // getCsrfToken().then(function (response) {
-  //  setCSRFToken(response.csrfToken);
-//  });
-
-  
-
-  $("#signup-form").on("submit", function (e) {
-    e.preventDefault();
-    if (validateForm(this, true)) {
-      const formData = {
-        username: $("#username").val(),
-        email: $("#email").val(),
-        password: $("#password").val(),
-        confirmPassword: $("#confirm-password").val()
-      };
-  
-      showLoadingIndicator();
-
-
-      $.ajax({
-        url: "/api/register-create",
-        type: "POST",
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-        timeout: 10000,
-        success: function (response) {
-                  hideLoadingIndicator();
-
-          showAlert("success", response.message);
-          //if (response.previewUrl) {
-           // showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
-          //}
-          setTimeout(() => {
-            window.location.href = "/login.html";
-          }, 1000);
-        },
-        error: function(xhr, status, error) {
-          hideLoadingIndicator();
-          if (status === "timeout") {
-            // Assume the account was created successfully
-            showAlert("success", "Your account has been created successfully. You can now log in.");
-            setTimeout(() => {
-              window.location.href = "/login.html";
-            }, 5000);
-          } else {
-            handleRegistrationError(xhr, status, error);
-          }
-        }
-      });
-    }
-  });
-
-  
-  function logout() {
-    const token = localStorage.getItem("token");
+  updateUserCount: function() {
     $.ajax({
-      url: "/api/logout",
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
+      url: "/api/user-count",
+      method: "GET",
+      success: (response) => {
+        $("#user-count").text(response.count);
       },
-      success: function (response) {
-        localStorage.removeItem("username");
-        localStorage.removeItem("token");
-        showAlert("success", "Logged out successfully");
-        setTimeout(() => {
-          window.location.replace('/login.html');
-        }, 1000);
-      },
-      error: function (xhr, status, error) {
-        showAlert("danger", "Error logging out: " + xhr.responseText);
+      error: (xhr, status, error) => {
+        console.error("Error fetching user count:", error);
+        $("#user-count").text("Error");
       }
     });
-  }
+  },
 
-  // Add event listener for logout button
-  $(document).on("click", "#logout-button", function(e) {
-    e.preventDefault();
-    logout();
-  });
-  function handleRegistrationError(xhr, status, error) {
-    if (status === "timeout") {
-      showAlert("danger", "The request timed out. Please try again or check your internet connection.");
-    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-      const errorMessages = xhr.responseJSON.errors
-        .map((err) => err.msg)
-        .join("<br>");
-      showAlert("danger", "Error signing up:<br>" + errorMessages);
-    } else if (xhr.responseJSON && xhr.responseJSON.error) {
-      showAlert("danger", "Error signing up: " + xhr.responseJSON.error);
-    } else {
-      showAlert("danger", "An unexpected error occurred. Please try again later.");
-    }
-  }
+};
 
-  $("#login-form").on("submit", function (e) {
-    e.preventDefault();
-    if (validateForm(this, false)) {
-      const username = $("#username").val();
-      const password = $("#password").val();
-  
-      $.ajax({
-        url: "/api/login",
-        method: "POST",
-        data: { username, password },
-        success: function (response) {
-          localStorage.setItem("token", response.token);
-          localStorage.setItem("username", response.username);
-          showAlert("success", "Logged in successfully. Redirecting...");
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1000);
-        },
-        error: function (xhr, status, error) {
-          showAlert("danger", "Error logging in: " + xhr.responseJSON.message);
-        },
-      });
-    }
-  });
+// Initialize the application
+$(document).ready(function() {
+  App.init();
 });
-
-function showLoadingIndicator() {
-  $("#signup-form button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing up...');
-}
-
-function hideLoadingIndicator() {
-  $("#signup-form button[type='submit']").prop("disabled", false).html('Sign Up');
-}
