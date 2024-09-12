@@ -24,20 +24,21 @@ $(document).ready(function () {
     }
   
     function fetchUserBlurb() {
-      $.ajax({
-        url: `/api/user/${username}`,
-        method: 'GET',
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        success: function (user) {
-          displayBlurb(user.blurb);
-        },
-        error: function (xhr, status, error) {
-          console.error('Error fetching user blurb:', error);
-        }
-      });
-    }
+        const token = localStorage.getItem('token');
+        $.ajax({
+          url: `/api/user/${username}`,
+          method: 'GET',
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          success: function (user) {
+            displayBlurb(user.blurb);
+          },
+          error: function (xhr, status, error) {
+            console.error('Error fetching user blurb:', error);
+          }
+        });
+      }
   
     function displayBlurb(blurb) {
       const blurbHtml = `
@@ -69,6 +70,7 @@ $(document).ready(function () {
       
           $('#save-blurb').on('click', function() {
             const newBlurb = textarea.val();
+            const token = localStorage.getItem('token');
             $.ajax({
               url: '/api/user/blurb',
               method: 'PUT',
@@ -81,6 +83,8 @@ $(document).ready(function () {
                 displayBlurb(response.blurb);
               },
               error: function(xhr, status, error) {
+                console.error('Error updating blurb:', error);
+                console.error('Response:', xhr.responseText);
                 alert('Error updating blurb: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
               }
             });
