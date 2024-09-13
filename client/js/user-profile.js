@@ -25,6 +25,7 @@ $(document).ready(function () {
             success: function (user) {
                 currentUser = user;
                 displayUserProfile(user);
+                document.getElementById('profile-title').textContent = `${user.username}'s Profile - AlphaBlox`;
             },
             error: function (xhr, status, error) {
                 console.error('Error fetching user profile:', xhr.responseText);
