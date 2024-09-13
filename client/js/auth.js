@@ -202,30 +202,31 @@ const App = {
 }
 });
 
-  $("#login-form").on("submit", (e) => {
-    e.preventDefault();
-    if (this.validateForm(false)) {
-      const username = $("#username").val();
-      const password = $("#password").val();
-  
-      $.ajax({
-        url: "/api/login",
-        method: "POST",
-        data: { username, password },
-        success: (response) => {
-          localStorage.setItem("token", response.token);
-          localStorage.setItem("username", response.username);
-          this.showAlert("success", "Logged in successfully. Redirecting...");
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 3000);
-        },
-        error: function (xhr, status, error) {
-          this.showAlert("danger", "Error logging in: " + (xhr.responseJSON ? xhr.responseJSON.message : "Unknown error"));
-        },
-      });
-    }
-  });
+$("#login-form").on("submit", (e) => {
+  e.preventDefault();
+  if (this.validateForm(false)) {
+    const username = $("#username").val();
+    const password = $("#password").val();
+
+    $.ajax({
+      url: "/api/login",
+      method: "POST",
+      data: { username, password },
+      success: (response) => {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("username", response.username);
+        this.showAlert("success", "Logged in successfully. Redirecting...");
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 3000);
+      },
+      error: (xhr) => {
+        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
+        this.showAlert("danger", `Error logging in: ${errorMessage}`);
+      },
+    });
+  }
+});
   },
 
   validateForm: function (isSignup) {
