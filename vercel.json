@@ -19,12 +19,5 @@
       "src": "/(.*)",
       "dest": "server/server.js"
     }
-  ],
-  "alias": [
-    "alphablox.net",
-    "www.alphablox.net",
-    "alpha-blox.com",
-    "www.alpha-blox.com"
-
   ]
 }
