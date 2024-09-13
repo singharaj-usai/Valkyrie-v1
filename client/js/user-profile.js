@@ -65,7 +65,7 @@ $(document).ready(function () {
                 <div id="blurb-container">
                     <h4>About Me</h4>
                     <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
-                    ${actionButton}
+                    <div id="action-button-container">${actionButton}</div>
                 </div>
             </div>
         </div>
@@ -74,6 +74,8 @@ $(document).ready(function () {
     
         if (!isOwnProfile) {
             initFriendActions(user);
+        } else {
+            initBlurbEdit(user.blurb);
         }
     }
 

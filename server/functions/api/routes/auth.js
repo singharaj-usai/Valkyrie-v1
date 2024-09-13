@@ -346,20 +346,24 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
     const currentUser = await User.findById(req.user.userId);
-    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests');
+    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests');
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const isFriend = currentUser.friends.includes(user._id);
     const friendRequestSent = user.friendRequests.includes(currentUser._id);
     const friendRequestReceived = currentUser.friendRequests.includes(user._id);
 
     const userObject = user.toObject();
-    delete userObject.friendRequests; // Remove friendRequests from the response for privacy
+    delete userObject.friendRequests;
+    delete userObject.friends;
+    delete userObject.sentFriendRequests;
 
     res.json({
       ...userObject,
+      isFriend,
       friendRequestSent,
       friendRequestReceived
     });
