@@ -40,7 +40,7 @@ $(document).ready(function () {
         let actionButton = '';
     
         if (isOwnProfile) {
-            actionButton = `<button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>`;
+            actionButton = `<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>`;
         } else if (user.isFriend) {
             actionButton = `<button id="unfriend" class="btn btn-warning btn-sm">Unfriend</button>`;
         } else if (user.friendRequestReceived) {
@@ -162,7 +162,7 @@ function sendAjaxRequest(url, method, successMessage) {
                 <h4>Edit About Me</h4>
                 <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(currentBlurb || '')}</textarea>
                 <p id="char-count">0/500</p>
-                <button id="save-blurb" class="btn btn-primary btn-sm mt-2">Save</button>
+                <button id="save-blurb" class="btn btn-success btn-sm mt-2">Save</button>
                 <button id="cancel-blurb" class="btn btn-secondary btn-sm mt-2">Cancel</button>
             `);
       

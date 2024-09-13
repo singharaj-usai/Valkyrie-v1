@@ -43,7 +43,7 @@ $(document).ready(function () {
     function displayBlurb(blurb) {
       const blurbHtml = `
         <p id="blurb-text">${blurb ? escapeHtml(blurb) : 'No blurb set.'}</p>
-        <button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>
+        <button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>
       `;
       $('#blurb-container').html(blurbHtml);
       initBlurbEdit(blurb);
@@ -55,7 +55,7 @@ $(document).ready(function () {
           blurbContainer.html(`
             <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(currentBlurb || '')}</textarea>
             <p id="char-count">0/500</p>
-            <button id="save-blurb" class="btn btn-primary btn-sm mt-2">Save</button>
+            <button id="save-blurb" class="btn btn-success btn-sm mt-2">Save</button>
             <button id="cancel-blurb" class="btn btn-secondary btn-sm mt-2">Cancel</button>
           `);
       

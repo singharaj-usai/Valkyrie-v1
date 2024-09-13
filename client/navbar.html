@@ -5,7 +5,6 @@
         border-top: none;
         border-radius: 0;
         margin-bottom: 0;
-        background-color: #f8f8f8;
         border-bottom: 1px solid #e7e7e7;
     }
 
@@ -42,10 +41,10 @@
 
     #site-wide-announcement {
   position: fixed;
-  top: 100px;
   left: 0;
   right: 0;
   z-index: 1000;
+  transition: top 0.3s ease;
 }
 
 @media (max-width: 767px) {
@@ -113,7 +112,7 @@
     </div>
 </nav>
 
-<div id="site-wide-announcement" class="alert alert-warning text-center" style="margin-bottom: 0;">
+<div id="site-wide-announcement" class="alert alert-info text-center" style="margin-bottom: 0;">
     <div class="container">
         <span>Welcome to Alphablox! Please know this is a work in progress and I have a lot of work to do. Consider this a beta version of the site.</span>
     </div>
