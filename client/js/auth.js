@@ -16,6 +16,8 @@ const App = {
       this.initForms();
       this.initLogout();
       this.loadFooter();
+      this.updateAuthUI();
+
     });
   },
 

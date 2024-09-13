@@ -77,12 +77,12 @@ $(document).ready(function () {
       
             $('#save-blurb').on('click', function() {
                 const newBlurb = textarea.val();
-                const sessionToken = localStorage.getItem("sessionToken");
+                const token = localStorage.getItem('token');
                 $.ajax({
                     url: '/api/user/blurb',
                     method: 'PUT',
                     headers: {
-                        "Authorization": `Bearer ${sessionToken}`,
+                        "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                     data: JSON.stringify({ blurb: newBlurb }),
