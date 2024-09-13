@@ -10,53 +10,72 @@ $(document).ready(function () {
     }
 
     function fetchUserProfile(username) {
-        const sessionToken = localStorage.getItem("sessionToken");
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error('No token found in localStorage');
+            $('#user-profile').html('<p>You are not logged in. Please <a href="/login.html">login</a> to view profiles.</p>');
+            return;
+        }
         $.ajax({
             url: `/api/user/${username}`,
             method: 'GET',
             headers: {
-                "Authorization": `Bearer ${sessionToken}`
+                "Authorization": `Bearer ${token}`
             },
             success: function (user) {
                 currentUser = user;
                 displayUserProfile(user);
             },
             error: function (xhr, status, error) {
-                $('#user-profile').html('<p>Error fetching user profile. Please try again.</p>');
+                console.error('Error fetching user profile:', xhr.responseText);
+                console.error('Status:', status);
+                console.error('Error:', error);
+                $('#user-profile').html('<p>Error fetching user profile. Please try again. If the problem persists, please <a href="/login.html">login</a> again.</p>');
             }
         });
     }
 
     function displayUserProfile(user) {
         const isOwnProfile = user.username === localStorage.getItem('username');
-        const profileHtml = `
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">${escapeHtml(user.username)}</h3>
-            </div>
-            <div class="panel-body">
-              <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
-              <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
-              <div id="blurb-container">
-                <h4>About Me</h4>
-                <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
-                ${isOwnProfile ? `
-                  <button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>
-          ` : `
-            <button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>
-          `}
-              </div>
-            </div>
-          </div>
-        `;
-        $('#user-profile').html(profileHtml);
-      
+        let actionButton = '';
+
         if (isOwnProfile) {
-          initBlurbEdit(user.blurb);
+          actionButton = `<button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>`;
+        } else if (user.friendRequestReceived) {
+          actionButton = `<button id="accept-friend-request" class="btn btn-success btn-sm">Accept Friend Request</button>`;
+        } else if (user.friendRequestSent) {
+          actionButton = `<button class="btn btn-secondary btn-sm" disabled>Friend Request Sent</button>`;
         } else {
-            initFriendRequest(user._id);
-          }
+          actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
+        }
+
+         const profileHtml = `
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+        </div>
+        <div class="panel-body">
+          <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
+          <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
+          <div id="blurb-container">
+            <h4>About Me</h4>
+            <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
+            ${actionButton}
+          </div>
+        </div>
+      </div>
+    `;
+    $('#user-profile').html(profileHtml);
+    
+    if (isOwnProfile) {
+      initBlurbEdit(user.blurb);
+    } else if (!user.friendRequestSent) {
+      initFriendRequest(user._id);
     }
+    if (user.friendRequestReceived) {
+      initAcceptFriendRequest(user._id);
+    }
+  }
       
     function initFriendRequest(userId) {
         $('#send-friend-request').on('click', function() {
@@ -70,14 +89,34 @@ $(document).ready(function () {
               "Authorization": `Bearer ${token}`
             },
             success: function(response) {
+                alert('Friend request sent successfully');
               console.log('Friend request sent successfully:', response);
-              alert('Friend request sent successfully');
             },
             error: function(xhr, status, error) {
               console.error('Error sending friend request:', xhr.responseText);
               console.error('Status:', status);
               console.error('Error:', error);
               alert('Error sending friend request: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+            }
+          });
+        });
+      }
+
+      function initAcceptFriendRequest(userId) {
+        $('#accept-friend-request').on('click', function() {
+          const token = localStorage.getItem('token');
+          $.ajax({
+            url: `/api/accept-friend-request/${userId}`,
+            method: 'POST',
+            headers: {
+              "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+              alert('Friend request accepted');
+              fetchUserProfile(username);
+            },
+            error: function(xhr, status, error) {
+              alert('Error accepting friend request: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
             }
           });
         });

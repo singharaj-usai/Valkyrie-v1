@@ -342,7 +342,35 @@ router.get("/search", async (req, res) => {
 
 
 // User profile endpoint
-router.get('/user/:username', async (req, res) => {
+router.get('/user/:username', authenticateToken, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const currentUser = await User.findById(req.user.userId);
+    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const friendRequestSent = user.friendRequests.includes(currentUser._id);
+    const friendRequestReceived = currentUser.friendRequests.includes(user._id);
+
+    const userObject = user.toObject();
+    delete userObject.friendRequests; // Remove friendRequests from the response for privacy
+
+    res.json({
+      ...userObject,
+      friendRequestSent,
+      friendRequestReceived
+    });
+  } catch (error) {
+    console.error('User profile error:', error);
+    res.status(500).json({ error: 'Error fetching user profile' });
+  }
+});
+
+
+/* router.get('/user/:username', async (req, res) => {
   try {
       const { username } = req.params;
       const user = await User.findOne({ username }, 'username signupDate lastLoggedIn blurb');
@@ -354,7 +382,8 @@ router.get('/user/:username', async (req, res) => {
       console.error('User profile error:', error);
       res.status(500).send('Error fetching user profile');
   }
-});
+}); */
+
 
 // Get number of registered users
 router.get("/user-count", async (req, res) => {
