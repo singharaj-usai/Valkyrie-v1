@@ -50,7 +50,6 @@ const App = {
             $("#content").show();
             this.fetchData();
             this.updateAuthUI();
-            this.updateDataContainer();
           }
         },
         error: () => {

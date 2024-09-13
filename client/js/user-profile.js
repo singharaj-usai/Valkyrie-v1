@@ -42,7 +42,9 @@ $(document).ready(function () {
                 <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
                 ${isOwnProfile ? `
                   <button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>
-                ` : ''}
+          ` : `
+            <button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>
+          `}
               </div>
             </div>
           </div>
@@ -51,9 +53,37 @@ $(document).ready(function () {
       
         if (isOwnProfile) {
           initBlurbEdit(user.blurb);
-        }
+        } else {
+            initFriendRequest(user._id);
+          }
     }
       
+    function initFriendRequest(userId) {
+        $('#send-friend-request').on('click', function() {
+          const token = localStorage.getItem('token');
+          console.log('Sending friend request to:', userId);
+          console.log('Using token:', token);
+          $.ajax({
+            url: `/api/send-friend-request/${userId}`,
+            method: 'POST',
+            headers: {
+              "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+              console.log('Friend request sent successfully:', response);
+              alert('Friend request sent successfully');
+            },
+            error: function(xhr, status, error) {
+              console.error('Error sending friend request:', xhr.responseText);
+              console.error('Status:', status);
+              console.error('Error:', error);
+              alert('Error sending friend request: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+            }
+          });
+        });
+      }
+    
+
     function initBlurbEdit(currentBlurb) {
         $('#edit-blurb').on('click', function() {
             const blurbContainer = $('#blurb-container');

@@ -24,4 +24,8 @@ router.get("/user-profile.html", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/views/user-profile.html"));
 });
 
+router.get('/friends.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../../../client/views/friends.html'));
+});
+
 module.exports = router;

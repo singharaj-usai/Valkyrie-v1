@@ -9,6 +9,29 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail } = require('../utils/emailService');
 
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  console.log('Auth header:', authHeader);
+  console.log('Token:', token);
+
+  if (token == null) {
+    console.log('No token provided');
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_for_development', (err, user) => {
+    if (err) {
+      console.error('Token verification error:', err);
+      return res.sendStatus(403);
+    }
+    console.log('Decoded user:', user);
+    req.user = user;
+    next();
+  });
+}
+
 const router = express.Router();
 
 // Setup CSRF protection
@@ -440,6 +463,91 @@ router.put("/user/blurb", async (req, res) => {
   } catch (error) {
     console.error("Error updating user blurb:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Send friend request
+router.post('/send-friend-request/:userId', authenticateToken, async (req, res) => {
+  try {
+    console.log('Authenticated user:', req.user);
+    console.log('Target user ID:', req.params.userId);
+
+    const sender = await User.findById(req.user.userId);
+    const receiver = await User.findById(req.params.userId);
+
+    console.log('Sender:', sender);
+    console.log('Receiver:', receiver);
+
+    if (!sender) {
+      console.log('Sender not found');
+      return res.status(404).json({ error: 'Sender not found' });
+    }
+
+    if (!receiver) {
+      console.log('Receiver not found');
+      return res.status(404).json({ error: 'Receiver not found' });
+    }
+
+    if (receiver.friendRequests.includes(sender._id)) {
+      console.log('Friend request already sent');
+      return res.status(400).json({ error: 'Friend request already sent' });
+    }
+
+    receiver.friendRequests.push(sender._id);
+    await receiver.save();
+
+    console.log('Friend request sent successfully');
+    res.json({ message: 'Friend request sent successfully' });
+  } catch (error) {
+    console.error("Error sending friend request:", error);
+    res.status(500).json({ error: 'Error sending friend request' });
+  }
+});
+
+// Accept friend request
+router.post('/accept-friend-request/:userId', authenticateToken, async (req, res) => {
+  try {
+    const receiver = await User.findById(req.user.userId);
+    const sender = await User.findById(req.params.userId);
+
+    if (!sender) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!receiver.friendRequests.includes(sender._id)) {
+      return res.status(400).json({ error: 'No friend request from this user' });
+    }
+
+    receiver.friendRequests = receiver.friendRequests.filter(id => !id.equals(sender._id));
+    receiver.friends.push(sender._id);
+    sender.friends.push(receiver._id);
+
+    await receiver.save();
+    await sender.save();
+
+    res.json({ message: 'Friend request accepted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error accepting friend request' });
+  }
+});
+
+// Get friend requests
+router.get('/friend-requests', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate('friendRequests', 'username');
+    res.json(user.friendRequests);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching friend requests' });
+  }
+});
+
+// Get friends list
+router.get('/friends', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate('friends', 'username');
+    res.json(user.friends);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching friends list' });
   }
 });
 

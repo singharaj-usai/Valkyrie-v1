@@ -72,6 +72,15 @@ lastActiveAt: {
   default: Date.now
 },
 
+friends: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User'
+}],
+friendRequests: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User'
+}]
+
 });
 
 userSchema.pre('save', async function(next) {
