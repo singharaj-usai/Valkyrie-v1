@@ -104,16 +104,16 @@ const App = {
     const username = localStorage.getItem("username");
     const token = localStorage.getItem("token");
     const authContainer = $("#auth-container");
-
+  
     if (username && token) {
       $.ajax({
         url: "/api/user-info",
         method: "GET",
         headers: { "Authorization": `Bearer ${token}` },
-        success: function (response) {
+        success: (response) => {
           authContainer.html(`
             <span class="navbar-text">
-              Welcome, ${username} 
+              Welcome, ${this.escapeHtml(username)} 
               <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
             </span>
             <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
@@ -121,10 +121,11 @@ const App = {
           `);
           this.initClaimCurrency();
           this.initLogout();
-          
+          $('#user-submenu').show();
         },
-        error: function (xhr, status, error) {
+        error: (xhr, status, error) => {
           console.error("Error fetching user info:", error);
+          this.logout();
         }
       });
     } else {
@@ -132,6 +133,7 @@ const App = {
         <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
         <a href="/register.html" class="btn btn-sm btn-default">Register</a>
       `);
+      $('#user-submenu').hide();
     }
   },
 
