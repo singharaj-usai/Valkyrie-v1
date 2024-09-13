@@ -515,13 +515,16 @@ router.post('/send-friend-request/:userId', authenticateToken, async (req, res) 
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (sender.friends.includes(receiver._id) || receiver.friends.includes(sender._id)) {
+    if (sender.friends.includes(receiver._id)) {
       return res.status(400).json({ error: 'You are already friends with this user' });
     }
 
-    if (receiver.friendRequests.includes(sender._id)) {
-      console.log('Friend request already sent');
-      return res.status(400).json({ error: 'Friend request already sent' });
+    if (receiver.friendRequests.includes(sender._id) || sender.friendRequests.includes(receiver._id)) {
+      return res.status(400).json({ error: 'A friend request already exists between you and this user' });
+    }
+
+    if (sender.sentFriendRequests.includes(receiver._id)) {
+      return res.status(400).json({ error: 'You have already sent a friend request to this user' });
     }
 
     receiver.friendRequests.push(sender._id);

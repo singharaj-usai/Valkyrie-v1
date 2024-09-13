@@ -148,6 +148,8 @@ function sendAjaxRequest(url, method, successMessage) {
             } else {
                 alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
             }
+            checkFriendshipStatus(username);
+
         }
     });
 }
