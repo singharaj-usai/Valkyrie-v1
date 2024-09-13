@@ -152,6 +152,15 @@ router.post("/register-create", async (req, res) => {
     const clientIp = getClientIp(req);
    // const verificationToken = crypto.randomBytes(20).toString('hex');
 
+   const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+   if (existingUser) {
+     if (existingUser.username === username) {
+       return res.status(409).json({ message: "Username already exists" });
+     } else {
+       return res.status(409).json({ message: "Email already exists" });
+     }
+   }
+
     const user = new User({
       username,
       email,
@@ -177,14 +186,12 @@ router.post("/register-create", async (req, res) => {
   //      error: emailError.message
   //    });
   //  }
-  } catch (error) {
-    console.error("Registration error:", error);
-    if (error.code === 11000) {
-      res.status(409).json({ error: "Username or email already exists" });
-    } else {
-      res.status(500).json({ error: "Error creating user", details: error.message || "Unknown error" });
-    }
-  }
+  await user.save();
+  res.status(201).json({ message: "User registered successfully" });
+} catch (error) {
+  console.error("Registration error:", error);
+  res.status(500).json({ message: "An error occurred during registration" });
+}
 });
 
 router.get("/verify-email/:token", async (req, res) => {

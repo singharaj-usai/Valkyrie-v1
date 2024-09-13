@@ -91,13 +91,15 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script>
         $(document).ready(function() {
-              if (localStorage.getItem("username")) {
-                  window.location.href = '/';
-              } else {
-                  $('#loading').hide();
-                  $('#content').show();
-              }
-          });
-      </script>
+            if (localStorage.getItem("username")) {
+                window.location.href = '/';
+            } else {
+                $('#loading').hide();
+                $('#content').show();
+                App.init();
+                App.initForms();
+            }
+        });
+    </script>
 </body>
 </html>

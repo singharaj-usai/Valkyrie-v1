@@ -121,6 +121,7 @@ const App = {
           `);
           this.initClaimCurrency();
           this.initLogout();
+          
         },
         error: function (xhr, status, error) {
           console.error("Error fetching user info:", error);
@@ -173,41 +174,30 @@ const App = {
           confirmPassword: $("#confirm-password").val()
         };
   
-      showLoadingIndicator();
+  // showLoadingIndicator();
 
 
-      $.ajax({
-        url: "/api/register-create",
-        type: "POST",
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-        timeout: 10000,
-        success: function (response) {
-                  hideLoadingIndicator();
-
-          showAlert("success", response.message);
-          //if (response.previewUrl) {
-           // showAlert("info", `For testing purposes, view the email here: <a href="${response.previewUrl}" target="_blank">Preview Email</a>`);
-          //}
-          setTimeout(() => {
-            window.location.href = "/login.html";
-          }, 1000);
-        },
-        error: function(xhr, status, error) {
-          hideLoadingIndicator();
-          if (status === "timeout") {
-            // Assume the account was created successfully
-            showAlert("success", "Your account has been created successfully. You can now log in.");
-            setTimeout(() => {
-              window.location.href = "/login.html";
-            }, 1000);
-          } else {
-            handleRegistrationError(xhr, status, error);
-          }
-        }
-      });
+  $.ajax({
+    url: "/api/register-create",
+    type: "POST",
+    data: JSON.stringify(formData),
+    contentType: "application/json",
+    success: (response) => {
+      this.showAlert("success", response.message);
+      setTimeout(() => {
+        window.location.href = "/login.html";
+      }, 1000);
+    },
+    error: (xhr) => {
+      if (xhr.status === 409) {
+        this.showAlert("danger", xhr.responseJSON.message);
+      } else {
+        this.showAlert("danger", "Error signing up: " + (xhr.responseJSON ? xhr.responseJSON.message : "Unknown error"));
+      }
     }
   });
+}
+});
 
   $("#login-form").on("submit", (e) => {
     e.preventDefault();
@@ -368,6 +358,18 @@ const App = {
       if (!validDomains.includes(emailDomain)) {
         isValid = false;
         errorMessages.push("Invalid email domain.");
+      }
+    }
+
+    if (isSignup) {
+      if (email.trim() === "") {
+        isValid = false;
+        errorMessages.push("Email cannot be empty.");
+      }
+  
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        isValid = false;
+        errorMessages.push("Invalid email format.");
       }
     }
 
