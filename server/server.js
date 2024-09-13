@@ -16,14 +16,17 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 // Add this near the top of your server.js file
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+console.log('MAINTENANCE_MODE:', MAINTENANCE_MODE); // Add this line for debugging
+
 
 // Add this middleware before your routes
 app.use((req, res, next) => {
-  if (MAINTENANCE_MODE && req.url !== '/maintenance.html') {
-    res.sendFile(path.join(__dirname, '../client/maintenance.html'));
-  } else {
-    next();
+  console.log('Checking maintenance mode...'); // Add this line for debugging
+  if (MAINTENANCE_MODE) {
+    console.log('Maintenance mode is active, serving maintenance page'); // Add this line for debugging
+    return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
   }
+  next();
 });
 
 

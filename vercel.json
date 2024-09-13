@@ -17,7 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/$1"
+      "dest": "server/server.js"
     }
   ]
 }
