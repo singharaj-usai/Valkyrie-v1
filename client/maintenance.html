@@ -3,35 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Maintenance - My Node.js App</title>
+    <title>Site Maintenance - AlphaBlox</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/simplex/bootstrap.min.css">
     <link rel="icon" href="./images/AlphaBlox.ico" type="image/x-icon">
-
-   <style>
-        body {
-            background-color: #f8f9fa;
+    <style>
+        html, body {
+            height: 100%;
         }
-        .maintenance-container {
-            text-align: center;
-            padding-top: 100px;
+        body {
+            background-image: url('./images/alphablox-maintenance.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .maintenance-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .maintenance-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
         }
         .maintenance-icon {
-            font-size: 100px;
+            font-size: 64px;
             color: #007bff;
         }
-        .maintenance-message {
-            font-size: 24px;
-            margin-bottom: 30px;
+        @media (max-width: 768px) {
+            .maintenance-content {
+                margin: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="maintenance-container">
-            <div class="maintenance-icon">🛠️</div>
-            <h1>Site Maintenance</h1>
-            <div class="maintenance-message">We're currently performing some maintenance. We'll be back soon!</div>
-            <p>We apologize for any inconvenience. Please check back later.</p>
+    <div class="maintenance-overlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="maintenance-content text-center">
+                        <div class="maintenance-icon">🛠️</div>
+                        <h1 class="mt-4">Site Maintenance</h1>
+                        <p class="lead">We're currently performing some maintenance. We'll be back soon!</p>
+                        <p>We apologize for any inconvenience. Please check back later.</p>
+                        <a href="/" class="btn btn-primary mt-3">Refresh</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
