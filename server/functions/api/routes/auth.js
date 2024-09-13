@@ -346,7 +346,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
     const currentUser = await User.findById(req.user.userId);
-    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests');
+    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests friends');
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -354,17 +354,20 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
 
     const friendRequestSent = user.friendRequests.includes(currentUser._id);
     const friendRequestReceived = currentUser.friendRequests.includes(user._id);
+    const isFriend = currentUser.friends.includes(user._id);
 
     const userObject = user.toObject();
-    delete userObject.friendRequests; // Remove friendRequests from the response for privacy
+    delete userObject.friendRequests;
+    delete userObject.friends;
 
     res.json({
       ...userObject,
       friendRequestSent,
-      friendRequestReceived
+      friendRequestReceived,
+      isFriend
     });
   } catch (error) {
-    console.error('User profile error:', error);
+    console.error("Error fetching user profile:", error);
     res.status(500).json({ error: 'Error fetching user profile' });
   }
 });
@@ -507,23 +510,29 @@ router.post('/send-friend-request/:userId', authenticateToken, async (req, res) 
     console.log('Sender:', sender);
     console.log('Receiver:', receiver);
 
-    if (!sender) {
-      console.log('Sender not found');
-      return res.status(404).json({ error: 'Sender not found' });
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    if (!receiver) {
-      console.log('Receiver not found');
-      return res.status(404).json({ error: 'Receiver not found' });
+    if (sender.friends.includes(receiver._id) || receiver.friends.includes(sender._id)) {
+      return res.status(400).json({ error: 'You are already friends with this user' });
     }
 
-    if (receiver.friendRequests.includes(sender._id)) {
+    if (receiver.friendRequests.includes(sender._id) || sender.sentFriendRequests.includes(receiver._id)) {
       console.log('Friend request already sent');
       return res.status(400).json({ error: 'Friend request already sent' });
     }
 
+    if (sender.friendRequests.includes(receiver._id) || receiver.sentFriendRequests.includes(sender._id)) {
+      console.log('Friend request already received from this user');
+      return res.status(400).json({ error: 'You have already received a friend request from this user' });
+    }
+
     receiver.friendRequests.push(sender._id);
     await receiver.save();
+
+    sender.sentFriendRequests.push(receiver._id);
+    await sender.save();
 
     console.log('Friend request sent successfully');
     res.json({ message: 'Friend request sent successfully' });
@@ -539,7 +548,7 @@ router.post('/accept-friend-request/:userId', authenticateToken, async (req, res
     const receiver = await User.findById(req.user.userId);
     const sender = await User.findById(req.params.userId);
 
-    if (!sender) {
+    if (!sender || !receiver) {
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -548,15 +557,64 @@ router.post('/accept-friend-request/:userId', authenticateToken, async (req, res
     }
 
     receiver.friendRequests = receiver.friendRequests.filter(id => !id.equals(sender._id));
+    sender.sentFriendRequests = sender.sentFriendRequests.filter(id => !id.equals(receiver._id));
     receiver.friends.push(sender._id);
     sender.friends.push(receiver._id);
+
 
     await receiver.save();
     await sender.save();
 
     res.json({ message: 'Friend request accepted' });
   } catch (error) {
+    console.error("Error accepting friend request:", error)
     res.status(500).json({ error: 'Error accepting friend request' });
+  }
+});
+
+// Unfriend
+router.post('/unfriend/:userId', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    const friend = await User.findById(req.params.userId);
+
+    if (!user || !friend) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.friends = user.friends.filter(id => !id.equals(friend._id));
+    friend.friends = friend.friends.filter(id => !id.equals(user._id));
+
+    await user.save();
+    await friend.save();
+
+    res.json({ message: 'Unfriended successfully' });
+  } catch (error) {
+    console.error("Error unfriending:", error);
+    res.status(500).json({ error: 'Error unfriending' });
+  }
+});
+
+// Decline friend request
+router.post('/decline-friend-request/:userId', authenticateToken, async (req, res) => {
+  try {
+    const receiver = await User.findById(req.user.userId);
+    const sender = await User.findById(req.params.userId);
+
+    if (!receiver || !sender) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    receiver.friendRequests = receiver.friendRequests.filter(id => !id.equals(sender._id));
+    sender.sentFriendRequests = sender.sentFriendRequests.filter(id => !id.equals(receiver._id));
+
+    await receiver.save();
+    await sender.save();
+
+    res.json({ message: 'Friend request declined' });
+  } catch (error) {
+    console.error("Error declining friend request:", error);
+    res.status(500).json({ error: 'Error declining friend request' });
   }
 });
 

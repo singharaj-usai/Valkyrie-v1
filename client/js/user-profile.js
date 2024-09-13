@@ -38,89 +38,102 @@ $(document).ready(function () {
     function displayUserProfile(user) {
         const isOwnProfile = user.username === localStorage.getItem('username');
         let actionButton = '';
-
-        if (isOwnProfile) {
-          actionButton = `<button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>`;
-        } else if (user.friendRequestReceived) {
-          actionButton = `<button id="accept-friend-request" class="btn btn-success btn-sm">Accept Friend Request</button>`;
-        } else if (user.friendRequestSent) {
-          actionButton = `<button class="btn btn-secondary btn-sm" disabled>Friend Request Sent</button>`;
-        } else {
-          actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
-        }
-
-         const profileHtml = `
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">${escapeHtml(user.username)}</h3>
-        </div>
-        <div class="panel-body">
-          <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
-          <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
-          <div id="blurb-container">
-            <h4>About Me</h4>
-            <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
-            ${actionButton}
-          </div>
-        </div>
-      </div>
-    `;
-    $('#user-profile').html(profileHtml);
     
-    if (isOwnProfile) {
-      initBlurbEdit(user.blurb);
-    } else if (!user.friendRequestSent) {
-      initFriendRequest(user._id);
+        if (isOwnProfile) {
+            actionButton = `<button id="edit-blurb" class="btn btn-primary btn-sm">Edit Blurb</button>`;
+        } else if (user.isFriend) {
+            actionButton = `<button id="unfriend" class="btn btn-warning btn-sm">Unfriend</button>`;
+        } else if (user.friendRequestReceived) {
+            actionButton = `
+                <button id="accept-friend-request" class="btn btn-success btn-sm">Accept Friend Request</button>
+                <button id="decline-friend-request" class="btn btn-danger btn-sm">Decline Friend Request</button>
+            `;
+        } else if (user.friendRequestSent) {
+            actionButton = `<button class="btn btn-secondary btn-sm" disabled>Friend Request Sent</button>`;
+        } else {
+            actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
+        }
+    
+        const profileHtml = `
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+            </div>
+            <div class="panel-body">
+                <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
+                <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
+                <div id="blurb-container">
+                    <h4>About Me</h4>
+                    <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
+                    ${actionButton}
+                </div>
+            </div>
+        </div>
+        `;
+        $('#user-profile').html(profileHtml);
+    
+        if (isOwnProfile) {
+            initBlurbEdit(user.blurb);
+        } else {
+            initFriendActions(user);
+        }
     }
-    if (user.friendRequestReceived) {
-      initAcceptFriendRequest(user._id);
-    }
-  }
-      
-    function initFriendRequest(userId) {
-        $('#send-friend-request').on('click', function() {
-          const token = localStorage.getItem('token');
-          console.log('Sending friend request to:', userId);
-          console.log('Using token:', token);
-          $.ajax({
-            url: `/api/send-friend-request/${userId}`,
-            method: 'POST',
-            headers: {
-              "Authorization": `Bearer ${token}`
-            },
-            success: function(response) {
-                alert('Friend request sent successfully');
-              console.log('Friend request sent successfully:', response);
-            },
-            error: function(xhr, status, error) {
-              console.error('Error sending friend request:', xhr.responseText);
-              console.error('Status:', status);
-              console.error('Error:', error);
-              alert('Error sending friend request: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
-            }
-          });
-        });
-      }
 
-      function initAcceptFriendRequest(userId) {
-        $('#accept-friend-request').on('click', function() {
-          const token = localStorage.getItem('token');
-          $.ajax({
-            url: `/api/accept-friend-request/${userId}`,
-            method: 'POST',
-            headers: {
-              "Authorization": `Bearer ${token}`
-            },
-            success: function(response) {
-              alert('Friend request accepted');
-              fetchUserProfile(username);
-            },
-            error: function(xhr, status, error) {
-              alert('Error accepting friend request: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+function initFriendActions(user) {
+    $('#send-friend-request').on('click', function() {
+        sendFriendRequest(user._id);
+    });
+
+    $('#accept-friend-request').on('click', function() {
+        acceptFriendRequest(user._id);
+    });
+
+    $('#decline-friend-request').on('click', function() {
+        declineFriendRequest(user._id);
+    });
+
+    $('#unfriend').on('click', function() {
+        unfriend(user._id);
+    });
+}
+
+function sendFriendRequest(userId) {
+    sendAjaxRequest('/api/send-friend-request/' + userId, 'POST', 'Friend request sent successfully');
+}
+
+function acceptFriendRequest(userId) {
+    sendAjaxRequest('/api/accept-friend-request/' + userId, 'POST', 'Friend request accepted');
+}
+
+function declineFriendRequest(userId) {
+    sendAjaxRequest('/api/decline-friend-request/' + userId, 'POST', 'Friend request declined');
+}
+
+function unfriend(userId) {
+    sendAjaxRequest('/api/unfriend/' + userId, 'POST', 'Unfriended successfully');
+}
+
+function sendAjaxRequest(url, method, successMessage) {
+    const token = localStorage.getItem('token');
+    $.ajax({
+        url: url,
+        method: method,
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        success: function(response) {
+            alert(successMessage);
+            fetchUserProfile(username);
+        },
+        error: function(xhr, status, error) {
+            if (xhr.responseJSON && xhr.responseJSON.error === 'You have already received a friend request from this user') {
+                alert('You have already received a friend request from this user. Please check your friend requests.');
+            } else {
+                alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
             }
-          });
-        });
-      }
+        }
+    });
+}
     
 
     function initBlurbEdit(currentBlurb) {
