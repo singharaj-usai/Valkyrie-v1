@@ -54,6 +54,11 @@ const App = {
     $.get("/navbar.html", (data) => {
       $("#navbar-container").html(data);
       this.updateAuthUI();
+      if (typeof updateAnnouncementPosition === 'function') {
+        updateAnnouncementPosition();
+        // Call it again after a short delay to ensure all elements are properly rendered
+        setTimeout(updateAnnouncementPosition, 100);
+      }
     });
   },
 
@@ -95,6 +100,7 @@ const App = {
         $("#content").show();
       }
     }
+    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
   },
 
   // Fetch data from the API
@@ -164,6 +170,7 @@ const App = {
       `);
       $('#user-submenu').hide();
     }
+    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
   },
 
   // Handle user logout

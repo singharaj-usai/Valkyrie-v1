@@ -41,15 +41,22 @@
 
     #site-wide-announcement {
   position: fixed;
-  top: 100px;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 999;
+  transition: top 0.3s ease;
+}
+
+body {
+  padding-top: 150px; /* Increased to accommodate both navbars and announcement */
 }
 
 @media (max-width: 767px) {
   #site-wide-announcement {
     top: 50px;
+  }
+  body {
+    padding-top: 100px;
   }
 }
 </style>
@@ -117,3 +124,23 @@
         <span>Welcome to Alphablox! Please know this is a work in progress and I have a lot of work to do. Consider this a beta version of the site.</span>
     </div>
 </div>
+
+<script>
+    function updateAnnouncementPosition() {
+      var userSubmenu = document.getElementById('user-submenu');
+      var announcement = document.getElementById('site-wide-announcement');
+      var mainNavbar = document.querySelector('.navbar-fixed-top');
+      
+      if (userSubmenu && window.getComputedStyle(userSubmenu).display !== 'none') {
+        announcement.style.top = '100px';
+        mainNavbar.style.top = '0';
+        userSubmenu.style.top = '50px';
+      } else {
+        announcement.style.top = '50px';
+        mainNavbar.style.top = '0';
+      }
+    }
+    
+    window.addEventListener('resize', updateAnnouncementPosition);
+    document.addEventListener('DOMContentLoaded', updateAnnouncementPosition);
+    </script>
