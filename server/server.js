@@ -14,6 +14,19 @@ const port = process.env.PORT || 3000;
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Add this near the top of your server.js file
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+
+// Add this middleware before your routes
+app.use((req, res, next) => {
+  if (MAINTENANCE_MODE && req.url !== '/maintenance.html') {
+    res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+  } else {
+    next();
+  }
+});
+
+
 let isConnected = false;
 
 async function connectToDatabase() {
@@ -93,8 +106,13 @@ async function resetUserIdsIfNeeded() {
   }
 }
 
+// Update your 404 handler
 app.use((req, res, next) => {
-  res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
+  if (MAINTENANCE_MODE) {
+    res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+  } else {
+    res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
+  }
 });
 
 // Call this function after the server starts

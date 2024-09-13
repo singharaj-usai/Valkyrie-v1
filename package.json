@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/server.js",
+    "start:maintenance": "cross-env MAINTENANCE_MODE=true node server/server.js",
     "dev": "nodemon server/server.js",
+    "dev:maintenance": "cross-env MAINTENANCE_MODE=true nodemon server/server.js",
     "build": "echo 'No build script needed'",
     "vercel-build": "echo 'Build step not required'",
     "deploy": "vercel",
@@ -47,6 +49,7 @@
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.4",
     "vercel": "^37.3.0"
   }
