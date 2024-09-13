@@ -72,9 +72,7 @@ $(document).ready(function () {
         `;
         $('#user-profile').html(profileHtml);
     
-        if (isOwnProfile) {
-            initBlurbEdit(user.blurb);
-        } else {
+        if (!isOwnProfile) {
             initFriendActions(user);
         }
     }
@@ -94,6 +92,23 @@ function initFriendActions(user) {
 
     $('#unfriend').on('click', function() {
         unfriend(user._id);
+    });
+}
+
+function checkFriendshipStatus(username) {
+    const token = localStorage.getItem('token');
+    $.ajax({
+        url: `/api/friendship-status/${username}`,
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        success: function(response) {
+            fetchUserProfile(username);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error checking friendship status:', error);
+        }
     });
 }
 
@@ -123,7 +138,7 @@ function sendAjaxRequest(url, method, successMessage) {
         },
         success: function(response) {
             alert(successMessage);
-            fetchUserProfile(username);
+            checkFriendshipStatus(username);
         },
         error: function(xhr, status, error) {
             if (xhr.responseJSON && xhr.responseJSON.error === 'You have already received a friend request from this user') {

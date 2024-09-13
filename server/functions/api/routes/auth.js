@@ -346,7 +346,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
     const currentUser = await User.findById(req.user.userId);
-    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests friends');
+    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests');
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -354,20 +354,17 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
 
     const friendRequestSent = user.friendRequests.includes(currentUser._id);
     const friendRequestReceived = currentUser.friendRequests.includes(user._id);
-    const isFriend = currentUser.friends.includes(user._id);
 
     const userObject = user.toObject();
-    delete userObject.friendRequests;
-    delete userObject.friends;
+    delete userObject.friendRequests; // Remove friendRequests from the response for privacy
 
     res.json({
       ...userObject,
       friendRequestSent,
-      friendRequestReceived,
-      isFriend
+      friendRequestReceived
     });
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    console.error('User profile error:', error);
     res.status(500).json({ error: 'Error fetching user profile' });
   }
 });
@@ -518,14 +515,9 @@ router.post('/send-friend-request/:userId', authenticateToken, async (req, res) 
       return res.status(400).json({ error: 'You are already friends with this user' });
     }
 
-    if (receiver.friendRequests.includes(sender._id) || sender.sentFriendRequests.includes(receiver._id)) {
+    if (receiver.friendRequests.includes(sender._id)) {
       console.log('Friend request already sent');
       return res.status(400).json({ error: 'Friend request already sent' });
-    }
-
-    if (sender.friendRequests.includes(receiver._id) || receiver.sentFriendRequests.includes(sender._id)) {
-      console.log('Friend request already received from this user');
-      return res.status(400).json({ error: 'You have already received a friend request from this user' });
     }
 
     receiver.friendRequests.push(sender._id);
@@ -533,6 +525,7 @@ router.post('/send-friend-request/:userId', authenticateToken, async (req, res) 
 
     sender.sentFriendRequests.push(receiver._id);
     await sender.save();
+
 
     console.log('Friend request sent successfully');
     res.json({ message: 'Friend request sent successfully' });
@@ -567,8 +560,33 @@ router.post('/accept-friend-request/:userId', authenticateToken, async (req, res
 
     res.json({ message: 'Friend request accepted' });
   } catch (error) {
-    console.error("Error accepting friend request:", error)
+    console.error("Error accepting friend request:", error);
     res.status(500).json({ error: 'Error accepting friend request' });
+  }
+});
+
+// Add this new route after the existing friend-related routes
+router.get('/friendship-status/:username', authenticateToken, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.userId);
+    const targetUser = await User.findOne({ username: req.params.username });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const isFriend = currentUser.friends.includes(targetUser._id);
+    const friendRequestSent = targetUser.friendRequests.includes(currentUser._id);
+    const friendRequestReceived = currentUser.friendRequests.includes(targetUser._id);
+
+    res.json({
+      isFriend,
+      friendRequestSent,
+      friendRequestReceived
+    });
+  } catch (error) {
+    console.error('Error checking friendship status:', error);
+    res.status(500).json({ error: 'Error checking friendship status' });
   }
 });
 
