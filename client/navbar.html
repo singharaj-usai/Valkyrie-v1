@@ -39,6 +39,20 @@
             padding-top: 50px;
         }
     }
+
+    #site-wide-announcement {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+@media (max-width: 767px) {
+  #site-wide-announcement {
+    top: 50px;
+  }
+}
 </style>
 
 <nav class="navbar navbar-default navbar-fixed-top">
@@ -98,3 +112,9 @@
         </ul>
     </div>
 </nav>
+
+<div id="site-wide-announcement" class="alert alert-warning text-center" style="margin-bottom: 0;">
+    <div class="container">
+        <span>Welcome to Alphablox! Please know this is a work in progress and I have a lot of work to do. Consider this a beta version of the site.</span>
+    </div>
+</div>

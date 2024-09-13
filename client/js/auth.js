@@ -17,8 +17,36 @@ const App = {
       this.initLogout();
       this.loadFooter();
       this.updateAuthUI();
+      this.checkForAnnouncements();
 
     });
+  },
+
+  checkForAnnouncements: function () {
+    $.ajax({
+      url: "/api/announcements",
+      method: "GET",
+      success: (response) => {
+        if (response.announcement) {
+          this.showAnnouncement(response.announcement, response.type);
+        }
+      },
+      error: (xhr) => {
+        console.error("Error fetching announcements:", xhr.responseText);
+      },
+    });
+  },
+  
+  showAnnouncement: function (message, type = 'info') {
+    $("#announcement-message").text(message);
+    $("#site-wide-announcement")
+      .removeClass()
+      .addClass(`alert alert-${type} alert-dismissible`)
+      .show();
+  },
+  
+  hideAnnouncement: function () {
+    $("#site-wide-announcement").hide();
   },
 
   // Load navbar
