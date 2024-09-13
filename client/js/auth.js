@@ -189,10 +189,10 @@ const App = {
       this.showAlert("success", response.message);
       setTimeout(() => {
         window.location.href = "/login.html";
-      }, 1000);
+      }, 2000);
     },
     error: (xhr) => {
-      if (xhr.status === 409) {
+      if (xhr.responseJSON && xhr.responseJSON.message) {
         this.showAlert("danger", xhr.responseJSON.message);
       } else {
         this.showAlert("danger", "Error signing up: " + (xhr.responseJSON ? xhr.responseJSON.message : "Unknown error"));

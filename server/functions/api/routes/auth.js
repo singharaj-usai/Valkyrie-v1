@@ -175,14 +175,16 @@ router.post("/register-create", async (req, res) => {
     const clientIp = getClientIp(req);
    // const verificationToken = crypto.randomBytes(20).toString('hex');
 
-   const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-   if (existingUser) {
-     if (existingUser.username === username) {
-       return res.status(409).json({ message: "Username already exists" });
-     } else {
-       return res.status(409).json({ message: "Email already exists" });
-     }
+   const existingUsername = await User.findOne({ username });
+   if (existingUsername) {
+     return res.status(409).json({ message: "Username already exists" });
    }
+
+    // Check if email already exists
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
 
     const user = new User({
       username,
@@ -194,7 +196,6 @@ router.post("/register-create", async (req, res) => {
     //  verificationToken
     });
 
-    await user.save();
     //const baseUrl = `${req.protocol}://${req.get('host')}`;
     //try {
      // await sendVerificationEmail(email, verificationToken, baseUrl);
