@@ -10,6 +10,7 @@
       "use": "@vercel/static"
     }
   ],
+  "cleanUrls": true,
   "routes": [
     {
       "src": "/api/(.*)",
