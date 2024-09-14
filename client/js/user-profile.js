@@ -58,7 +58,9 @@ $(document).ready(function () {
     function displayUserProfile(user) {
         const isOwnProfile = user.username === localStorage.getItem('username');
         let actionButton = '';
-        let onlineStatus = user.isOnline ? '<span class="text-success">Online</span>' : '<span class="text-muted">Offline</span>';
+        let onlineStatus = user.isOnline 
+        ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
+        : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
 
     
         if (isOwnProfile) {
