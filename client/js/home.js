@@ -109,11 +109,25 @@ $(document).ready(function () {
             if (friends.length === 0) {
               friendsList.html('<p>You have no friends yet.</p>');
             } else {
-              let html = '<ul class="list-group">';
+              let html = '<div class="row">';
               friends.forEach(function(friend) {
-                html += `<li class="list-group-item">${escapeHtml(friend.username)}</li>`;
+                html += `
+                  <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
+                    <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}">
+                      <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(friend.username[0])}" 
+                           alt="${escapeHtml(friend.username)}" 
+                           class="img-circle" 
+                           style="width: 100px; height: 100px;">
+                    </a>
+                    <p class="mt-2">
+                      <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}">
+                        ${escapeHtml(friend.username)}
+                      </a>
+                    </p>
+                  </div>
+                `;
               });
-              html += '</ul>';
+              html += '</div>';
               friendsList.html(html);
             }
           },
