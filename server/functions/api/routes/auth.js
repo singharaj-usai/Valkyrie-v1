@@ -326,19 +326,30 @@ router.post("/logout", async (req, res) => {
 // Search users endpoint
 router.get("/search", async (req, res) => {
   try {
-    const { username } = req.query;
-    const users = await User.find({ 
-      username: new RegExp(username, 'i') 
-    }).select('username signupDate lastLoggedIn blurb');
+    const { username, page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const query = { username: new RegExp(username, 'i') };
+    const total = await User.countDocuments(query);
+    const users = await User.find(query)
+      .select('username signupDate lastLoggedIn blurb isOnline lastActiveAt')
+      .skip(skip)
+      .limit(parseInt(limit));
+
     //res.status(500).send("Error searching users");
-    res.json(users.map(user => ({
-      username: user.username,
-      signupDate: user.signupDate,
-      lastLoggedIn: user.lastLoggedIn,
-      blurb: user.blurb,
-      isOnline: user.isOnline,
-      lastActiveAt: user.lastActiveAt,
-    })));
+    res.json({
+      users: users.map(user => ({
+        username: user.username,
+        signupDate: user.signupDate,
+        lastLoggedIn: user.lastLoggedIn,
+        blurb: user.blurb,
+        isOnline: user.isOnline,
+        lastActiveAt: user.lastActiveAt,
+      })),
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit)
+    });
   } catch (error) {
     console.error("Error searching users:", error);
     res.status(500).json({ error: "Internal server error" });

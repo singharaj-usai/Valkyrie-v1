@@ -1,11 +1,15 @@
 $(document).ready(function () {
-  function performSearch(searchTerm) {
+  let currentPage = 1;
+  const usersPerPage = 10;
+
+  function performSearch(searchTerm, page = 1) {
     $.ajax({
       url: "/api/search",
       method: "GET",
-      data: { username: searchTerm },
-      success: function (users) {
-        displaySearchResults(users);
+      data: { username: searchTerm, page: page, limit: usersPerPage },
+      success: function (response) {
+        displaySearchResults(response.users);
+        displayPagination(response.total, page);
       },
       error: function (xhr, status, error) {
         console.error("Error searching users:", error);
@@ -39,6 +43,18 @@ $(document).ready(function () {
     $("#search-results").html(html);
   }
 
+  function displayPagination(total, currentPage) {
+    const totalPages = Math.ceil(total / usersPerPage);
+    let paginationHtml = '<nav><ul class="pagination">';
+
+    for (let i = 1; i <= totalPages; i++) {
+      paginationHtml += `<li class="${i === currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`;
+    }
+
+    paginationHtml += '</ul></nav>';
+    $("#pagination").html(paginationHtml);
+  }
+
   function escapeHtml(unsafe) {
     return unsafe
       .replace(/&/g, "&amp;")
@@ -52,7 +68,17 @@ $(document).ready(function () {
   $("#search-form").on("submit", function (e) {
     e.preventDefault();
     const searchTerm = $("#search-input").val();
-    performSearch(searchTerm);
+    currentPage = 1;
+
+    performSearch(searchTerm, currentPage);
+  });
+
+   // Handle pagination clicks
+   $(document).on('click', '#pagination a', function(e) {
+    e.preventDefault();
+    const page = $(this).data('page');
+    const searchTerm = $("#search-input").val();
+    performSearch(searchTerm, page);
   });
 
   // Check if we're on the search results page and perform initial search
@@ -61,7 +87,7 @@ $(document).ready(function () {
     const searchTerm = urlParams.get("q") || "";
     $("#search-input").val(searchTerm);
     if (searchTerm) {
-      performSearch(searchTerm);
+      performSearch(searchTerm, currentPage);
     }
   }
 });
