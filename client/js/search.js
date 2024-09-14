@@ -27,20 +27,42 @@ $(document).ready(function () {
     }
   
     let html = '<table class="table table-striped">';
-    html += '<thead><tr><th>Avatar</th><th>Username</th><th>Blurb</th><th>Last Logged In</th></tr></thead>';
+    html += '<thead><tr><th>Avatar</th><th>Username</th><th>Blurb</th><th>Last Logged In</th><th>Status</th></tr></thead>';
     html += '<tbody>';
   
-    users.forEach((user) => {
-      html += `<tr>
-    <td><img src="https://via.placeholder.com/50x50.png?text=Avatar" alt="Avatar" class="img-square" width="50" height="50"></td>
-        <td><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
-        <td>${user.blurb ? escapeHtml(user.blurb.substring(0, 50) + (user.blurb.length > 50 ? '...' : '')) : 'No blurb'}</td>
-        <td>${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</td>
-      </tr>`;
-    });
+    const fetchStatusPromises = users.map(user => fetchUserStatus(user.username));
   
-    html += '</tbody></table>';
-    $("#search-results").html(html);
+    Promise.all(fetchStatusPromises).then(statuses => {
+      users.forEach((user, index) => {
+        const onlineStatus = statuses[index] ? '<span class="text-success">Online</span>' : '<span class="text-muted">Offline</span>';
+        html += `<tr>
+          <td><img src="https://via.placeholder.com/50x50.png?text=Avatar" alt="Avatar" class="img-square" width="50" height="50"></td>
+          <td><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
+          <td>${user.blurb ? escapeHtml(user.blurb.substring(0, 50) + (user.blurb.length > 50 ? '...' : '')) : 'No blurb'}</td>
+          <td>${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</td>
+          <td>${onlineStatus}</td>
+        </tr>`;
+      });
+  
+      html += '</tbody></table>';
+      $("#search-results").html(html);
+    });
+  }
+  
+  function fetchUserStatus(username) {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: `/api/user-status/${username}`,
+        method: 'GET',
+        success: function (response) {
+          resolve(response.isOnline);
+        },
+        error: function (xhr, status, error) {
+          console.error('Error fetching user status:', error);
+          resolve(false);
+        }
+      });
+    });
   }
 
   function displayPagination(total, currentPage) {

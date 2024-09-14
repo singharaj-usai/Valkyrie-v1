@@ -24,7 +24,10 @@ $(document).ready(function () {
             },
             success: function (user) {
                 currentUser = user;
-                displayUserProfile(user);
+                fetchUserStatus(username).then(isOnline => {
+                    user.isOnline = isOnline;
+                    displayUserProfile(user);
+                });
                 document.getElementById('profile-title').textContent = `${user.username}'s Profile - AlphaBlox`;
             },
             error: function (xhr, status, error) {
@@ -36,9 +39,27 @@ $(document).ready(function () {
         });
     }
 
+    function fetchUserStatus(username) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: `/api/user-status/${username}`,
+                method: 'GET',
+                success: function (response) {
+                    resolve(response.isOnline);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching user status:', error);
+                    resolve(false);
+                }
+            });
+        });
+    }
+
     function displayUserProfile(user) {
         const isOwnProfile = user.username === localStorage.getItem('username');
         let actionButton = '';
+        let onlineStatus = user.isOnline ? '<span class="text-success">Online</span>' : '<span class="text-muted">Offline</span>';
+
     
         if (isOwnProfile) {
             actionButton = `<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>`;
@@ -58,7 +79,7 @@ $(document).ready(function () {
         const profileHtml = `
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+                <h3 class="panel-title">${escapeHtml(user.username)} - ${onlineStatus}</h3>
             </div>
             <div class="panel-body">
                 <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
@@ -79,6 +100,24 @@ $(document).ready(function () {
             initBlurbEdit(user.blurb);
         }
     }
+
+      // Add a function to periodically update the user's status
+      function startStatusUpdates() {
+        setInterval(() => {
+            if (currentUser) {
+                fetchUserStatus(currentUser.username).then(isOnline => {
+                    const statusElement = $('.panel-title span');
+                    if (isOnline) {
+                        statusElement.removeClass('text-muted').addClass('text-success').text('Online');
+                    } else {
+                        statusElement.removeClass('text-success').addClass('text-muted').text('Offline');
+                    }
+                });
+            }
+        }, 60000); // Update every minute
+    }
+
+    startStatusUpdates();
 
 function initFriendActions(user) {
     $('#send-friend-request').on('click', function() {

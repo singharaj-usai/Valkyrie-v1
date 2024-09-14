@@ -89,6 +89,9 @@ const App = {
             $("#content").show();
             this.fetchData();
             this.updateAuthUI();
+            this.updateUserStatus();
+            // Set up periodic status update
+            setInterval(() => this.updateUserStatus(), 60000); // Update every minute
           }
         },
         error: () => {
@@ -109,6 +112,26 @@ const App = {
     if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
   },
 
+
+  // Add this new method to update user status
+updateUserStatus: function () {
+  const token = localStorage.getItem("token");
+  if (token) {
+    $.ajax({
+      url: "/api/update-status",
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      success: (response) => {
+        console.log("User status updated:", response.isOnline);
+      },
+      error: (xhr, status, error) => {
+        console.error("Error updating user status:", error);
+      },
+    });
+  }
+},
   // Fetch data from the API
   fetchData: function () {
     $.ajax({
