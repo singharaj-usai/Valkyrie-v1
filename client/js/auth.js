@@ -114,24 +114,32 @@ const App = {
 
 
   // Add this new method to update user status
-updateUserStatus: function () {
-  const token = localStorage.getItem("token");
-  if (token) {
-    $.ajax({
-      url: "/api/update-status",
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-      success: (response) => {
-        console.log("User status updated:", response.isOnline);
-      },
-      error: (xhr, status, error) => {
-        console.error("Error updating user status:", error);
-      },
-    });
-  }
-},
+  updateUserStatus: function () {
+    const token = localStorage.getItem("token");
+    if (token) {
+      $.ajax({
+        url: "/api/update-status",
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        success: (response) => {
+          console.log("User status updated:", response.isOnline);
+        },
+        error: (xhr, status, error) => {
+          console.error("Error updating user status:", error);
+          if (xhr.status === 401) {
+            // Token is invalid or expired, log out the user
+            this.logout();
+          }
+        }
+      });
+    } else {
+      // User is not logged in, clear the interval
+      clearInterval(this.statusUpdateInterval);
+    }
+  },
+
   // Fetch data from the API
   fetchData: function () {
     $.ajax({
@@ -212,11 +220,13 @@ updateUserStatus: function () {
       success: () => {
         localStorage.removeItem("username");
         localStorage.removeItem("token");
+        clearInterval(this.statusUpdateInterval);
+
         window.location.href = "/login.html";
       },
       error: (xhr) => {
         console.error("Error logging out:", xhr.responseText);
-      },
+      } 
     });
   },
 
