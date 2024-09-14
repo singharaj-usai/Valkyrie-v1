@@ -214,7 +214,11 @@ router.post("/register-create", async (req, res) => {
   res.status(201).json({ message: "User registered successfully" });
 } catch (error) {
   console.error("Registration error:", error);
-  res.status(500).json({ message: "An error occurred during registration" });
+  if (error.name === 'ValidationError') {
+    res.status(400).json({ message: "Invalid input data", details: error.errors });
+  } else {
+    res.status(500).json({ message: "An unexpected error occurred during registration. Please try again." });
+  }
 }
 });
 

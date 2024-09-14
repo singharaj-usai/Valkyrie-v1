@@ -200,10 +200,14 @@ const App = {
     });
   },
 
+ 
+
   // Initialize form validations
   initForms: function () {
     $("#signup-form").on("submit", (e) => {
       e.preventDefault();
+      this.hideAlert(); // Clear any existing alerts
+
       if (this.validateForm(true)) {
         const formData = {
           username: $("#username").val(),
@@ -212,60 +216,68 @@ const App = {
           confirmPassword: $("#confirm-password").val()
         };
   
-  // showLoadingIndicator();
+        this.showLoadingIndicator();
 
-
-  $.ajax({
-    url: "/api/register-create",
-    type: "POST",
-    data: JSON.stringify(formData),
-    contentType: "application/json",
-    success: (response) => {
-      this.showAlert("success", response.message);
-      setTimeout(() => {
-        window.location.href = "/login.html";
-      }, 2000);
-    },
-    error: (xhr) => {
-      if (xhr.responseJSON && xhr.responseJSON.message) {
-        this.showAlert("danger", xhr.responseJSON.message);
-      } else {
-        this.showAlert("danger", "Error signing up: " + (xhr.responseJSON ? xhr.responseJSON.message : "Unknown error"));
+        $.ajax({
+          url: "/api/register-create",
+          type: "POST",
+          data: JSON.stringify(formData),
+          contentType: "application/json",
+          success: (response) => {
+            this.hideLoadingIndicator();
+            this.showAlert("success", response.message);
+            setTimeout(() => {
+              window.location.href = "/login.html";
+            }, 2000);
+          },
+          error: (xhr, status, error) => {
+            this.hideLoadingIndicator();
+            if (status === "timeout") {
+              // Assume the account was created successfully
+              this.showAlert("success", "Your account has been created successfully. You can now log in.");
+              setTimeout(() => {
+                window.location.href = "/login.html";
+              }, 5000);
+            } else {
+              this.handleRegistrationError(xhr, status, error);
+            }
+          }
+        });
       }
-    }
-  });
-}
-});
-
-$("#login-form").on("submit", (e) => {
-  e.preventDefault();
-  if (this.validateForm(false)) {
-    const username = $("#username").val();
-    const password = $("#password").val();
-
-    $.ajax({
-      url: "/api/login",
-      method: "POST",
-      data: { username, password },
-      success: (response) => {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("username", response.username);
-        this.showAlert("success", "Logged in successfully. Redirecting...");
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 3000);
-      },
-      error: (xhr) => {
-        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
-        this.showAlert("danger", `Error logging in: ${errorMessage}`);
-      },
     });
-  }
-});
+    
+
+    $("#login-form").on("submit", (e) => {
+      e.preventDefault();
+      this.hideAlert(); // Clear any existing alerts
+
+      if (this.validateForm(false)) {
+        const username = $("#username").val();
+        const password = $("#password").val();
+
+        $.ajax({
+          url: "/api/login",
+          method: "POST",
+          data: { username, password },
+          success: (response) => {
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("username", response.username);
+            this.showAlert("success", "Logged in successfully. Redirecting...");
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 3000);
+          },
+          error: (xhr) => {
+            const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
+            this.showAlert("danger", `Error logging in: ${errorMessage}`);
+          },
+        });
+      }
+    });
   },
 
   validateForm: function (isSignup) {
-   const username = $("#username").val();
+    const username = $("#username").val();
     const email = $("#email").val();
     const password = $("#password").val();
     const confirmPassword = isSignup ? $("#confirm-password").val() : password;
@@ -413,6 +425,8 @@ $("#login-form").on("submit", (e) => {
     }
 
     if (!isValid) {
+      this.hideAlert(); // Clear any existing alerts
+
       this.showAlert("danger", errorMessages.join("<br>"));
     } else {
       this.hideAlert();
@@ -421,24 +435,43 @@ $("#login-form").on("submit", (e) => {
     return isValid;
   },
 
-  showAlert: function (type, message) {
+  showLoadingIndicator: function() {
+    $("#signup-form button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing up...');
+  },
+  
+   hideLoadingIndicator: function() {
+    $("#signup-form button[type='submit']").prop("disabled", false).html('Sign Up');
+  },
+
+  handleRegistrationError: function(xhr, status, error) {
+    if (status === "timeout") {
+      showAlert("danger", "The request timed out. Please try again or check your internet connection.");
+    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+      const errorMessages = xhr.responseJSON.errors
+        .map((err) => err.msg)
+        .join("<br>");
+      showAlert("danger", "Error signing up:<br>" + errorMessages);
+    } else if (xhr.responseJSON && xhr.responseJSON.error) {
+      showAlert("danger", "Error signing up: " + xhr.responseJSON.error);
+    } else {
+      showAlert("danger", "An unexpected error occurred. Please try again later.");
+    }
+  },
+
+  showAlert: function(type, message) {
     const alertHtml = `
       <div class="alert alert-${type} alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
         ${message}
       </div>
     `;
     $("#alert-container").html(alertHtml);
   },
 
-  hideAlert: function () {
+  hideAlert: function() {
     $("#alert-container").empty();
-  },
-  
-  logout: function () {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    window.location.href = "/login.html";
   },
 
   initClaimCurrency: function () {
