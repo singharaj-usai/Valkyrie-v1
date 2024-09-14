@@ -110,7 +110,7 @@ $(document).ready(function () {
               friendsList.html('<p>You have no friends yet.</p>');
             } else {
               let html = '<div class="row">';
-              friends.forEach(function(friend) {
+              friends.slice(0, 10).forEach(function(friend) {
                 html += `
                   <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
                     <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
@@ -119,7 +119,7 @@ $(document).ready(function () {
                            class="img-circle" 
                            style="width: 100px; height: 100px;">
                     </a>
-                    <p class="mt-2">
+                    <p>
                       <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                         ${escapeHtml(friend.username)}
                       </a>
@@ -128,6 +128,9 @@ $(document).ready(function () {
                 `;
               });
               html += '</div>';
+              //if (friends.length > 10) {
+              //  html += `<p>Showing 10 of ${friends.length} friends.</p>`;
+              //}
               friendsList.html(html);
             }
           },
