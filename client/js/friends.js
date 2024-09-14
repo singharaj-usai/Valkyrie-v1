@@ -10,6 +10,9 @@ $(document).ready(function() {
             },
             success: function(requests) {
                 const requestsList = $('#friend-requests');
+
+                $('#requests-tab').text(`Friend Requests (${requests.length})`);
+
                 requestsList.empty();
                 if (requests.length === 0) {
                     requestsList.append('<p>No friend requests.</p>');
@@ -66,6 +69,9 @@ $(document).ready(function() {
             },
             success: function(friends) {
                 const friendsList = $('#friends-list');
+
+                $('#friends-tab').text(`Friends (${friends.length})`);
+
                 if (friends.length === 0) {
                     friendsList.html('<p>You have no friends yet.</p>');
                 } else {
