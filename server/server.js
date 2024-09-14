@@ -83,7 +83,10 @@ app.use((err, req, res, next) => {
 });
 
 app.use('/api', authRoutes);
-app.use('/', express.static(path.join(__dirname, '../client')));
+app.use('/', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  next();
+}, express.static(path.join(__dirname, '../client')));
 app.use('/', pageRoutes);
 
 // Add this new route handler

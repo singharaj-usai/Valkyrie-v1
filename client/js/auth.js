@@ -1,3 +1,9 @@
+let VERSION;
+
+$.getScript('./js/version.js', function() {
+  VERSION = window.VERSION;
+});
+
 // Main application object
 const App = {
   // Configuration
@@ -106,7 +112,7 @@ const App = {
   // Fetch data from the API
   fetchData: function () {
     $.ajax({
-      url: this.config.apiUrl,
+      url: this.config.apiUrl + '?v=' + VERSION,
       method: "GET",
       success: this.handleDataSuccess.bind(this),
       error: this.handleDataError,
