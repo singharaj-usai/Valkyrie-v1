@@ -12,6 +12,7 @@ $(document).ready(function () {
         success: function(response) {
           $('#profile-username').text(`Welcome, ${username}!`);
           fetchUserBlurb();
+          fetchFriendsList();
         },
         error: function() {
           localStorage.removeItem("username");
@@ -93,6 +94,33 @@ $(document).ready(function () {
           $('#cancel-blurb').on('click', function() {
             displayBlurb(currentBlurb);
           });
+        });
+      }
+
+      function fetchFriendsList() {
+        $.ajax({
+          url: '/api/friends',
+          method: 'GET',
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          success: function(friends) {
+            const friendsList = $('#friends-list');
+            if (friends.length === 0) {
+              friendsList.html('<p>You have no friends yet.</p>');
+            } else {
+              let html = '<ul class="list-group">';
+              friends.forEach(function(friend) {
+                html += `<li class="list-group-item">${escapeHtml(friend.username)}</li>`;
+              });
+              html += '</ul>';
+              friendsList.html(html);
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error fetching friends list:', error);
+            $('#friends-list').html('<p>Error loading friends list.</p>');
+          }
         });
       }
 
