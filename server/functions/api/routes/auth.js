@@ -324,7 +324,7 @@ router.get("/user-status/:username", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    const isOnline = user.isOnline && (new Date() - user.lastActiveAt) < 1 * 60 * 1000; // 1 minute
+    const isOnline = user.isOnline && (new Date() - user.lastActiveAt) < 5 * 60 * 1000; // 5 minutes
     if (!isOnline && user.isOnline) {
       // Update user status to offline if they haven't been active for 5 minutes
       await User.findByIdAndUpdate(user._id, { isOnline: false });

@@ -119,7 +119,7 @@ $(document).ready(function () {
                            class="img-circle" 
                            style="width: 100px; height: 100px;">
                     </a>
-                    <p>
+                    <p class="mt-2">
                       <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                         ${escapeHtml(friend.username)}
                       </a>
@@ -128,9 +128,9 @@ $(document).ready(function () {
                 `;
               });
               html += '</div>';
-              //if (friends.length > 10) {
-              //  html += `<p>Showing 10 of ${friends.length} friends.</p>`;
-              //}
+              if (friends.length > 10) {
+                html += '<p class="text-center mt-3">Showing 10 of ' + friends.length + ' friends</p>';
+              }
               friendsList.html(html);
             }
           },

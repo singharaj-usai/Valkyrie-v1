@@ -10,15 +10,18 @@
       "use": "@vercel/static"
     }
   ],
-  "cleanUrls": true,
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "server/server.js"
     },
     {
+      "src": "^/([^.]+)$",
+      "dest": "/$1.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "server/server.js"
+      "dest": "/client/$1"
     }
   ]
 }
