@@ -16,12 +16,12 @@
       "dest": "server/server.js"
     },
     {
-      "src": "^/([^.]+)$",
-      "dest": "/$1.html"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/client/$1"
+      "dest": "server/server.js"
     }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/client/$1" },
+    { "source": "/(.*)", "destination": "/client/$1.html" }
   ]
 }
