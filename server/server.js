@@ -3,10 +3,13 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const MongoStore = require('connect-mongo');
+const fs = require('fs');
 
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -83,13 +86,27 @@ app.use((err, req, res, next) => {
 });
 
 app.use('/api', authRoutes);
+
+// Serve static files from the client directory
 app.use('/', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   next();
 }, express.static(path.join(__dirname, '../client')));
+
+// Handle clean URLs for HTML files
+app.get('/:page', (req, res, next) => {
+  const page = req.params.page;
+  const filePath = path.join(__dirname, `../client/${page}.html`);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    next();
+  }
+});
+
 app.use('/', pageRoutes);
 
-// Add this new route handler
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'));
 });

@@ -13,7 +13,7 @@ $(document).ready(function () {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error('No token found in localStorage');
-            $('#user-profile').html('<p>You are not logged in. Please <a href="/login.html">login</a> to view profiles.</p>');
+            $('#user-profile').html('<p>You are not logged in. Please <a href="/login">login</a> to view profiles.</p>');
             return;
         }
         $.ajax({
@@ -34,7 +34,7 @@ $(document).ready(function () {
                 console.error('Error fetching user profile:', xhr.responseText);
                 console.error('Status:', status);
                 console.error('Error:', error);
-                $('#user-profile').html('<p>Error fetching user profile. Please try again. If the problem persists, please <a href="/login.html">login</a> again.</p>');
+                $('#user-profile').html('<p>Error fetching user profile. Please try again. If the problem persists, please <a href="/login">login</a> again.</p>');
             }
         });
     }

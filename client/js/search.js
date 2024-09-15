@@ -106,7 +106,7 @@ $(document).ready(function () {
   });
 
   // Check if we're on the search results page and perform initial search
-  if (window.location.pathname === "/search-results.html") {
+  if (window.location.pathname === "/search-results") {
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("q") || "";
     $("#search-input").val(searchTerm);
