@@ -77,6 +77,11 @@ $(document).ready(function () {
         } else {
             actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
         }
+
+           // Add Message button
+    if (!isOwnProfile) {
+            actionButton += `<button id="message-user" class="btn btn-info btn-sm">Message</button>`;
+        }
     
         const profileHtml = `
         <div class="panel panel-default">
@@ -95,12 +100,16 @@ $(document).ready(function () {
         </div>
         `;
         $('#user-profile').html(profileHtml);
-    
-        if (!isOwnProfile) {
-            initFriendActions(user);
-        } else {
-            initBlurbEdit(user.blurb);
-        }
+
+       // Initialize actions
+       if (!isOwnProfile) {
+        initFriendActions(user);
+        $('#message-user').on('click', function() {
+            window.location.href = `/messages/compose?recipient=${encodeURIComponent(user.username)}`;
+        });
+    } else {
+        initBlurbEdit(user.blurb);
+    }
     }
 
       // Add a function to periodically update the user's status

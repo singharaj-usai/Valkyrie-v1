@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compose Message - AlphaBlox</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/simplex/bootstrap.min.css">
+    <link rel="icon" href="./images/AlphaBlox.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="navbar-container"></div>
+   
+
+    <div class="container" style="margin-top: 70px;">
+        <h2>Compose Message</h2>
+        <div id="alert-container"></div>
+        <form id="compose-form">
+            <div class="form-group">
+                <label for="recipient">To:</label>
+                <input type="text" class="form-control" id="recipient" readonly>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" class="form-control" id="subject" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea class="form-control" id="message" rows="5" required maxlength="1000"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Send Message</button>
+            <button type="button" id="discard-button" class="btn btn-default">Discard</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="../js/auth/auth.js"></script>
+    <script src="../js/messages.js"></script>
+</body>
+</html>
