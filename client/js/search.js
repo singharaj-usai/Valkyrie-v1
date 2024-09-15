@@ -39,7 +39,7 @@ $(document).ready(function () {
         : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
       html += `<tr>
         <td><img src="https://via.placeholder.com/50x50.png?text=Avatar" alt="Avatar" class="img-square" width="50" height="50"></td>
-        <td><a href="/user-profile.html?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
+        <td><a href="/user-profile?username=${encodeURIComponent(user.username)}">${escapeHtml(user.username)}</a></td>
         <td>${user.blurb ? escapeHtml(user.blurb.substring(0, 50) + (user.blurb.length > 50 ? '...' : '')) : 'No blurb'}</td>
         <td>${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</td>
         <td>${onlineStatus}</td>

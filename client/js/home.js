@@ -17,11 +17,11 @@ $(document).ready(function () {
         error: function() {
           localStorage.removeItem("username");
           localStorage.removeItem("token");
-          window.location.href = '/login.html';
+          window.location.href = '/login';
         }
       });
     } else {
-      window.location.href = '/login.html';
+      window.location.href = '/login';
     }
   
     function fetchUserBlurb() {
@@ -113,14 +113,14 @@ $(document).ready(function () {
               friends.slice(0, 10).forEach(function(friend) {
                 html += `
                   <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
-                    <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                    <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                       <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(friend.username[0])}" 
                            alt="${escapeHtml(friend.username)}" 
                            class="img-circle" 
                            style="width: 100px; height: 100px;">
                     </a>
                     <p class="mt-2">
-                      <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                      <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                         ${escapeHtml(friend.username)}
                       </a>
                     </p>

@@ -10,6 +10,9 @@ $(document).ready(function() {
             },
             success: function(requests) {
                 const requestsList = $('#friend-requests');
+
+                $('#requests-tab').text(`Friend Requests (${requests.length})`);
+
                 requestsList.empty();
                 if (requests.length === 0) {
                     requestsList.append('<p>No friend requests.</p>');
@@ -22,7 +25,7 @@ $(document).ready(function() {
                                     <div class="panel-body">
                                         <div class="media">
                                             <div class="media-left">
-                                                <a href="/user-profile.html?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
+                                                <a href="/user-profile?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
                                                     <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(request.username[0])}" 
                                                          alt="${escapeHtml(request.username)}" 
                                                          class="media-object img-circle" 
@@ -31,7 +34,7 @@ $(document).ready(function() {
                                             </div>
                                             <div class="media-body">
                                                 <h4 class="media-heading">
-                                                    <a href="/user-profile.html?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
+                                                    <a href="/user-profile?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
                                                         ${escapeHtml(request.username)}
                                                     </a>
                                                 </h4>
@@ -66,6 +69,9 @@ $(document).ready(function() {
             },
             success: function(friends) {
                 const friendsList = $('#friends-list');
+
+                $('#friends-tab').text(`Friends (${friends.length})`);
+
                 if (friends.length === 0) {
                     friendsList.html('<p>You have no friends yet.</p>');
                 } else {
@@ -81,7 +87,7 @@ $(document).ready(function() {
                                         <div class="panel-body">
                                             <div class="media">
                                                 <div class="media-left">
-                                                    <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                                                    <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                                                         <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(friend.username[0])}" 
                                                              alt="${escapeHtml(friend.username)}" 
                                                              class="media-object img-circle" 
@@ -90,7 +96,7 @@ $(document).ready(function() {
                                                 </div>
                                                 <div class="media-body">
                                                     <h4 class="media-heading">
-                                                        <a href="/user-profile.html?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                                                        <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
                                                             ${escapeHtml(friend.username)}
                                                         </a>
                                                     </h4>

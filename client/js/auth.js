@@ -82,7 +82,7 @@ const App = {
           "Authorization": `Bearer ${token}`,
         },
         success: () => {
-          if (["/login.html", "/register.html"].includes(currentPath)) {
+          if (["/login", "/register"].includes(currentPath)) {
             window.location.href = "/";
           } else {
             $("#loading").hide();
@@ -96,14 +96,14 @@ const App = {
         },
         error: () => {
           this.logout();
-          if (currentPath !== "/login.html" && currentPath !== "/register.html") {
-            window.location.href = "/login.html";
+          if (currentPath !== "/login" && currentPath !== "/register") {
+            window.location.href = "/login";
           }
         },
       });
     } else {
-      if (currentPath !== "/login.html" && currentPath !== "/register.html") {
-        window.location.href = "/login.html";
+      if (currentPath !== "/login" && currentPath !== "/register") {
+        window.location.href = "/login";
       } else {
         $("#loading").hide();
         $("#content").show();
@@ -173,42 +173,42 @@ const App = {
 
   // Update authentication UI
   updateAuthUI: function () {
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
-    const authContainer = $("#auth-container");
-  
-    if (username && token) {
-      $.ajax({
-        url: "/api/user-info",
-        method: "GET",
-        headers: { "Authorization": `Bearer ${token}` },
-        success: (response) => {
-          authContainer.html(`
-            <span class="navbar-text">
-              Welcome, ${this.escapeHtml(username)} 
-              <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
-            </span>
-            <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
-            <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
-          `);
-          this.initClaimCurrency();
-          this.initLogout();
-          $('#user-submenu').show();
-        },
-        error: (xhr, status, error) => {
-          console.error("Error fetching user info:", error);
-          this.logout();
-        }
-      });
-    } else {
-      authContainer.html(`
-        <a href="/login.html" class="btn btn-sm btn-primary">Login</a>
-        <a href="/register.html" class="btn btn-sm btn-default">Register</a>
-      `);
-      $('#user-submenu').hide();
-    }
-    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
-  },
+  const username = localStorage.getItem("username");
+  const token = localStorage.getItem("token");
+  const authContainer = $("#auth-container");
+
+  if (username && token) {
+    $.ajax({
+      url: "/api/user-info",
+      method: "GET",
+      headers: { "Authorization": `Bearer ${token}` },
+      success: (response) => {
+        authContainer.html(`
+          <span class="navbar-text">
+            Welcome, ${this.escapeHtml(username)} 
+            <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
+          </span>
+          <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
+          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
+        `);
+        this.initClaimCurrency();
+        this.initLogout();
+        $('#user-submenu').show();
+      },
+      error: (xhr, status, error) => {
+        console.error("Error fetching user info:", error);
+        this.logout();
+      }
+    });
+  } else {
+    authContainer.html(`
+      <a href="/login" class="btn btn-sm btn-primary">Login</a>
+      <a href="/register" class="btn btn-sm btn-default">Register</a>
+    `);
+    $('#user-submenu').hide();
+  }
+  if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
+},
 
   // Handle user logout
   logout: function () {
@@ -222,7 +222,7 @@ const App = {
         localStorage.removeItem("token");
         clearInterval(this.statusUpdateInterval);
 
-        window.location.href = "/login.html";
+        window.location.href = "/login";
       },
       error: (xhr) => {
         console.error("Error logging out:", xhr.responseText);
@@ -235,7 +235,7 @@ const App = {
     $(document).on("submit", ".navbar-form", (e) => {
       e.preventDefault();
       const searchTerm = $("#search-input").val().trim();
-      window.location.href = `/search-results.html?q=${encodeURIComponent(searchTerm)}`;
+      window.location.href = `/search-results?q=${encodeURIComponent(searchTerm)}`;
     });
   },
 
@@ -266,7 +266,7 @@ const App = {
             this.hideLoadingIndicator();
             this.showAlert("success", response.message);
             setTimeout(() => {
-              window.location.href = "/login.html";
+              window.location.href = "/login";
             }, 2000);
           },
           error: (xhr, status, error) => {
@@ -275,7 +275,7 @@ const App = {
               // Assume the account was created successfully
               this.showAlert("success", "Your account has been created successfully. You can now log in.");
               setTimeout(() => {
-                window.location.href = "/login.html";
+                window.location.href = "/login";
               }, 5000);
             } else {
               this.handleRegistrationError(xhr, status, error);
