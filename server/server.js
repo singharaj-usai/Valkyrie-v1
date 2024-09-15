@@ -94,9 +94,8 @@ app.use('/', (req, res, next) => {
 }, express.static(path.join(__dirname, '../client')));
 
 // Handle clean URLs for HTML files
-app.get('/:page', (req, res, next) => {
-  const page = req.params.page;
-  const filePath = path.join(__dirname, `../client/${page}.html`);
+app.get('*', (req, res, next) => {
+  const filePath = path.join(__dirname, '../client', req.path + '.html');
   
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
