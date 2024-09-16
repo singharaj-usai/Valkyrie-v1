@@ -45,7 +45,7 @@ router.post('/send', authenticateToken, [
     }
 });
 
-// (Optional) Get received messages
+// Get received messages
 router.get('/received', authenticateToken, async (req, res) => {
     try {
         const user = await User.findOne({ username: req.user.username });
@@ -60,7 +60,7 @@ router.get('/received', authenticateToken, async (req, res) => {
     }
 });
 
-// (Optional) Get sent messages
+// Get sent messages
 router.get('/sent', authenticateToken, async (req, res) => {
     try {
         const user = await User.findOne({ username: req.user.username });
@@ -71,6 +71,53 @@ router.get('/sent', authenticateToken, async (req, res) => {
         res.json(messages);
     } catch (error) {
         console.error('Error fetching sent messages:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get a specific message by ID
+router.get('/:id', authenticateToken, async (req, res) => {
+    const messageId = req.params.id;
+    try {
+        const message = await Message.findById(messageId)
+            .populate('sender', 'username')
+            .populate('recipient', 'username');
+
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        // Verify that the requester is either the sender or the recipient
+        if (message.sender.username !== req.user.username && message.recipient.username !== req.user.username) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        res.json(message);
+    } catch (error) {
+        console.error('Error fetching message:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// (Optional) Delete a message
+router.delete('/:id', authenticateToken, async (req, res) => {
+    const messageId = req.params.id;
+    try {
+        const message = await Message.findById(messageId);
+
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        // Verify that the requester is either the sender or the recipient
+        if (message.sender.toString() !== req.user.userId && message.recipient.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        await message.remove();
+        res.json({ message: 'Message deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting message:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

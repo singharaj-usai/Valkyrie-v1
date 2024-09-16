@@ -28,8 +28,13 @@ router.get("/user-profile", (req, res) => {
 
 router.use("/api/messages", messagesRoutes); // Add this middleware
 
+// Route to serve the "My Messages" page
+router.get("/messages", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../../../client/views/messages.html"));
+});
+
 router.get("/messages/compose", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../../../client/views/compose.html"));
+  res.sendFile(path.join(__dirname, "../../../../client/compose.html"));
 });
 
 
