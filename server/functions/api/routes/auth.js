@@ -7,7 +7,7 @@ const moment = require("moment-timezone");
 const requestIp = require('request-ip');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { sendVerificationEmail } = require('../utils/emailService');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];

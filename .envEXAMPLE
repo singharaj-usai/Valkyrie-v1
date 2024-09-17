@@ -1,9 +1,0 @@
-MONGODB_URI=mongodb+srv://usais:fast12@cluster0.isaat.mongodb.net/
-JWT_SECRET=your_very_long_and_secure_random_string_here
-
-MAINTENANCE_MODE=false
-
-MAILCHIMP_API_KEY=8bdf84c00e127f26802a94474aa96bdf-us17
-MAILCHIMP_SERVER_PREFIX=https://us17.admin.mailchimp.com/
-MAILCHIMP_LIST_ID=bee92a5a1e
-

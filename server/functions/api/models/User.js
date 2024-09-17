@@ -72,6 +72,15 @@ lastActiveAt: {
   default: Date.now
 },
 
+resetPasswordToken: {
+  type: String,
+  default: null,
+},
+resetPasswordExpires: {
+  type: Date,
+  default: null,
+},
+
 friends: [{
   type: mongoose.Schema.Types.ObjectId,
   ref: 'User'
