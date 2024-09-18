@@ -182,19 +182,20 @@ const App = {
       url: "/api/user-info",
       method: "GET",
       headers: { "Authorization": `Bearer ${token}` },
-      success: (response) => {
-        authContainer.html(`
-          <span class="navbar-text">
-            Welcome, ${this.escapeHtml(username)} 
-            <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
-          </span>
-          <button id="claim-currency" class="btn btn-sm btn-primary ml-2">Claim Daily</button>
-          <button id="logout" class="btn btn-sm btn-default ml-2">Logout</button>
-        `);
-        this.initClaimCurrency();
-        this.initLogout();
-        $('#user-submenu').show();
-      },
+          // Start of Selection
+          success: (response) => {
+            authContainer.html(`
+              <span class="navbar-text">
+                Welcome, ${this.escapeHtml(username)} 
+                <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
+              </span>
+              <button id="claim-currency" class="btn btn-sm btn-primary ml-2 navbar-btn">Claim Daily</button>
+              <button id="logout" class="btn btn-sm btn-default ml-2 navbar-btn">Logout</button>
+            `);
+            this.initClaimCurrency();
+            this.initLogout();
+            $('#user-submenu').show();
+          },
       error: (xhr, status, error) => {
         console.error("Error fetching user info:", error);
         this.logout();
@@ -202,8 +203,8 @@ const App = {
     });
   } else {
     authContainer.html(`
-      <a href="/login" class="btn btn-sm btn-primary">Login</a>
-      <a href="/register" class="btn btn-sm btn-default">Register</a>
+      <a href="/login" class="btn btn-sm btn-primary ml-2 navbar-btn">Login</a>
+      <a href="/register" class="btn btn-sm btn-default ml-2 navbar-btn">Register</a>
     `);
     $('#user-submenu').hide();
   }
