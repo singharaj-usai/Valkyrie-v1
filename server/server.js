@@ -12,7 +12,7 @@ const pageRoutes = require('./functions/api/routes/pages');
 
 
 const app = express();
-const port = process.env.PORT || 3004;
+const port = process.env.PORT || 3000;
 
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
