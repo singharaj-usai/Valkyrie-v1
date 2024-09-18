@@ -12,22 +12,26 @@ const pageRoutes = require('./functions/api/routes/pages');
 
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3004;
 
 require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Add this near the top of your server.js file
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+
+const MAINTENANCE_KEY = process.env.MAINTENANCE_MODE_KEY;
 console.log('MAINTENANCE_MODE:', MAINTENANCE_MODE); // Add this line for debugging
+console.log('MAINTENANCE_KEY: ', MAINTENANCE_KEY)
 
 
 // Add this middleware before your routes
+app.use(cookieParser());
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); // Add this line for debugging
-  if (MAINTENANCE_MODE) {
-    console.log('Maintenance mode is active, serving maintenance page'); // Add this line for debugging
-    return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+    if (MAINTENANCE_MODE && req.cookies['maintenance-key'] != MAINTENANCE_KEY) {
+        console.log('Maintenance mode is active, serving maintenance page'); // Add this line for debugging
+        return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
   }
   next();
 });
@@ -62,7 +66,7 @@ app.use(updateUserStatus);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -130,7 +134,7 @@ async function resetUserIdsIfNeeded() {
 
 // Update your 404 handler
 app.use((req, res, next) => {
-  if (MAINTENANCE_MODE) {
+    if (MAINTENANCE_MODE && req.cookies['maintenance-key'] != MAINTENANCE_KEY) {
     res.sendFile(path.join(__dirname, '../client/maintenance.html'));
   } else {
     res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
