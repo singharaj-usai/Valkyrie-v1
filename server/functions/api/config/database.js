@@ -18,7 +18,7 @@ const connectDB = async (uri) => {
         console.log('MongoDB connected');
         require('../models/Counter');
         require('../models/User');
-      //  require('../models/Message')
+       require('../models/Message')
         return client;
     } catch (error) {
         console.error('MongoDB connection error:', error);
