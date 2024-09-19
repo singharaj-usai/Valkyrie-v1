@@ -101,7 +101,7 @@ $(document).ready(function() {
                                                         </a>
                                                     </h4>
                                                     <p class="${isOnline ? 'text-success' : 'text-muted'}">
-                                                        <i class="bi bi-circle-fill"></i> ${isOnline ? 'Online' : 'Offline'}
+                                                        <i class="bi bi-circle-fill"></i> ${isOnline ? '[ Online ]' : '[ Offline ]'}
                                                     </p>
                                                 </div>
                                             </div>
