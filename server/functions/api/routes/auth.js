@@ -532,12 +532,13 @@ router.put("/user/blurb", async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { blurb } = req.body;
+    let { blurb } = req.body;
     if (typeof blurb !== 'string' || blurb.length > 500) {
       return res.status(400).json({ error: "Invalid blurb" });
     }
+    blurb = blurb.trim().replace(/\n+/g, '\n').replace(/^\n|\n$/g, '');
 
-    const user = await User.findByIdAndUpdate(userId, { blurb }, { new: true });
+    const user = await User.findByIdAndUpdate(userId, { blurb: blurb }, { new: true });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
