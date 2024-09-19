@@ -59,9 +59,8 @@ $(document).ready(function () {
         const isOwnProfile = user.username === localStorage.getItem('username');
         let actionButton = '';
         let onlineStatus = user.isOnline 
-        ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
-        : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
-
+            ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
+            : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
     
         if (isOwnProfile) {
             actionButton = `<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>`;
@@ -77,43 +76,105 @@ $(document).ready(function () {
         } else {
             actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
         }
-
-           // Add Message button
-    if (!isOwnProfile) {
+    
+        // Add Message button
+        if (!isOwnProfile) {
             actionButton += `<button id="message-user" class="btn btn-info btn-sm">Message</button>`;
         }
     
-        const profileHtml = `
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">${escapeHtml(user.username)} - ${onlineStatus}</h3>
-            </div>
-            <div class="panel-body">
-                <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
-                <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
-                <div id="blurb-container">
-                    <h4>About Me</h4>
-                    <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
+        const userInfoHtml = `
+<div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">${escapeHtml(user.username)}'s Profile</h3>
+                </div>
+                <div class="panel-body text-center">
+                    <img src="https://via.placeholder.com/200x200.png?text=${encodeURIComponent(user.username[0])}" 
+                         alt="${escapeHtml(user.username)}" 
+                         class="img-circle user-avatar">
+                    <h3>${escapeHtml(user.username)}</h3>
+                    <p>${onlineStatus}</p>
+                    <p><strong>Signed Up:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
+                    <p><strong>Last Logged In:</strong> ${user.lastLoggedIn ? new Date(user.lastLoggedIn).toLocaleString() : 'Never'}</p>
                     <div id="action-button-container">${actionButton}</div>
+                    <div id="blurb-container" class="mt-3">
+                        <h4>About Me</h4>
+                        <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb) : 'No blurb set.'}</p>
+                        ${isOwnProfile ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>' : ''}
+                    </div>
                 </div>
             </div>
-        </div>
         `;
-        $('#user-profile').html(profileHtml);
+    
+        $('#user-info').html(userInfoHtml);
+    
+        // Fetch and display friends list
+        fetchFriendsList();
+    
+        // Initialize actions
+        if (!isOwnProfile) {
+            initFriendActions(user);
+            $('#message-user').on('click', function() {
+                window.location.href = `/messages/compose?recipient=${encodeURIComponent(user.username)}`;
+            });
+        } else {
+            initBlurbEdit(user.blurb);
+        }
+    }
 
-       // Initialize actions
-       if (!isOwnProfile) {
-        initFriendActions(user);
-        $('#message-user').on('click', function() {
-            window.location.href = `/messages/compose?recipient=${encodeURIComponent(user.username)}`;
+    function fetchFriendsList() {
+        const token = localStorage.getItem('token');
+        $.ajax({
+            url: '/api/friends',
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            success: function(friends) {
+                const friendsList = $('#user-friends');
+                let html = `
+<div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Friends</h3>
+                        </div>
+                        <div class="panel-body">
+                `;
+    
+                if (friends.length === 0) {
+                    html += '<p>No friends yet.</p>';
+                } else {
+                    html += '<div class="row">';
+                    friends.forEach(function(friend) {
+                        html += `
+                            <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
+                                <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                                    <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(friend.username[0])}" 
+                                         alt="${escapeHtml(friend.username)}" 
+                                         class="img-circle" 
+                                         style="width: 100px; height: 100px;">
+                                </a>
+                                <p class="mt-2">
+                                    <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
+                                        ${escapeHtml(friend.username)}
+                                    </a>
+                                </p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+    
+                html += '</div></div>';
+                friendsList.html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching friends list:', error);
+                $('#user-friends').html('<p>Error loading friends list.</p>');
+            }
         });
-    } else {
-        initBlurbEdit(user.blurb);
-    }
     }
 
-      // Add a function to periodically update the user's status
-      function startStatusUpdates() {
+    // Add a function to periodically update the user's status
+    function startStatusUpdates() {
         setInterval(() => {
             if (currentUser) {
                 fetchUserStatus(currentUser.username).then(isOnline => {
@@ -130,81 +191,79 @@ $(document).ready(function () {
 
     startStatusUpdates();
 
-function initFriendActions(user) {
-    $('#send-friend-request').on('click', function() {
-        sendFriendRequest(user._id);
-    });
+    function initFriendActions(user) {
+        $('#send-friend-request').on('click', function() {
+            sendFriendRequest(user._id);
+        });
 
-    $('#accept-friend-request').on('click', function() {
-        acceptFriendRequest(user._id);
-    });
+        $('#accept-friend-request').on('click', function() {
+            acceptFriendRequest(user._id);
+        });
 
-    $('#decline-friend-request').on('click', function() {
-        declineFriendRequest(user._id);
-    });
+        $('#decline-friend-request').on('click', function() {
+            declineFriendRequest(user._id);
+        });
 
-    $('#unfriend').on('click', function() {
-        unfriend(user._id);
-    });
-}
+        $('#unfriend').on('click', function() {
+            unfriend(user._id);
+        });
+    }
 
-function checkFriendshipStatus(username) {
-    const token = localStorage.getItem('token');
-    $.ajax({
-        url: `/api/friendship-status/${username}`,
-        method: 'GET',
-        headers: {
-            "Authorization": `Bearer ${token}`
-        },
-        success: function(response) {
-            fetchUserProfile(username);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error checking friendship status:', error);
-        }
-    });
-}
-
-function sendFriendRequest(userId) {
-    sendAjaxRequest('/api/send-friend-request/' + userId, 'POST', 'Friend request sent successfully');
-}
-
-function acceptFriendRequest(userId) {
-    sendAjaxRequest('/api/accept-friend-request/' + userId, 'POST', 'Friend request accepted');
-}
-
-function declineFriendRequest(userId) {
-    sendAjaxRequest('/api/decline-friend-request/' + userId, 'POST', 'Friend request declined');
-}
-
-function unfriend(userId) {
-    sendAjaxRequest('/api/unfriend/' + userId, 'POST', 'Unfriended successfully');
-}
-
-function sendAjaxRequest(url, method, successMessage) {
-    const token = localStorage.getItem('token');
-    $.ajax({
-        url: url,
-        method: method,
-        headers: {
-            "Authorization": `Bearer ${token}`
-        },
-        success: function(response) {
-            alert(successMessage);
-            checkFriendshipStatus(username);
-        },
-        error: function(xhr, status, error) {
-            if (xhr.responseJSON && xhr.responseJSON.error === 'You have already received a friend request from this user') {
-                alert('You have already received a friend request from this user. Please check your friend requests.');
-            } else {
-                alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+    function checkFriendshipStatus(username) {
+        const token = localStorage.getItem('token');
+        $.ajax({
+            url: `/api/friendship-status/${username}`,
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+                fetchUserProfile(username);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error checking friendship status:', error);
             }
-            checkFriendshipStatus(username);
+        });
+    }
 
-        }
-    });
-}
-    
+    function sendFriendRequest(userId) {
+        sendAjaxRequest('/api/send-friend-request/' + userId, 'POST', 'Friend request sent successfully');
+    }
+
+    function acceptFriendRequest(userId) {
+        sendAjaxRequest('/api/accept-friend-request/' + userId, 'POST', 'Friend request accepted');
+    }
+
+    function declineFriendRequest(userId) {
+        sendAjaxRequest('/api/decline-friend-request/' + userId, 'POST', 'Friend request declined');
+    }
+
+    function unfriend(userId) {
+        sendAjaxRequest('/api/unfriend/' + userId, 'POST', 'Unfriended successfully');
+    }
+
+    function sendAjaxRequest(url, method, successMessage) {
+        const token = localStorage.getItem('token');
+        $.ajax({
+            url: url,
+            method: method,
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+                alert(successMessage);
+                checkFriendshipStatus(username);
+            },
+            error: function(xhr, status, error) {
+                if (xhr.responseJSON && xhr.responseJSON.error === 'You have already received a friend request from this user') {
+                    alert('You have already received a friend request from this user. Please check your friend requests.');
+                } else {
+                    alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+                }
+                checkFriendshipStatus(username);
+            }
+        });
+    }
 
     function initBlurbEdit(currentBlurb) {
         $('#edit-blurb').on('click', function() {

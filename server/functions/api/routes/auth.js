@@ -365,7 +365,7 @@ router.get("/search", async (req, res) => {
     const query = { username: new RegExp(username, 'i') };
     const total = await User.countDocuments(query);
     const users = await User.find(query)
-      .select('username signupDate lastLoggedIn blurb isOnline lastActiveAt')
+      .select('username userId signupDate lastLoggedIn blurb isOnline lastActiveAt')
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -373,6 +373,7 @@ router.get("/search", async (req, res) => {
     res.json({
       users: users.map(user => ({
         username: user.username,
+        userId: user.userId,
         signupDate: user.signupDate,
         lastLoggedIn: user.lastLoggedIn,
         blurb: user.blurb,
@@ -395,7 +396,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
     const currentUser = await User.findById(req.user.userId);
-    const user = await User.findOne({ username }).select('username signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests');
+    const user = await User.findOne({ username }).select('username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests');
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
