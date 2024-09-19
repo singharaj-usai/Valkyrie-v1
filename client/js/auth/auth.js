@@ -82,7 +82,7 @@ const App = {
           "Authorization": `Bearer ${token}`,
         },
         success: () => {
-          if (["/login", "/register"].includes(currentPath)) {
+          if (["/login", "/register"	].includes(currentPath)) {
             window.location.href = "/";
           } else {
             $("#loading").hide();
@@ -96,13 +96,13 @@ const App = {
         },
         error: () => {
           this.logout();
-          if (currentPath !== "/login" && currentPath !== "/register") {
+          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/terms-of-service") {
             window.location.href = "/login";
           }
         },
       });
     } else {
-      if (currentPath !== "/login" && currentPath !== "/register") {
+      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/terms-of-service") {
         window.location.href = "/login";
       } else {
         $("#loading").hide();
