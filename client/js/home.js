@@ -43,7 +43,7 @@ $(document).ready(function () {
   
     function displayBlurb(blurb) {
       const blurbHtml = `
-        <p id="blurb-text">${blurb ? escapeHtml(blurb).replace(/\n/g, '<br>') : 'No blurb set.'}</p>
+        <p id="blurb-text">${blurb ? escapeHtml(blurb) : 'No blurb set.'}</p>
         <button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>
       `;
       $('#blurb-container').html(blurbHtml);

@@ -536,7 +536,7 @@ router.put("/user/blurb", async (req, res) => {
     if (typeof blurb !== 'string' || blurb.length > 500) {
       return res.status(400).json({ error: "Invalid blurb" });
     }
-    blurb = blurb.trim().replace(/\n+/g, '\n').replace(/^\n|\n$/g, '');
+    blurb = blurb.trim().replace(/\n+/g, '\n').replace(/^\n|\n$/g, '').split('\n').map(line => line.trim()).join('\n');
 
     const user = await User.findByIdAndUpdate(userId, { blurb: blurb }, { new: true });
     if (!user) {

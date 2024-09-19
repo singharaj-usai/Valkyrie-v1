@@ -84,7 +84,7 @@ $(document).ready(function () {
       } else {
         actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
       }
-      actionButton += `<button id="message-user" class="btn btn-info btn-sm">Message</button>`;
+      actionButton += `<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">Message</button>`;
     }
 
     const userInfoHtml = `
@@ -106,16 +106,19 @@ $(document).ready(function () {
                     )}" 
                          alt="${escapeHtml(user.username)}" 
                          class="img-circle user-avatar">
-                    <div id="action-button-container">${actionButton}</div>
-                    <div id="blurb-container" class="mt-3">
-                        <h4>About Me</h4>
-                       <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb).replace(/\n/g, '<br>') : "No blurb set."}</p>
-                        ${
-                          isOwnProfile
-                            ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>'
-                            : ""
-                        }
+                    <div id="blurb-container" style="margin-top: 10px;">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb).replace(/\n/g, '<br>') : "No blurb set."}</p>
+                            </div>
+                        </div>
+                         ${
+                                    isOwnProfile
+                                        ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>'
+                                        : ""
+                                }
                     </div>
+                    <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
                 </div>
             </div>
         `;
