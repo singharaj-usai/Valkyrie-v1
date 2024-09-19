@@ -84,7 +84,7 @@ $(document).ready(function () {
       } else {
         actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
       }
-      actionButton += `<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">Message</button>`;
+      actionButton += `<button id="message-user" class="btn btn-info btn-sm">Message</button>`;
     }
 
     const userInfoHtml = `
@@ -126,8 +126,8 @@ $(document).ready(function () {
     $("#user-info").html(userInfoHtml);
 
     // Fetch and display friends list
-    fetchFriendsList();
-
+    fetchFriendsList(user.username);
+    
     // Initialize actions
     if (!isOwnProfile) {
       initFriendActions(user);
@@ -141,61 +141,81 @@ $(document).ready(function () {
     }
   }
 
-  function fetchFriendsList() {
-    const token = localStorage.getItem("token");
+  function fetchFriendsList(username) {
     $.ajax({
-      url: "/api/friends",
+      url: `/api/friends/${username}`,
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       success: function (friends) {
         const friendsList = $("#user-friends");
         let html = `
-<div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Friends</h3>
-                        </div>
-                        <div class="panel-body">
-                `;
-
+  <div class="panel panel-primary">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">Friends</h3>
+                          </div>
+                          <div class="panel-body">
+                  `;
+  
         if (friends.length === 0) {
           html += "<p>No friends yet.</p>";
         } else {
           html += '<div class="row">';
           friends.forEach(function (friend) {
             html += `
-                            <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
-                                <a href="/user-profile?username=${encodeURIComponent(
-                                  friend.username
-                                )}" title="${escapeHtml(friend.username)}">
-                                    <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(
-                                      friend.username[0]
-                                    )}" 
-                                         alt="${escapeHtml(friend.username)}" 
-                                         class="img-circle" 
-                                         style="width: 100px; height: 100px;">
-                                </a>
-                                <p class="mt-2">
-                                    <a href="/user-profile?username=${encodeURIComponent(
-                                      friend.username
-                                    )}" title="${escapeHtml(friend.username)}">
-                                        ${escapeHtml(friend.username)}
-                                    </a>
-                                </p>
-                            </div>
-                        `;
+                              <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
+                                  <a href="/user-profile?username=${encodeURIComponent(
+                                    friend.username
+                                  )}" title="${escapeHtml(friend.username)}">
+                                      <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(
+                                        friend.username[0]
+                                      )}" 
+                                           alt="${escapeHtml(friend.username)}" 
+                                           class="img-circle" 
+                                           style="width: 100px; height: 100px;">
+                                  </a>
+                                  <p class="mt-2">
+                                      <a href="/user-profile?username=${encodeURIComponent(
+                                        friend.username
+                                      )}" title="${escapeHtml(friend.username)}">
+                                          <span class="friend-status" data-username="${encodeURIComponent(friend.username)}"></span>
+                                          ${escapeHtml(friend.username)}
+                                      </a>
+                                  </p>
+                              </div>
+                          `;
           });
           html += "</div>";
         }
-
+  
         html += "</div></div>";
         friendsList.html(html);
+        
+        // Update online status for each friend
+        friends.forEach(function (friend) {
+          updateFriendStatus(friend.username);
+        });
       },
       error: function (xhr, status, error) {
         console.error("Error fetching friends list:", error);
         $("#user-friends").html("<p>Error loading friends list.</p>");
       },
+    });
+  }
+
+  function updateFriendStatus(username) {
+    $.ajax({
+      url: `/api/user-status/${username}`,
+      method: "GET",
+      success: function (response) {
+        const statusElement = $(`.friend-status[data-username="${encodeURIComponent(username)}"]`);
+        if (response.isOnline) {
+          statusElement.html('<span class="text-success"><i class="bi bi-circle-fill"></i></span> ');
+        } else {
+          statusElement.html('<span class="text-danger"><i class="bi bi-circle-fill"></i></span> ');
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(`Error fetching status for ${username}:`, error);
+      }
     });
   }
 

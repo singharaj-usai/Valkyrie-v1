@@ -714,4 +714,19 @@ router.get('/friends', authenticateToken, async (req, res) => {
   }
 });
 
+// Get friends list for a specific user
+router.get('/friends/:username', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const friends = await User.find({ _id: { $in: user.friends } }, 'username');
+    res.json(friends);
+  } catch (error) {
+    console.error('Error fetching friends list:', error);
+    res.status(500).json({ error: 'Error fetching friends list' });
+  }
+});
+
 module.exports = router;
