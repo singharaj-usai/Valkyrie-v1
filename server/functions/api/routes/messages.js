@@ -75,6 +75,82 @@ router.get('/sent', authenticateToken, async (req, res) => {
     }
 });
 
+// Archive a message
+router.post('/:id/archive', authenticateToken, async (req, res) => {
+    const messageId = req.params.id;
+    try {
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        const user = await User.findOne({ username: req.user.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify that the requester is the recipient
+        if (message.recipient.toString() !== user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        message.isArchived = true;
+        message.archivedBy = user.username;
+        await message.save();
+
+        res.json({ message: 'Message archived successfully' });
+    } catch (error) {
+        console.error('Error archiving message:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Restore a message from archive
+router.post('/:id/restore', authenticateToken, async (req, res) => {
+    const messageId = req.params.id;
+    try {
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        const user = await User.findOne({ username: req.user.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify that the requester is the recipient
+        if (message.recipient.toString() !== user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        message.isArchived = false;
+        message.archivedBy = null;
+        await message.save();
+
+        res.json({ message: 'Message restored successfully' });
+    } catch (error) {
+        console.error('Error restoring message:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Get archived messages
+router.get('/archived', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.user.username });
+        const messages = await Message.find({ recipient: user._id, isArchived: true })
+            .populate('sender', 'username')
+            .populate('recipient', 'username')
+            .sort({ sentAt: -1 });
+
+        res.json(messages);
+    } catch (error) {
+        console.error('Error fetching archived messages:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Get a specific message by ID
 router.get('/:id', authenticateToken, async (req, res) => {
     const messageId = req.params.id;

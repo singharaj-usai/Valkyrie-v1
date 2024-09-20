@@ -30,7 +30,21 @@ $(document).ready(function () {
             return;
         }
 
-        const url = type === 'inbox' ? '/api/messages/received' : '/api/messages/sent';
+        let url;
+        switch (type) {
+            case 'inbox':
+                url = '/api/messages/received';
+                break;
+            case 'sent':
+                url = '/api/messages/sent';
+                break;
+            case 'archive':
+                url = '/api/messages/archived';
+                break;
+            default:
+                showAlert('danger', 'Invalid message type.');
+                return;
+        }
 
         $.ajax({
             url: url,
@@ -39,6 +53,9 @@ $(document).ready(function () {
                 "Authorization": `Bearer ${token}`
             },
             success: function(messages) {
+                if (type === 'inbox') {
+                    messages = messages.filter(message => !message.isArchived);
+                }
                 displayMessages(type, messages);
             },
             error: function(xhr) {
@@ -59,7 +76,7 @@ $(document).ready(function () {
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>${type === 'inbox' ? 'From' : 'To'}</th>
+                            <th>${type === 'sent' ? 'To' : 'From'}</th>
                             <th>Subject</th>
                             <th>Date</th>
                             <th>Action</th>
@@ -69,7 +86,7 @@ $(document).ready(function () {
             `;
 
             messages.forEach(function(message) {
-                const senderOrRecipient = type === 'inbox' ? message.sender.username : message.recipient.username;
+                const senderOrRecipient = type === 'sent' ? message.recipient.username : message.sender.username;
                 messagesHtml += `
                     <tr>
                         <td>
@@ -82,6 +99,8 @@ $(document).ready(function () {
                         <td>${new Date(message.sentAt).toLocaleString()}</td>
                         <td>
                             <button class="btn btn-primary btn-sm view-message" data-id="${message._id}">View</button>
+                            ${type === 'inbox' ? `<button class="btn btn-warning btn-sm archive-message" data-id="${message._id}">Archive</button>` : ''}
+                            ${type === 'archive' ? `<button class="btn btn-info btn-sm restore-message" data-id="${message._id}">Restore</button>` : ''}
                         </td>
                     </tr>
                 `;
@@ -97,13 +116,28 @@ $(document).ready(function () {
             $('#inbox-messages').html(messagesHtml);
         } else if (type === 'sent') {
             $('#sent-messages').html(messagesHtml);
-        }
+        }else if (type === 'archive') {
+        $('#archive-messages').html(messagesHtml);
+    }
 
         // Attach event listeners to 'View' buttons
         $('.view-message').off('click').on('click', function() {
             const messageId = $(this).data('id');
             viewMessage(messageId, type);
         });
+
+        // Archive button
+    $('.archive-message').off('click').on('click', function() {
+        const messageId = $(this).data('id');
+            archiveMessage(messageId);
+        });
+
+           // Restore messages
+    $('.restore-message').off('click').on('click', function() {
+        const messageId = $(this).data('id');
+        restoreMessage(messageId);
+    });
+
     }
 
     // Function to view a specific message in a modal
@@ -249,8 +283,64 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
         });
     }
 
+    // Archive message fn
+    function archiveMessage(messageId) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAlert('danger', 'You must be logged in to archive messages.');
+            return;
+        }
+    
+        $.ajax({
+            url: `/api/messages/${messageId}/archive`,
+            method: 'POST',
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+                showAlert('success', 'Message archived successfully.');
+                loadMessages('inbox');
+                loadMessages('archive');
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Failed to archive message.';
+                const errorDetails = xhr.responseJSON && xhr.responseJSON.details ? xhr.responseJSON.details : '';
+                console.error('Error archiving message:', errorMsg, errorDetails);
+                showAlert('danger', `${errorMsg} ${errorDetails}`);
+            }
+        });
+    }
+
+    // Restore message function
+function restoreMessage(messageId) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showAlert('danger', 'You must be logged in to restore messages.');
+        return;
+    }
+
+    $.ajax({
+        url: `/api/messages/${messageId}/restore`,
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        success: function(response) {
+            showAlert('success', 'Message restored successfully.');
+            loadMessages('inbox');
+            loadMessages('archive');
+        },
+        error: function(xhr) {
+            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Failed to restore message.';
+            const errorDetails = xhr.responseJSON && xhr.responseJSON.details ? xhr.responseJSON.details : '';
+            console.error('Error restoring message:', errorMsg, errorDetails);
+            showAlert('danger', `${errorMsg} ${errorDetails}`);
+        }
+    });
+}
+
     // Function to show alerts
-    function showAlert(type, message) {
+    function showAlert(type, message, duration=5000) { // duration is 5 seconds
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -259,8 +349,13 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                 ${message}
             </div>
         `;
-        $('#alert-container').html(alertHtml);
-    }
+        const $alertContainer = $('#alert-container');
+        $alertContainer.html(alertHtml);
+        
+        // Automatically close the alert after the specified duration
+        setTimeout(function() {
+            $alertContainer.find('.alert').alert('close');
+        }, duration);    }
 
     // Utility function to escape HTML to prevent XSS
     function escapeHtml(text) {
@@ -276,6 +371,7 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
     // Load messages on page load
     loadMessages('inbox');
     loadMessages('sent');
+    loadMessages('archive');
 
     // Reload messages when switching tabs
     $('#messageTabs a').on('shown.bs.tab', function (e) {
@@ -284,6 +380,8 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
             loadMessages('inbox');
         } else if (target === '#sent') {
             loadMessages('sent');
+        } else if (target === '#archive') {
+            loadMessages('archive');
         }
     });
 });

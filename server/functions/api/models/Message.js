@@ -24,6 +24,14 @@ const messageSchema = new mongoose.Schema({
     sentAt: {
         type: Date,
         default: Date.now
+    },
+    isArchived: {
+        type: Boolean,
+        default: false
+    },
+    archivedBy: {
+        type: String,
+        default: null
     }
 });
 
