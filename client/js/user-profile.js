@@ -140,81 +140,14 @@ $(document).ready(function () {
   }
 
   function fetchFriendsList(username) {
-    $.ajax({
-      url: `/api/friends/${username}`,
-      method: "GET",
-      success: function (friends) {
-        const friendsList = $("#user-friends");
-        let html = `
-  <div class="panel panel-primary">
-                          <div class="panel-heading">
-                              <h3 class="panel-title">Friends</h3>
-                          </div>
-                          <div class="panel-body">
-                  `;
-  
-        if (friends.length === 0) {
-          html += "<p>No friends yet.</p>";
-        } else {
-          html += '<div class="row">';
-          friends.forEach(function (friend) {
-            html += `
-                              <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
-                                  <a href="/user-profile?username=${encodeURIComponent(
-                                    friend.username
-                                  )}" title="${escapeHtml(friend.username)}">
-                                      <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png"
-                                           alt="${escapeHtml(friend.username)}" 
-                                           class="img-circle" 
-                                           style="width: 100px; height: 100px; background-color: #f5f5f5;">
-                                  </a>
-                                  <p class="mt-2">
-                                      <a href="/user-profile?username=${encodeURIComponent(
-                                        friend.username
-                                      )}" title="${escapeHtml(friend.username)}">
-                                          <span class="friend-status" data-username="${encodeURIComponent(friend.username)}"></span>
-                                          ${escapeHtml(friend.username)}
-                                      </a>
-                                  </p>
-                              </div>
-                          `;
-          });
-          html += "</div>";
-        }
-  
-        html += "</div></div>";
-        friendsList.html(html);
-        
-        // Update online status for each friend
-        friends.forEach(function (friend) {
-          updateFriendStatus(friend.username);
-        });
-      },
-      error: function (xhr, status, error) {
-        console.error("Error fetching friends list:", error);
-        $("#user-friends").html("<p>Error loading friends list.</p>");
-      },
-    });
+    Friends.fetchFriendsList(username, 'user-friends')
+      .catch(error => {
+        console.error('Error fetching friends list:', error);
+        $('#user-friends').html('<p>Error loading friends list.</p>');
+      });
   }
-
-  function updateFriendStatus(username) {
-    $.ajax({
-      url: `/api/user-status/${username}`,
-      method: "GET",
-      success: function (response) {
-        const statusElement = $(`.friend-status[data-username="${encodeURIComponent(username)}"]`);
-        if (response.isOnline) {
-          statusElement.html('<span class="text-success"><i class="bi bi-circle-fill"></i></span> ');
-        } else {
-          statusElement.html('<span class="text-danger"><i class="bi bi-circle-fill"></i></span> ');
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error(`Error fetching status for ${username}:`, error);
-      }
-    });
-  }
-
+  
+  
   // Add a function to periodically update the user's status
   function startStatusUpdates() {
     setInterval(() => {

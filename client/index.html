@@ -36,6 +36,10 @@
     <link rel="stylesheet" href="./css/particles.css">
     <link rel="icon" href="/images/AlphaBlox.ico" type="image/x-icon">
 
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
     <style>
         .profile-image {
             width: 100%;
@@ -82,12 +86,8 @@
                         </div>
                     </div>
                     <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Friends</h3>
-                        </div>
-                        <div class="panel-body">
-                            <div id="friends-list"></div>
-                        </div>
+                      
+                         <div id="friends-list"></div>
                     </div>
                 </div>
             </div>
@@ -98,7 +98,9 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="./js/auth/auth.js?v=VERSION_NUMBER"></script>
+    <script src="./js/particles-config.js"></script>
     <script src="./js/home.js"></script>
+    <script src="./js/components/friends.js"></script>
     <script>
         $(document).ready(function() {
             App.init();

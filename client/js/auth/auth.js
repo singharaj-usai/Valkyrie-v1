@@ -585,6 +585,8 @@ const App = {
     $.get("/footer.html", (data) => {
       $("body").append(data);
       this.updateUserCount();
+      setInterval(() => this.updateUserCount(), 60000); // Update every minute
+
     });
   },
 
@@ -593,12 +595,22 @@ const App = {
       url: "/api/user-count",
       method: "GET",
       success: (response) => {
-        $("#user-count").text(response.count);
+        const userCountElement = $("#user-count");
+        if (userCountElement.length) {
+          userCountElement.text(response.count);
+        } else {
+          console.warn("User count element not found in the DOM");
+        }
       },
       error: (xhr, status, error) => {
         console.error("Error fetching user count:", error);
-        $("#user-count").text("Error");
-      }
+        const userCountElement = $("#user-count");
+        if (userCountElement.length) {
+          userCountElement.text("Error");
+        } else {
+          console.warn("User count element not found in the DOM");
+        }
+            }
     });
   },
 

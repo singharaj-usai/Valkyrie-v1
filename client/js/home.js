@@ -98,47 +98,16 @@ $(document).ready(function () {
       }
 
       function fetchFriendsList() {
-        $.ajax({
-          url: '/api/friends',
-          method: 'GET',
-          headers: {
-            "Authorization": `Bearer ${token}`
-          },
-          success: function(friends) {
-            const friendsList = $('#friends-list');
-            if (friends.length === 0) {
-              friendsList.html('<p>You have no friends yet.</p>');
-            } else {
-              let html = '<div class="row">';
-              friends.slice(0, 10).forEach(function(friend) {
-                html += `
-                  <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3">
-                    <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
-                                      <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png"
-                           alt="${escapeHtml(friend.username)}" 
-                           class="img-circle" 
-                           style="width: 100px; height: 100px;  background-color: #f5f5f5;">
-                    </a>
-                    <p class="mt-2">
-                      <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
-                        ${escapeHtml(friend.username)}
-                      </a>
-                    </p>
-                  </div>
-                `;
-              });
-              html += '</div>';
-              if (friends.length > 10) {
-                html += '<p class="text-center mt-3">Showing 10 of ' + friends.length + ' friends</p>';
-              }
-              friendsList.html(html);
+        Friends.fetchFriendsList(username, 'friends-list', 10)
+          .then(friends => {
+            if (friends.length > 10) {
+              $('#friends-list').append('<p class="text-center mt-3">Showing 10 of ' + friends.length + ' friends</p>');
             }
-          },
-          error: function(xhr, status, error) {
+          })
+          .catch(error => {
             console.error('Error fetching friends list:', error);
             $('#friends-list').html('<p>Error loading friends list.</p>');
-          }
-        });
+          });
       }
 
     function escapeHtml(unsafe) {
