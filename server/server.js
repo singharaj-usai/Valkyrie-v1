@@ -160,6 +160,16 @@ app.get('/', (req, res) => {
 const adminRoutes = require('./functions/api/routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const gamesRouter = require('./functions/api/routes/games');
+app.use('/api/games', gamesRouter);
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+const uploadsDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const User = require('./functions/api/models/User');
 
 async function resetUserIdsIfNeeded() {

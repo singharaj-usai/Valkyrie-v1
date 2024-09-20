@@ -92,6 +92,10 @@ friendRequests: [{
 sentFriendRequests: [{
   type: mongoose.Schema.Types.ObjectId,
   ref: 'User'
+}],
+games: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Game'
 }]
 
 });
