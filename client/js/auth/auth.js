@@ -126,7 +126,7 @@ const App = {
           } else {
             $("#loading").hide();
             $("#content").show();
-            this.fetchData();
+          //  this.fetchData();
             this.updateAuthUI();
             this.updateUserStatus();
             // Set up periodic status update
@@ -180,7 +180,7 @@ const App = {
     }
   },
 
-  // Fetch data from the API
+ /*  // Fetch data from the API
   fetchData: function () {
     $.ajax({
       url: this.config.apiUrl + '?v=' + VERSION,
@@ -194,7 +194,7 @@ const App = {
   handleDataSuccess: function (data) {
     const html = this.generateHtml(data);
     this.renderHtml(html);
-  },
+  }, */
 
   // Render HTML to the DOM
   renderHtml: function (html) {

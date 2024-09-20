@@ -106,7 +106,7 @@ body {
         </div>
     </div>
 </nav>
-<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top hidden-xs" style="display: none;">
+<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top hidden-xs" style="top: 66px; display: none;">
     <div class="container">
         <ul class="nav navbar-nav">
             <li><a href="/"><i class="bi bi-house-door"></i> Home</a></li>
@@ -119,7 +119,7 @@ body {
     </div>
 </nav>
 
-<div id="site-wide-announcement" class="alert alert-warning text-center" style="margin-bottom: 0;">
+<!-- <div id="site-wide-announcement" class="alert alert-warning text-center" style="margin-bottom: 0;">
     <div class="container">
         <span>Welcome to Alphablox! Please know this is a work in progress and I have a lot of work to do. Consider this a beta version of the site.</span>
     </div>
@@ -127,20 +127,24 @@ body {
 
 <script>
     function updateAnnouncementPosition() {
-      var userSubmenu = document.getElementById('user-submenu');
-      var announcement = document.getElementById('site-wide-announcement');
-      var mainNavbar = document.querySelector('.navbar-fixed-top');
-      
-      if (userSubmenu && window.getComputedStyle(userSubmenu).display !== 'none') {
-        announcement.style.top = '128px';
-        mainNavbar.style.top = '0';
-        userSubmenu.style.top = '65px';
-      } else {
-        announcement.style.top = '64px';
-        mainNavbar.style.top = '0';
-      }
+        const userSubmenu = document.getElementById('user-submenu');
+        const announcement = document.getElementById('site-wide-announcement');
+        const mainNavbar = document.querySelector('.navbar-fixed-top');
+
+        // Get the heights of the navbars
+        const mainNavbarHeight = mainNavbar ? mainNavbar.offsetHeight : 0;
+        const userSubmenuHeight = (userSubmenu && window.getComputedStyle(userSubmenu).display !== 'none') ? userSubmenu.offsetHeight : 0;
+
+        // Calculate the total top offset
+        const totalTop = mainNavbarHeight + userSubmenuHeight;
+
+        // Apply the calculated top to the announcement
+        announcement.style.top = `${totalTop}px`;
+
+        // Adjust body padding
+        document.body.style.paddingTop = `${totalTop + announcement.offsetHeight}px`;
     }
-    
+
     window.addEventListener('resize', updateAnnouncementPosition);
     document.addEventListener('DOMContentLoaded', updateAnnouncementPosition);
-    </script>
+</script> -->
