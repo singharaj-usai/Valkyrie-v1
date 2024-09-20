@@ -19,7 +19,6 @@
     { "src": "/api/verify-secret-key", "dest": "/server/server.js" }
   ],
   "env": {
-    "MAINTENANCE_MODE": "true",
-    "ENCRYPTION_KEY": "@encryption_key"
-  }
+    "MAINTENANCE_MODE": "true"
+    }
 }
