@@ -72,7 +72,12 @@ $(document).ready(function () {
                 const senderOrRecipient = type === 'inbox' ? message.sender.username : message.recipient.username;
                 messagesHtml += `
                     <tr>
-                        <td>${escapeHtml(senderOrRecipient)}</td>
+                        <td>
+                            <a href="/user-profile?username=${encodeURIComponent(senderOrRecipient)}">
+                                <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
+                                ${escapeHtml(senderOrRecipient)}
+                            </a>
+                        </td>
                         <td>${escapeHtml(message.subject)}</td>
                         <td>${new Date(message.sentAt).toLocaleString()}</td>
                         <td>
@@ -142,8 +147,18 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                                     <h4 class="modal-title" id="messageModalLabel">Message Details</h4>
                                 </div>
                                 <div class="modal-body">
-                                    <p><strong>From:</strong> ${escapeHtml(message.sender.username)}</p>
-                                    <p><strong>To:</strong> ${escapeHtml(message.recipient.username)}</p>
+                                    <p>
+                                        <a href="/user-profile?username=${encodeURIComponent(message.sender.username)}">
+                                            <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
+                                            <strong>From:</strong> ${escapeHtml(message.sender.username)}
+                                        </a>
+                                    </p>
+                                    <p>
+                                        <a href="/user-profile?username=${encodeURIComponent(message.recipient.username)}">
+                                            <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
+                                            <strong>To:</strong> ${escapeHtml(message.recipient.username)}
+                                        </a>
+                                    </p>
                                     <p><strong>Subject:</strong> ${escapeHtml(message.subject)}</p>
                                     <p><strong>Date:</strong> ${new Date(message.sentAt).toLocaleString()}</p>
                                     <hr>

@@ -101,11 +101,9 @@ $(document).ready(function () {
                     )}">https://www.alphablox.net/user-profile?username=${encodeURIComponent(
       user.username
     )}</a></p>
-                    <img src="https://via.placeholder.com/200x200.png?text=${encodeURIComponent(
-                      user.username[0]
-                    )}" 
+                    <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
                          alt="${escapeHtml(user.username)}" 
-                         class="img-circle user-avatar">
+                         class="user-avatar">
                     <div id="blurb-container" style="margin-top: 10px;">
                         <div class="panel panel-default">
                             <div class="panel-body">
@@ -165,12 +163,10 @@ $(document).ready(function () {
                                   <a href="/user-profile?username=${encodeURIComponent(
                                     friend.username
                                   )}" title="${escapeHtml(friend.username)}">
-                                      <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(
-                                        friend.username[0]
-                                      )}" 
+                                      <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png"
                                            alt="${escapeHtml(friend.username)}" 
                                            class="img-circle" 
-                                           style="width: 100px; height: 100px;">
+                                           style="width: 100px; height: 100px; background-color: #f5f5f5;">
                                   </a>
                                   <p class="mt-2">
                                       <a href="/user-profile?username=${encodeURIComponent(

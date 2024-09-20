@@ -131,6 +131,7 @@ const App = {
             this.updateUserStatus();
             // Set up periodic status update
             setInterval(() => this.updateUserStatus(), 60000); // Update every minute
+            $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
           }
         },
         error: () => {
@@ -217,6 +218,9 @@ const App = {
   const authContainer = $("#auth-container");
 
   if (username && token) {
+    $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
+
+
     $.ajax({
       url: "/api/user-info",
       method: "GET",

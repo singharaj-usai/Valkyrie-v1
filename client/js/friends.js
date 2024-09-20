@@ -26,10 +26,10 @@ $(document).ready(function() {
                                         <div class="media">
                                             <div class="media-left">
                                                 <a href="/user-profile?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
-                                                    <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(request.username[0])}" 
+                                                        <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="50" height="50" 
                                                          alt="${escapeHtml(request.username)}" 
                                                          class="media-object img-circle" 
-                                                         style="width: 64px; height: 64px;">
+                                                         style="width: 64px; height: 64px; background-color: #f5f5f5;">
                                                 </a>
                                             </div>
                                             <div class="media-body">
@@ -88,10 +88,10 @@ $(document).ready(function() {
                                             <div class="media">
                                                 <div class="media-left">
                                                     <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
-                                                        <img src="https://via.placeholder.com/100x100.png?text=${encodeURIComponent(friend.username[0])}" 
+                                                        <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="50" height="50" 
                                                              alt="${escapeHtml(friend.username)}" 
                                                              class="media-object img-circle" 
-                                                             style="width: 64px; height: 64px;">
+                                                             style="width: 64px; height: 64px; background-color: #f5f5f5;">
                                                     </a>
                                                 </div>
                                                 <div class="media-body">
@@ -186,6 +186,9 @@ $(document).ready(function() {
         e.preventDefault();
         $(this).tab('show');
     });
+
+    // Make tabs full width (50/50)
+    $('#friendTabs').addClass('nav-justified');
 
     fetchFriendRequests();
     fetchFriendsList();
