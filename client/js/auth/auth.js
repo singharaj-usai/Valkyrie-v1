@@ -252,7 +252,6 @@ const App = {
     $('#user-submenu').hide();
   }
   if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
-  setTimeout(updateAnnouncementPosition, 100);
 },
 
   // Handle user logout
