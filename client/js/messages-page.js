@@ -68,23 +68,29 @@ $(document).ready(function () {
     // Function to display messages in the respective tab
     function displayMessages(type, messages) {
         let messagesHtml = '';
-
+    
         if (messages.length === 0) {
-            messagesHtml = '<p>No messages found.</p>';
+            messagesHtml = '<p class="text-center">No messages found.</p>';
         } else {
             messagesHtml = `
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>${type === 'sent' ? 'To' : 'From'}</th>
-                            <th>Subject</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">${type.charAt(0).toUpperCase() + type.slice(1)} Messages</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>${type === 'sent' ? 'To' : 'From'}</th>
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
             `;
-
+    
             messages.forEach(function(message) {
                 const senderOrRecipient = type === 'sent' ? message.recipient.username : message.sender.username;
                 messagesHtml += `
@@ -105,10 +111,13 @@ $(document).ready(function () {
                     </tr>
                 `;
             });
-
+    
             messagesHtml += `
-                    </tbody>
-                </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             `;
         }
 

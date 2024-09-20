@@ -26,9 +26,25 @@ $(document).ready(function () {
       return;
     }
   
-    let html = '<table class="table table-striped">';
-    html += '<thead><tr><th>Avatar</th><th>Username</th><th>Blurb</th><th>Last Logged In</th><th>Status</th></tr></thead>';
-  html += '<tbody>';
+    let html = `
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Search Results</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Username</th>
+                <th>Blurb</th>
+                <th>Last Logged In</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+  `;
 
   const fetchStatusPromises = users.map(user => fetchUserStatus(user.username));
 
@@ -46,7 +62,13 @@ $(document).ready(function () {
       </tr>`;
     });
   
-      html += '</tbody></table>';
+      html += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    `;
       $("#user-search-results").html(html);
     });
   }
@@ -69,11 +91,20 @@ $(document).ready(function () {
 
   function displayPagination(total, currentPage) {
     const totalPages = Math.ceil(total / usersPerPage);
-    let paginationHtml = '<nav><ul class="pagination">';
+    let paginationHtml =  `
+    <nav aria-label="Search results pages">
+      <ul class="pagination">
+  `;
 
-    for (let i = 1; i <= totalPages; i++) {
-      paginationHtml += `<li class="${i === currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`;
-    }
+  for (let i = 1; i <= totalPages; i++) {
+    paginationHtml += `
+      <li class="${i === currentPage ? 'active' : ''}">
+        <a href="#" data-page="${i}">${i}
+          ${i === currentPage ? '<span class="sr-only">(current)</span>' : ''}
+        </a>
+      </li>
+    `;
+  }
 
     paginationHtml += '</ul></nav>';
     $("#pagination").html(paginationHtml);

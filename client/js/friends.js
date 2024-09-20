@@ -13,16 +13,23 @@ $(document).ready(function() {
 
                 $('#requests-tab').text(`Friend Requests (${requests.length})`);
 
-                requestsList.empty();
-                if (requests.length === 0) {
-                    requestsList.append('<p>No friend requests.</p>');
-                } else {
-                    let html = '<div class="row">';
-                    requests.forEach(function(request) {
-                        html += `
-                            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-3">
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
+                let html = `
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Friend Requests</h3>
+                    </div>
+                    <div class="panel-body">
+            `;
+
+            if (requests.length === 0) {
+                html += '<p class="text-center">No friend requests.</p>';
+            } else {
+                html += '<div class="row">';
+                requests.forEach(function(request) {
+                    html += `
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
                                         <div class="media">
                                             <div class="media-left">
                                                 <a href="/user-profile?username=${encodeURIComponent(request.username)}" title="${escapeHtml(request.username)}">
@@ -72,19 +79,27 @@ $(document).ready(function() {
 
                 $('#friends-tab').text(`Friends (${friends.length})`);
 
-                if (friends.length === 0) {
-                    friendsList.html('<p>You have no friends yet.</p>');
-                } else {
-                    let html = '<div class="row">';
-                    const statusPromises = friends.map(friend => fetchUserStatus(friend.username));
-                    
-                    Promise.all(statusPromises).then(statuses => {
-                        friends.forEach((friend, index) => {
-                            const isOnline = statuses[index];
-                            html += `
-                                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-3">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body">
+                let html = `
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Friends List</h3>
+                    </div>
+                    <div class="panel-body">
+            `;
+
+            if (friends.length === 0) {
+                html += '<p class="text-center">You have no friends yet.</p>';
+            } else {
+                html += '<div class="row">';
+                const statusPromises = friends.map(friend => fetchUserStatus(friend.username));
+                
+                Promise.all(statusPromises).then(statuses => {
+                    friends.forEach((friend, index) => {
+                        const isOnline = statuses[index];
+                        html += `
+                            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
                                             <div class="media">
                                                 <div class="media-left">
                                                     <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${escapeHtml(friend.username)}">
