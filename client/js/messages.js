@@ -42,7 +42,7 @@ $(document).ready(function () {
                 showAlert('success', 'Message sent successfully.');
                 // Optionally redirect after a delay
                 setTimeout(() => {
-                    window.location.href = `/user-profile?username=${encodeURIComponent(recipientUsername)}`;
+                    window.location.href = `/my/messages`;
                 }, 2000);
             },
             error: function(xhr) {
