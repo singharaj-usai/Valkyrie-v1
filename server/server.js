@@ -19,17 +19,39 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 // Add this near the top of your server.js file
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
-console.log('MAINTENANCE_MODE:', MAINTENANCE_MODE); // Add this line for debugging
+console.log('MAINTENANCE_MODE:', MAINTENANCE_MODE);
+
+// Use cookie-parser middleware
+app.use(cookieParser());
+
+// Add body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 // Add this middleware before your routes
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); // Add this line for debugging
-  if (MAINTENANCE_MODE) {
+  if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
+    const bypassCookie = req.cookies.maintenanceBypass;
+    if (!bypassCookie || bypassCookie !== 'true') {
+
     console.log('Maintenance mode is active, serving maintenance page'); // Add this line for debugging
     return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
   }
+}
   next();
+});
+
+const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
+app.post('/api/verify-secret-key', (req, res) => {
+  const { secretKey } = req.body;
+  if (secretKey === SECRET_KEY) {
+    res.cookie('maintenanceBypass', 'true', { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }); // Set cookie for 24 hours
+    res.json({ success: true });
+  } else {
+    res.json({ success: false });
+  }
 });
 
 
@@ -59,10 +81,6 @@ app.use(async (req, res, next) => {
 
 const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
 app.use(updateUserStatus);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',

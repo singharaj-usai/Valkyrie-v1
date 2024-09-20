@@ -78,7 +78,7 @@
     <div class="maintenance-overlay">
         <div class="maintenance-content">
             <div class="maintenance-icon">🛠️</div>
-            <h1 class="mt-4">Site Maintenance</h1>
+            <h1 style="margin-top: 20px;">Site Maintenance</h1>
             <p class="lead">We're currently performing some maintenance. We'll be back soon!</p>
             <p>We apologize for any inconvenience. Please check back later.</p>
             <div class="mt-3">
@@ -90,7 +90,49 @@
                     <i class="bi bi-github" style="font-size: 1.5rem;" color: white;"></i> Contact Owner
                 </a>
             </div>
+            <form id="secret-key-form" style="display: none; margin-top: 15px;">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="password" id="secret-key" class="form-control" placeholder="Enter secret key">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+            <button id="toggle-secret-form" class="btn btn-link btn-sm" style="margin-top: 10px;">Enter secret key</button>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#toggle-secret-form').click(function() {
+            $('#secret-key-form').toggle();
+        });
+
+        $('#secret-key-form').submit(function(e) {
+            e.preventDefault();
+            var secretKey = $('#secret-key').val();
+            $.ajax({
+                url: '/api/verify-secret-key',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ secretKey: secretKey }),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('maintenanceBypass', 'true');
+                        window.location.href = '/';
+                    } else {
+                        alert('Invalid secret key');
+                    }
+                },
+                error: function() {
+                    alert('Error verifying secret key');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>
