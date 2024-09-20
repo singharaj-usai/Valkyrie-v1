@@ -275,7 +275,7 @@ const App = {
     $(document).on("submit", ".navbar-form", (e) => {
       e.preventDefault();
       const searchTerm = $("#search-input").val().trim();
-      window.location.href = `/search-results?q=${encodeURIComponent(searchTerm)}`;
+      window.location.href = `/users?q=${encodeURIComponent(searchTerm)}`;
     });
   },
 

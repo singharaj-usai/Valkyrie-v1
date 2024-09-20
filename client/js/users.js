@@ -13,7 +13,7 @@ $(document).ready(function () {
       },
       error: function (xhr, status, error) {
         console.error("Error searching users:", error);
-        $("#search-results").html(
+        $("#user-search-results").html(
           "<p>Error searching users. Please try again.</p>"
         );
       },
@@ -22,7 +22,7 @@ $(document).ready(function () {
 
   function displaySearchResults(users) {
     if (users.length === 0) {
-      $("#search-results").html("<p>No users found.</p>");
+      $("#user-search-results").html("<p>No users found.</p>");
       return;
     }
   
@@ -47,7 +47,7 @@ $(document).ready(function () {
     });
   
       html += '</tbody></table>';
-      $("#search-results").html(html);
+      $("#user-search-results").html(html);
     });
   }
   
@@ -106,7 +106,7 @@ $(document).ready(function () {
   });
 
   // Check if we're on the search results page and perform initial search
-  if (window.location.pathname === "/search-results") {
+  if (window.location.pathname === "/users") {
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("q") || "";
     $("#search-input").val(searchTerm);

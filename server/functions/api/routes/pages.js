@@ -18,8 +18,8 @@ router.get("/register", isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/register.html"));
 });
 
-router.get("/search-results", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../../../client/search-results.html"));
+router.get("/users", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../../../client/users.html"));
 });
 
 router.get("/user-profile", (req, res) => {
