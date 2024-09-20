@@ -88,17 +88,15 @@ $(document).ready(function () {
     }
 
     const userInfoHtml = `
-    <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">${escapeHtml(
-                      user.username
-                    )}'s Profile</h3>
-                </div>
-                <div class="panel-body text-center">
-                    <p>${onlineStatus}</p>
-                    <p><a href="https://www.alphablox.net/user-profile?username=${encodeURIComponent(
-                      user.username
-                    )}">https://www.alphablox.net/user-profile?username=${encodeURIComponent(
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title">${escapeHtml(user.username)}'s Profile</h3>
+        </div>
+        <div class="panel-body text-center">
+          <p>${onlineStatus}</p>
+          <p><a href="https://www.alphablox.net/user-profile?username=${encodeURIComponent(
+            user.username
+          )}">https://www.alphablox.net/user-profile?username=${encodeURIComponent(
       user.username
     )}</a></p>
                     <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
@@ -107,14 +105,21 @@ $(document).ready(function () {
                     <div id="blurb-container" style="margin-top: 10px;">
                         <div class="panel panel-default">
                             <div class="panel-body">
-                                <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb).replace(/\n/g, '<br>') : "No blurb set."}</p>
+                                <p id="blurb-text">${
+                                  user.blurb
+                                    ? escapeHtml(user.blurb).replace(
+                                        /\n/g,
+                                        "<br>"
+                                      )
+                                    : "No blurb set."
+                                }</p>
                             </div>
                         </div>
                          ${
-                                    isOwnProfile
-                                        ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>'
-                                        : ""
-                                }
+                           isOwnProfile
+                             ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>'
+                             : ""
+                         }
                     </div>
                     <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
                 </div>
@@ -123,9 +128,12 @@ $(document).ready(function () {
 
     $("#user-info").html(userInfoHtml);
 
+
     // Fetch and display friends list
     fetchFriendsList(user.username);
-    
+    // Call the new function to display the items panel
+    displayItemsPanel(user);
+
     // Initialize actions
     if (!isOwnProfile) {
       initFriendActions(user);
@@ -140,14 +148,12 @@ $(document).ready(function () {
   }
 
   function fetchFriendsList(username) {
-    Friends.fetchFriendsList(username, 'user-friends')
-      .catch(error => {
-        console.error('Error fetching friends list:', error);
-        $('#user-friends').html('<p>Error loading friends list.</p>');
-      });
+    Friends.fetchFriendsList(username, "user-friends").catch((error) => {
+      console.error("Error fetching friends list:", error);
+      $("#user-friends").html("<p>Error loading friends list.</p>");
+    });
   }
-  
-  
+
   // Add a function to periodically update the user's status
   function startStatusUpdates() {
     setInterval(() => {
@@ -296,7 +302,7 @@ $(document).ready(function () {
 
       $("#save-blurb").on("click", function () {
         let newBlurb = textarea.val().trim();
-        newBlurb = newBlurb.replace(/\n+/g, '\n').replace(/^\n|\n$/g, '');
+        newBlurb = newBlurb.replace(/\n+/g, "\n").replace(/^\n|\n$/g, "");
         const token = localStorage.getItem("token");
         $.ajax({
           url: "/api/user/blurb",
@@ -323,6 +329,114 @@ $(document).ready(function () {
         displayUserProfile(currentUser);
       });
     });
+  }
+
+  function displayItemsPanel(user) {
+    const itemsHtml = `
+      <div class="panel panel-primary" style="margin-top: 20px;">
+        <div class="panel-heading">
+          <h3 class="panel-title">${escapeHtml(user.username)}'s Inventory</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-2">
+              <ul class="nav nav-pills nav-stacked" role="tablist" style="text-align: center;">
+                <li role="presentation" class="active"><a href="#heads" aria-controls="heads" role="tab" data-toggle="tab">Heads</a></li>
+                <li role="presentation"><a href="#faces" aria-controls="faces" role="tab" data-toggle="tab">Faces</a></li>
+                <li role="presentation"><a href="#gears" aria-controls="gears" role="tab" data-toggle="tab">Gears</a></li>
+                <li role="presentation"><a href="#hats" aria-controls="hats" role="tab" data-toggle="tab">Hats</a></li>
+                <li role="presentation"><a href="#tshirts" aria-controls="tshirts" role="tab" data-toggle="tab">T-Shirts</a></li>
+                <li role="presentation"><a href="#shirts" aria-controls="shirts" role="tab" data-toggle="tab">Shirts</a></li>
+                <li role="presentation"><a href="#pants" aria-controls="pants" role="tab" data-toggle="tab">Pants</a></li>
+                <li role="presentation"><a href="#decals" aria-controls="decals" role="tab" data-toggle="tab">Decals</a></li>
+              </ul>
+            </div>
+            <div class="col-md-10">
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="heads">
+                  <div class="row">
+                    ${generateItemHtml("BlockHead", "https://static.wikia.nocookie.net/roblox/images/f/fe/BlockHead.png", "Roblox", "Free")}
+                    ${generateItemHtml("Roundy", "https://static.wikia.nocookie.net/roblox/images/7/71/Roundy1.png", "Roblox", "Free")}
+                    ${generateItemHtml("Trim", "https://static.wikia.nocookie.net/roblox/images/c/c9/Trim.png", "Roblox", "Free")}
+                    ${generateItemHtml("Diamond", "https://static.wikia.nocookie.net/roblox/images/e/ea/Diamond.png", "Roblox", "142")}
+                    ${generateItemHtml("Peabrain", "https://static.wikia.nocookie.net/roblox/images/1/15/PeabrainV2.png", "Roblox", "1,000")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="faces">
+                  <div class="row">
+                    ${generateItemHtml("Face 1", "placeholder-face.jpg", "Roblox", "100")}
+                    ${generateItemHtml("Face 2", "placeholder-face.jpg", "Roblox", "150")}
+                    ${generateItemHtml("Face 3", "placeholder-face.jpg", "Roblox", "200")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="gears">
+                  <div class="row">
+                    ${generateItemHtml("Gear 1", "placeholder-gear.jpg", "Roblox", "300")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="hats">
+                  <div class="row">
+                    ${generateItemHtml("Hat 1", "https://web.archive.org/web/20100430210534im_/http://t7bg.roblox.com/b86a5b790555d5219ea463bf38c74231", "Roblox", "100")}
+                    ${generateItemHtml("Hat 2", "placeholder-hat.jpg", "Roblox", "150")}
+                    ${generateItemHtml("Hat 3", "placeholder-hat.jpg", "Roblox", "200")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="tshirts">
+                  <div class="row">
+                    ${generateItemHtml("T-shirt 1", "placeholder-tshirt.jpg", "Roblox", "50")}
+                    ${generateItemHtml("T-shirt 2", "placeholder-tshirt.jpg", "Roblox", "75")}
+                  </div>
+                </div>
+                  <div role="tabpanel" class="tab-pane" id="shirts">
+                  <div class="row">
+                    ${generateItemHtml("Shirt 1", "placeholder-shirt.jpg", "Roblox", "80")}
+                    ${generateItemHtml("Shirt 2", "placeholder-shirt.jpg", "Roblox", "90")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="pants">
+                  <div class="row">
+                    ${generateItemHtml("Pants 1", "placeholder-pants.jpg", "Roblox", "80")}
+                    ${generateItemHtml("Pants 2", "placeholder-pants.jpg", "Roblox", "90")}
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="decals">
+                  <div class="row">
+                    ${generateItemHtml("Decal 1", "placeholder-decal.jpg", "Roblox", "25")}
+                    ${generateItemHtml("Decal 2", "placeholder-decal.jpg", "Roblox", "30")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  
+    $("#user-items-panel").html(itemsHtml);
+  
+    // Initialize Bootstrap tabs
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      // You can add logic here to load items dynamically if needed
+      console.log('Tab switched to: ' + $(e.target).attr('href'));
+    });
+  }
+  
+  function generateItemHtml(name, imageSrc, creator, price) {
+    const priceDisplay = price === "Free" ? "Free" : `$${price}`;
+    return `
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 text-center mb-3">
+        <div class="item-card center-block">
+          <div class="thumbnail" style="width: 100%; max-width: 150px; height: 150px; overflow: hidden; margin: 0 auto;">
+            <img src="${imageSrc}" alt="${name}" class="img-responsive center-block" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div class="caption">
+            <h4 class="text-center">${name}</h4>
+            <p class="text-center"><b>Creator:</b> ${creator}</p>
+            <p class="text-center"><b>Price:</b> ${priceDisplay}</p>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function escapeHtml(unsafe) {
