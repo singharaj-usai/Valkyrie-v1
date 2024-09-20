@@ -19,6 +19,6 @@
     { "src": "/api/verify-secret-key", "dest": "/server/server.js" }
   ],
   "env": {
-    "MAINTENANCE_MODE": "false"
+    "MAINTENANCE_MODE": "true"
   }
 }
