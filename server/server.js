@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const MongoStore = require('connect-mongo');
 const fs = require('fs');
+const crypto = require('crypto');
+
 
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
@@ -28,26 +30,53 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
+
+// encrypt secret key
+function encryptSecretKey(key) {
+  const iv = crypto.randomBytes(16);
+  const salt = crypto.randomBytes(16);
+  const derivedKey = crypto.pbkdf2Sync(process.env.ENCRYPTION_KEY, salt, 100000, 32, 'sha256');
+  const cipher = crypto.createCipheriv('aes-256-cbc', derivedKey, iv);
+  let encrypted = cipher.update(key, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return salt.toString('hex') + ':' + iv.toString('hex') + ':' + encrypted;
+}
+
+// decrypt secret key fn
+function decryptSecretKey(encryptedKey) {
+  const parts = encryptedKey.split(':');
+  const salt = Buffer.from(parts.shift(), 'hex');
+  const iv = Buffer.from(parts.shift(), 'hex');
+  const encrypted = Buffer.from(parts.join(':'), 'hex');
+  const derivedKey = crypto.pbkdf2Sync(process.env.ENCRYPTION_KEY, salt, 100000, 32, 'sha256');
+  const decipher = crypto.createDecipheriv('aes-256-cbc', derivedKey, iv);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
 
 // Add this middleware before your routes
 app.use((req, res, next) => {
-  console.log('Checking maintenance mode...'); // Add this line for debugging
+  console.log('Checking maintenance mode...'); 
   if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
     const bypassCookie = req.cookies.maintenanceBypass;
-    if (!bypassCookie || bypassCookie !== 'true') {
+    if (!bypassCookie || decryptSecretKey(bypassCookie) !== SECRET_KEY) {
 
-    console.log('Maintenance mode is active, serving maintenance page'); // Add this line for debugging
+    console.log('Maintenance mode is active, serving maintenance page');
     return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
   }
 }
   next();
 });
 
-const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
 app.post('/api/verify-secret-key', (req, res) => {
   const { secretKey } = req.body;
   if (secretKey === SECRET_KEY) {
-    res.cookie('maintenanceBypass', 'true', { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }); // Set cookie for 24 hours
+    const encryptedKey = encryptSecretKey(SECRET_KEY);
+    res.cookie('maintenanceBypass', encryptedKey, 
+      
+      { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: "strict" }); // Set cookie for 24 hours
     res.json({ success: true });
   } else {
     res.json({ success: false });
