@@ -24,7 +24,7 @@ $(document).ready(function () {
             success: function (response) {
                 showAlert('success', 'Game uploaded successfully!');
                 setTimeout(() => {
-                    window.location.href = `/games?id=${response.gameId}`;
+                    window.location.href = `/game?id=${response.gameId}`;
                 }, 2000);
             },
             error: function (xhr, status, error) {

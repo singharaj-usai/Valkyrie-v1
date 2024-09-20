@@ -23,8 +23,29 @@ const gameSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+      },
+      genre: {
+        type: String,
+        enum: ['Action', 'Adventure', 'Puzzle', 'RPG', 'Simulation', 'Strategy'],
+        required: true
+    },
+    maxPlayers: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 12
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
 });
+
 
 const Game = mongoose.model('Game', gameSchema);
 

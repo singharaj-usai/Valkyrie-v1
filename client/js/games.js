@@ -32,12 +32,13 @@ $(document).ready(function () {
             const gameElement = `
                 <div class="col-md-4 col-sm-6 mb-4">
                     <div class="thumbnail">
-                        <a href="/games?id=${game._id}">
+                        <a href="/game?id=${game._id}">
                             <img src="${game.thumbnailUrl}" alt="${game.title}" class="img-responsive">
                         </a>
                         <div class="caption">
-                            <h3><a href="/games?id=${game._id}">${game.title}</a></h3>
-                            <p>Created by: ${game.creator.username}</p>
+                            <h3><a href="/game?id=${game._id}">${game.title}</a></h3>
+                            <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
+                            
                         </div>
                     </div>
                 </div>
