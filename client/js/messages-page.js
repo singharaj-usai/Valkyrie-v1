@@ -373,7 +373,8 @@ function restoreMessage(messageId) {
     loadMessages('sent');
     loadMessages('archive');
 
-    // Reload messages when switching tabs
+    // Make message tabs nav-justified and reload messages when switching tabs
+    $('#messageTabs').addClass('nav-justified');
     $('#messageTabs a').on('shown.bs.tab', function (e) {
         const target = $(e.target).attr("href"); // activated tab
         if (target === '#inbox') {
