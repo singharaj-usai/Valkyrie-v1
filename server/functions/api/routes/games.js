@@ -46,8 +46,19 @@ const authenticateToken = (req, res, next) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-router.post('/upload', authenticateToken, upload.single('thumbnail'), (req, res) => {
+router.post('/upload', authenticateToken, (req, res, next) => {
+    const accessToken = req.headers['x-access-token'];
+    if (!accessToken) {
+      return res.status(403).json({ error: 'Access denied. No access token provided.' });
+    }
+    jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
+      if (err || decoded.accessKey !== process.env.UPLOAD_ACCESS_KEY) {
+        return res.status(403).json({ error: 'Access denied. Invalid access token.' });
+      }
+      next();
+    });
+  }, upload.single('thumbnail'), (req, res) => {
+    
     if (!req.file) {
       return res.status(400).json({ error: 'Thumbnail file is required' });
     }
@@ -89,7 +100,7 @@ router.post('/upload', authenticateToken, upload.single('thumbnail'), (req, res)
         res.status(500).json({ error: 'Error saving game', details: error.message });
       });
   });
-  
+
   // DELETE /api/games/:id
   router.delete('/:id', authenticateToken, async (req, res) => {
     try {

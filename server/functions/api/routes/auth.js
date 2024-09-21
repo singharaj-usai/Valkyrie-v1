@@ -730,4 +730,14 @@ router.get('/friends/:username', async (req, res) => {
   }
 });
 
+router.post('/verify-upload-access', (req, res) => {
+  const { accessKey } = req.body;
+  if (accessKey === process.env.UPLOAD_ACCESS_KEY) {
+    const token = jwt.sign({ accessKey }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ success: true, token });
+  } else {
+    res.json({ success: false });
+  }
+});
+
 module.exports = router;
