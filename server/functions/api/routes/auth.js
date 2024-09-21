@@ -366,6 +366,7 @@ router.get("/search", async (req, res) => {
     const total = await User.countDocuments(query);
     const users = await User.find(query)
       .select('username userId signupDate lastLoggedIn blurb isOnline lastActiveAt')
+      .sort({ isOnline: -1, username: 1 }) // Sort by isOnline (descending) and then by username ascending
       .skip(skip)
       .limit(parseInt(limit));
 
