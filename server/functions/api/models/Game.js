@@ -31,7 +31,7 @@ const gameSchema = new mongoose.Schema({
       },
       genre: {
         type: String,
-        enum: ['Action', 'Adventure', 'Puzzle', 'RPG', 'Simulation', 'Strategy'],
+        enum: ['Action', 'Adventure', 'Building', 'Comedy', 'Fighting', 'FPS', 'Horror', 'Puzzle', 'RPG', 'Medieval', 'Military', 'Naval', 'Roleplaying', 'Sci-Fi', 'Simulation', 'Sports', 'Strategy', 'Town and City', 'Western'],
         required: true
     },
     maxPlayers: {
