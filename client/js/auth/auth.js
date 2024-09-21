@@ -232,7 +232,7 @@ const App = {
                 Welcome, ${this.escapeHtml(username)} 
                 <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
               </span>
-              <button id="claim-currency" class="btn btn-sm btn-primary ml-2 navbar-btn">Claim Daily</button>
+              <button id="claim-currency" class="btn btn-sm btn-warning ml-2 navbar-btn">Claim Daily</button>
               <button id="logout" class="btn btn-sm btn-default ml-2 navbar-btn">Logout</button>
             `);
             this.initClaimCurrency();

@@ -4,6 +4,28 @@ $(document).ready(function () {
     App.updateAuthUI();
 
     let games = [];
+    let gameToDelete = null;
+
+    const deleteModalHtml = `
+    <div class="modal fade" id="deleteGameModal" tabindex="-1" role="dialog" aria-labelledby="deleteGameModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="deleteGameModalLabel">Confirm Deletion</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the game "<span id="delete-game-title"></span>"? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-game">Delete Game</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    $('body').append(deleteModalHtml);
+
 
     fetchUserGames();
 
@@ -43,15 +65,18 @@ $(document).ready(function () {
                         </h3>
                     </div>
                     <div class="panel-body">
-                        <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive">
+                        <div style="position: relative; width: 100%; padding-top: 56.25%;">
+                            <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                        </div>
                         <p class="mt-2">${escapeHtml(game.description)}</p>
                         <p><strong>Genre:</strong> ${escapeHtml(game.genre || 'Not specified')}</p>
                         <p><strong>Max Players:</strong> ${game.maxPlayers || 'Not specified'}</p>
                         ${lastUpdatedInfo}
                         <button class="btn btn-primary btn-sm edit-game" data-game-id="${game._id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete</button>
                     </div>
                 </div>
-            </div>
+              </div>
             `;
             placesContainer.append(gameElement);
         });
@@ -61,7 +86,26 @@ $(document).ready(function () {
             const gameId = $(this).data('game-id');
             openEditModal(gameId);
         });
+    
+        // Add event listeners for delete buttons
+        $('.delete-game').on('click', function() {
+            const gameId = $(this).data('game-id');
+            const game = games.find(g => g._id === gameId);
+            if (game) {
+                gameToDelete = game;
+                $('#delete-game-title').text(game.title);
+                $('#deleteGameModal').modal('show');
+            }
+        });
     }
+
+       // Add this new event listener for the confirm delete button in the modal
+       $('#confirm-delete-game').on('click', function() {
+        if (gameToDelete) {
+            deleteGame(gameToDelete._id);
+            $('#deleteGameModal').modal('hide');
+        }
+    });
 
     function openEditModal(gameId) {
         const game = games.find(g => g._id === gameId);
@@ -73,6 +117,40 @@ $(document).ready(function () {
             $('#edit-max-players').val(game.maxPlayers || '');
             $('#editGameModal').modal('show');
         }
+    }
+
+    
+    function deleteGame(gameId) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showError('User is not authenticated.');
+            return;
+        }
+
+        console.log(`Sending DELETE request for game ID: ${gameId}`);
+
+        $.ajax({
+            url: `/api/games/${gameId}`,
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            success: function (response) {
+                console.log('Game deleted successfully:', response);
+                fetchUserGames(); // Refresh the games list
+                showSuccess('Game deleted successfully');
+            },
+            error: function (xhr, status, error) {
+                console.error('Error deleting game:', xhr.responseText);
+                let errorMessage = 'Error deleting game: ';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage += xhr.responseJSON.error;
+                } else {
+                    errorMessage += 'Unknown error';
+                }
+                showError(errorMessage);
+            }
+        });
     }
 
     $('#save-game-changes').on('click', function() {
@@ -137,6 +215,13 @@ $(document).ready(function () {
     function showError(message) {
         console.error(message);
         $('#error-message').text(message).removeClass('hidden');
+    }
+
+    function showSuccess(message) {
+        $('#success-message').text(message).removeClass('hidden').addClass('alert alert-success');
+        setTimeout(() => {
+            $('#success-message').addClass('hidden').removeClass('alert alert-success');
+        }, 3000);
     }
 
     function escapeHtml(unsafe) {

@@ -90,6 +90,23 @@ router.post('/upload', authenticateToken, upload.single('thumbnail'), (req, res)
       });
   });
   
+  // DELETE /api/games/:id
+  router.delete('/:id', authenticateToken, async (req, res) => {
+    try {
+        const game = await Game.findById(req.params.id);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        if (game.creator.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'You are not authorized to delete this game' });
+        }
+        await Game.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Game deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+  
   router.get('/user', authenticateToken, async (req, res) => {
     try {
       const games = await Game.find({ creator: req.user.userId }).sort({ updatedAt: -1 });
