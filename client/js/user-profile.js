@@ -133,7 +133,9 @@ $(document).ready(function () {
     fetchFriendsList(user.username);
     // Call the new function to display the items panel
     displayItemsPanel(user);
-
+    // Call the new function to display the places panel
+    UserGames.displayPlacesPanel(user);
+    
     // Initialize actions
     if (!isOwnProfile) {
       initFriendActions(user);

@@ -155,4 +155,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/user/:username', authenticateToken, async (req, res) => {
+    try {
+      const username = req.params.username;
+      const user = await User.findOne({ username: username });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      const games = await Game.find({ creator: user._id }).sort({ createdAt: -1 });
+      res.json(games);
+    } catch (error) {
+      console.error('Error fetching user games:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
 module.exports = router;
