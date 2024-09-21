@@ -33,12 +33,13 @@ $(document).ready(function () {
                 <div class="col-md-4 col-sm-6 mb-4">
                     <div class="thumbnail">
                         <a href="/game?id=${game._id}">
-                            <img src="${game.thumbnailUrl}" alt="${game.title}" class="img-responsive">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <img src="${game.thumbnailUrl}" alt="${game.title}" class="embed-responsive-item">
+                            </div>
                         </a>
                         <div class="caption">
                             <h3><a href="/game?id=${game._id}">${game.title}</a></h3>
                             <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
-                            
                         </div>
                     </div>
                 </div>

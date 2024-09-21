@@ -43,7 +43,9 @@ $(document).ready(function () {
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <img id="game-thumbnail" src="${game.thumbnailUrl || ''}" alt="Game Thumbnail" class="img-responsive img-thumbnail">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <img id="game-thumbnail" src="${game.thumbnailUrl || ''}" alt="Game Thumbnail" class="embed-responsive-item">
+                            </div>
                             <div class="mt-3">
                                 <button id="play-game" class="btn btn-success btn-lg btn-block"><i class="bi bi-play-fill"></i> Play Game</button>
                             </div>

@@ -5,6 +5,10 @@ $(document).ready(function () {
         const formData = new FormData(this);
         const token = localStorage.getItem('token');
 
+    // Log form data
+ console.log('Form data:', Array.from(formData.entries()));
+
+
         // Validate file size
         const thumbnailFile = $('#thumbnail')[0].files[0];
         if (thumbnailFile && thumbnailFile.size > 20 * 1024 * 1024) {
@@ -41,6 +45,7 @@ $(document).ready(function () {
         });
     });
 
+ 
     function showAlert(type, message) {
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible" role="alert">
@@ -50,4 +55,6 @@ $(document).ready(function () {
         `;
         $('#alert-container').html(alertHtml);
     }
+
+    
 });
