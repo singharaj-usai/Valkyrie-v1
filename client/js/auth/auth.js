@@ -213,45 +213,98 @@ const App = {
 
   // Update authentication UI
   updateAuthUI: function () {
-  const username = localStorage.getItem("username");
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const authContainer = $("#auth-container");
+  
+    if (username && token) {
+      $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
+  
+      $.ajax({
+        url: "/api/user-info",
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+        success: (response) => {
+          authContainer.html(`
+            <span class="navbar-text">
+              Welcome, ${this.escapeHtml(username)} 
+              <i class="bi bi-coin" id="currency-icon"></i> 
+              <span id="currency-amount">${response.currency}</span>
+              <span id="currency-countdown" style="margin-left: 10px; font-size: 0.9em; color: #6c757d;"></span>
+            </span>
+            <button id="logout" class="btn btn-sm btn-danger ml-2 navbar-btn">Logout</button>
+          `);
+          this.updateCurrencyTooltip(response.lastCurrencyClaimDate);
+          this.initLogout();
+          $('#user-submenu').show();
+        },
+        error: (xhr, status, error) => {
+          console.error("Error fetching user info:", error);
+          this.logout();
+        }
+      });
+    } else {
+      authContainer.html(`
+        <a href="/login" class="btn btn-sm btn-primary ml-2 navbar-btn">Login</a>
+        <a href="/register" class="btn btn-sm btn-default ml-2 navbar-btn">Register</a>
+      `);
+      $('#user-submenu').hide();
+    }
+    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
+  },
+
+updateCurrencyTooltip: function (lastClaimDate) {
+  const countdownElement = $('#currency-countdown');
+
+  const updateCountdown = () => {
+    const now = new Date();
+    const lastClaim = new Date(lastClaimDate);
+    const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
+    let timeUntilNextClaim = nextClaimTime - now;
+
+    if (timeUntilNextClaim < 0) {
+      timeUntilNextClaim = 0;
+    }
+
+    const hours = Math.floor(timeUntilNextClaim / (60 * 60 * 1000));
+    const minutes = Math.floor((timeUntilNextClaim % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((timeUntilNextClaim % (60 * 1000)) / 1000);
+
+    const countdownText = timeUntilNextClaim > 0
+      ? `Next currency in ${hours}h ${minutes}m ${seconds}s`
+      : 'Currency available!';
+
+    countdownElement.text(countdownText);
+
+    // Automatically claim currency when countdown reaches zero
+    if (timeUntilNextClaim <= 0) {
+      this.claimCurrency();
+      clearInterval(this.currencyInterval);
+      countdownElement.text('Currency available!');
+    }
+  };
+
+  // Initial countdown update
+  updateCountdown();
+
+  // Update countdown every second
+  this.currencyInterval = setInterval(updateCountdown, 1000);
+},
+
+claimCurrency: function () {
   const token = localStorage.getItem("token");
-  const authContainer = $("#auth-container");
-
-  if (username && token) {
-    $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
-
-
-    $.ajax({
-      url: "/api/user-info",
-      method: "GET",
-      headers: { "Authorization": `Bearer ${token}` },
-          // Start of Selection
-          success: (response) => {
-            authContainer.html(`
-              <span class="navbar-text">
-                Welcome, ${this.escapeHtml(username)} 
-                <i class="bi bi-coin"></i> <span id="currency-amount">${response.currency}</span>
-              </span>
-              <button id="claim-currency" class="btn btn-sm btn-warning ml-2 navbar-btn">Claim Daily</button>
-              <button id="logout" class="btn btn-sm btn-default ml-2 navbar-btn">Logout</button>
-            `);
-            this.initClaimCurrency();
-            this.initLogout();
-            $('#user-submenu').show();
-          },
-      error: (xhr, status, error) => {
-        console.error("Error fetching user info:", error);
-        this.logout();
-      }
-    });
-  } else {
-    authContainer.html(`
-      <a href="/login" class="btn btn-sm btn-primary ml-2 navbar-btn">Login</a>
-      <a href="/register" class="btn btn-sm btn-default ml-2 navbar-btn">Register</a>
-    `);
-    $('#user-submenu').hide();
-  }
-  if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
+  $.ajax({
+    url: "/api/claim-daily-currency",
+    method: "POST",
+    headers: { "Authorization": `Bearer ${token}` },
+    success: (response) => {
+      $("#currency-amount").text(response.newBalance);
+      this.updateCurrencyTooltip(response.lastClaimDate);
+    },
+    error: (xhr) => {
+      console.error("Error claiming currency:", xhr.responseText);
+    },
+  });
 },
 
   // Handle user logout
@@ -265,6 +318,7 @@ const App = {
         localStorage.removeItem("username");
         localStorage.removeItem("token");
         clearInterval(this.statusUpdateInterval);
+        clearInterval(this.currencyInterval);
 
         window.location.href = "/login";
       },
@@ -557,22 +611,7 @@ const App = {
     $("#alert-container").empty();
   },
 
-  initClaimCurrency: function () {
-    $("#claim-currency").on("click", (e) => {
-      e.preventDefault();
-      $.ajax({
-        url: "/api/claim-daily-currency",
-        method: "POST",
-        success: (response) => {
-          $("#currency-amount").text(response.newBalance);
-          this.showAlert("success", "Daily currency claimed!");
-        },
-        error: (xhr) => {
-          this.showAlert("danger", xhr.responseText || "Error claiming currency.");
-        },
-      });
-    });
-  },
+  
 
   initLogout: function () {
     $(document).on("click", "#logout", (e) => {

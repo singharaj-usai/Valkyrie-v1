@@ -463,16 +463,16 @@ router.post("/claim-daily-currency", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const now = moment().tz("America/New_York");
-    const lastClaim = moment(user.lastCurrencyClaimDate).tz("America/New_York");
+    const now = moment().utc(); // Use UTC
+    const lastClaim = moment(user.lastCurrencyClaimDate).utc();
 
-    if (!user.lastCurrencyClaimDate || now.diff(lastClaim, 'days') >= 1) {
+    if (!user.lastCurrencyClaimDate || now.diff(lastClaim, 'hours') >= 24) {
       user.currency += 10;
-      user.lastCurrencyClaimDate = now.toDate();
+      user.lastCurrencyClaimDate = now.toISOString(); // Store in ISO format
       await user.save();
-      res.json({ success: true, newBalance: user.currency });
+      res.json({ success: true, newBalance: user.currency, lastClaimDate: user.lastCurrencyClaimDate });
     } else {
-      res.status(400).json({ error: "You can only claim currency once per day" });
+      res.status(400).json({ error: "Currency can only be claimed once per day" });
     }
   } catch (error) {
     console.error("Error claiming daily currency:", error);
@@ -506,7 +506,8 @@ router.get("/user-info", async (req, res) => {
 
     res.json({
       username: user.username,
-      currency: user.currency
+      currency: user.currency,
+      lastCurrencyClaimDate: user.lastCurrencyClaimDate
     });
   } catch (error) {
     console.error("Error fetching user info:", error);

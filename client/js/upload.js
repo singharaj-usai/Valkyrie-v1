@@ -24,7 +24,9 @@ $(document).ready(function () {
     });
 
     $('#access-key-modal').on('hide.bs.modal', function (e) {
-        window.location.href = '/';
+        if (!localStorage.getItem('uploadAccessKey')) {
+            window.location.href = '/';
+        }
     });
 
     function showAccessKeyModal() {
