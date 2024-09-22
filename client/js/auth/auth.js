@@ -107,6 +107,8 @@ const App = {
     });
   },
 
+
+
   // Check authentication status
   checkAuth: function () {
     const token = localStorage.getItem("token");
@@ -134,7 +136,12 @@ const App = {
             $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
           }
         },
-        error: () => {
+        error: (xhr, status, error) => {
+          if (status === "timeout") {
+            console.error("Request timed out. Please check your network connection.");
+          } else {
+            console.error("Error validating session:", xhr.responseText);
+          }
           this.logout();
           if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about") {
             window.location.href = "/login";
@@ -208,7 +215,38 @@ const App = {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/'/g, "&#039;")
+      .replace(/`/g, "&#96;")
+      .replace(/\//g, "&#47;")
+  },
+
+  rateLimitedRequest: function(url, method, data, successCallback, errorCallback) {
+    const now = Date.now();
+    const lastRequestTime = this.lastRequestTime || 0;
+    const minInterval = 1000; // Minimum 1 second between requests
+  
+    if (now - lastRequestTime < minInterval) {
+      console.warn("Rate limit exceeded. Please wait before making another request.");
+      return;
+    }
+  
+    this.lastRequestTime = now;
+  
+    $.ajax({
+      url: url,
+      method: method,
+      data: data,
+      timeout: 10000, // 10 seconds timeout
+      success: successCallback,
+      error: (xhr, status, error) => {
+        if (status === "timeout") {
+          console.error("Request timed out. Please check your network connection.");
+        } else {
+          console.error("Error:", error);
+        }
+        if (errorCallback) errorCallback(xhr, status, error);
+      }
+    });
   },
 
   // Update authentication UI
