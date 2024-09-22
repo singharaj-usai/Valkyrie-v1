@@ -63,6 +63,18 @@
     <div id="particles-js"></div>
     <div id="content" style="display: none">
         <div id="navbar-container"></div>
+
+            <!-- Ad Banners WIP -->
+            <div class="container-fluid ad-container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="ad-banner-top" class="text-center">
+                            <!-- Ad content will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
         <div class="container" style="margin-top: 70px">
             <div class="row content-container">
                 <div class="col-md-6">
@@ -111,10 +123,14 @@
     <script src="./js/auth/auth.js?v=VERSION_NUMBER"></script>
     <script src="./js/particles-config.js"></script>
     <script src="./js/home.js"></script>
+    <script src="./js/ads.js"></script>
+
     <script src="./js/components/friends.js"></script>
     <script>
         $(document).ready(function() {
             App.init();
+            Ads.loadTopBanner();
+
         });
     </script>
 </body>
