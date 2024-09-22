@@ -202,7 +202,7 @@ $(document).ready(function () {
                             <div class="card-body text-center p-3">
                                 <h4><i class="bi bi-discord"></i> Discord</h4>
                                 <p>Join our Discord server and talk to people in our community!</p>
-                                <a href="#" class="btn btn-primary mt-2">Join Discord</a>
+                                <a target="_blank" href="https://discord.gg/rpRz3mhuBz" class="btn btn-primary mt-2">Join Discord</a>
                             </div>
                         </div>
                     </div>
@@ -211,7 +211,7 @@ $(document).ready(function () {
                             <div class="card-body text-center p-3">
                                 <h4><i class="bi bi-youtube"></i> YouTube</h4>
                                 <p>Check out some of our videos, which detail some new and upcoming features.</p>
-                                <a href="#" class="btn btn-danger mt-2">Watch Videos</a>
+                                <a target="_blank" href="https://www.youtube.com/channel/UCBXD0DGmDfO_IqTgjOOKRYg" class="btn btn-danger mt-2">Watch Videos</a>
                             </div>
                         </div>
                     </div>
@@ -220,7 +220,7 @@ $(document).ready(function () {
                             <div class="card-body text-center p-3">
                                 <h4><i class="bi bi-twitter"></i> Twitter</h4>
                                 <p>We tweet whenever we post a video, and may even hint at some upcoming events on our Twitter.</p>
-                                <a href="#" class="btn btn-info mt-2">Follow Us</a>
+                                <a target="_blank" href="https://twitter.com/Omrbobbilly" class="btn btn-info mt-2">Follow Us</a>
                             </div>
                         </div>
                     </div>
