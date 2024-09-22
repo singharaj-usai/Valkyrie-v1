@@ -41,7 +41,7 @@ $(document).ready(function () {
                             </div>
                         </a>
                         <div class="caption">
-                            <h3><a href="/game?id=${game._id}">${game.title}</a></h3>
+                            <h4><a href="/game?id=${game._id}">${game.title}</a></h4>
                             <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
                         </div>
                     </div>

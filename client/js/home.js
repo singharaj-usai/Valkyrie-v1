@@ -161,9 +161,9 @@ $(document).ready(function () {
                             game.title
                           }" class="embed-responsive-item">
                                       <div class="caption">
-                                        <h3><a href="/game?id=${game._id}">${
+                                        <h4><a href="/game?id=${game._id}">${
                             game.title
-                          }</a></h3>
+                          }</a></h4>
                                         <p>Creator: <a href="/user-profile?username=${encodeURIComponent(
                                           game.creator.username
                                         )}">${game.creator.username}</a></p>
