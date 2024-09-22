@@ -32,7 +32,7 @@ $(document).ready(function () {
          
     
             const gameElement = `
-                <div class="col-md-4 col-sm-6 mb-4">
+                <div class="col-md-3 col-sm-6 mb-4">
                     <div class="thumbnail" style="position: relative;">
                         ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'}
                         <a href="/game?id=${game._id}">
@@ -43,7 +43,6 @@ $(document).ready(function () {
                         <div class="caption">
                             <h3><a href="/game?id=${game._id}">${game.title}</a></h3>
                             <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
-                       
                         </div>
                     </div>
                 </div>
