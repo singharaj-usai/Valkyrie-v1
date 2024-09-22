@@ -84,6 +84,10 @@ function displayPlaces(places, category) {
                 <div class="col-xs-12 col-sm-6">
                   <p><strong>Genre:</strong> ${escapeHtml(place.genre || 'Not specified')}</p>
                   <p><strong>Max Players:</strong> ${place.maxPlayers || 'Not specified'}</p>
+                  <p>
+                    <strong>Year:</strong>
+                    ${place.year ? `<span class="badge" style="background-color: #337ab7;">${place.year}</span>` : '<span class="badge" style="background-color: #d9534f;">No Year</span>'}
+                  </p>
                   <p><strong>Last Updated:</strong> ${new Date(place.updatedAt).toLocaleDateString()}</p>
                 </div>
               </div>

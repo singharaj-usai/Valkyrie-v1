@@ -44,6 +44,7 @@ $(document).ready(function () {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="embed-responsive embed-responsive-16by9">
+                                ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'}
                                 <img id="game-thumbnail" src="${game.thumbnailUrl || ''}" alt="Game Thumbnail" class="embed-responsive-item">
                             </div>
                             <div class="mt-3">

@@ -13,6 +13,7 @@ $(document).ready(function () {
           $('#profile-username').text(`Welcome, ${username}!`);
           fetchUserBlurb();
           fetchFriendsList();
+          fetchAndDisplayGames();
         },
         error: function() {
           localStorage.removeItem("username");
@@ -109,6 +110,56 @@ $(document).ready(function () {
             $('#friends-list').html('<p>Error loading friends list.</p>');
           });
       }
+
+      function fetchAndDisplayGames() {
+        $.ajax({
+            url: '/api/games',
+            method: 'GET',
+            success: function (games) {
+                displayGames(games);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching games:', error);
+                $('#games-container').html('<p>Error loading games.</p>');
+            }
+        });
+    }
+    
+    function displayGames(games) {
+        const gamesContainer = $('#games-container');
+        gamesContainer.empty();
+    
+        const gamesHtml = `
+          <div class="panel panel-primary">
+              <div class="panel-heading">
+                  <h3 class="panel-title">Featured Games</h3>
+              </div>
+              <div class="panel-body">
+                  <div class="row">
+                      ${games.slice(0, 4).map(game => `
+                          <div class="col-md-3 col-sm-6 mb-4">
+                              <div class="thumbnail" style="position: relative;">
+                              ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'}
+                                  <a href="/game?id=${game._id}">
+                                      <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive">
+                                      <div class="caption">
+                                          <h4>${escapeHtml(game.title)}</h4>
+                                          <p>By ${escapeHtml(game.creator.username)}</p>
+                                      </div>
+                                  </a>
+                              </div>
+                          </div>
+                      `).join('')}
+                  </div>
+                  <div class="text-center">
+                      <a href="/games" class="btn btn-primary">View All Games</a>
+                  </div>
+              </div>
+          </div>
+      `;
+    
+        gamesContainer.html(gamesHtml);
+    }
 
     function escapeHtml(unsafe) {
         return unsafe

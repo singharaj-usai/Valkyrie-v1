@@ -61,10 +61,10 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       return res.status(400).json({ error: 'Thumbnail file is required' });
     }
   
-    const { title, description, genre, maxPlayers } = req.body;
+    const { title, description, genre, maxPlayers, year } = req.body;
   
-    if (!title || !description || !genre || !maxPlayers) {
-      return res.status(400).json({ error: 'Title, description, genre, and max players are required' });
+    if (!title || !description || !genre || !maxPlayers || !year) {
+      return res.status(400).json({ error: 'Title, description, genre, max players, and year are required' });
     }
   
     // censor bad words
@@ -80,7 +80,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       thumbnailUrl,
       creator: req.user.userId,
       genre,
-      maxPlayers: parseInt(maxPlayers, 12)
+      maxPlayers: parseInt(maxPlayers, 10),
+      year: parseInt(year, 10)
     });
   
     game.save()
@@ -129,7 +130,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   router.put('/:id', authenticateToken, upload.single('thumbnail'), async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, description, genre, maxPlayers } = req.body;
+      const { title, description, genre, maxPlayers, year } = req.body;
   
       // Check if the game exists and belongs to the current user
       const game = await Game.findOne({ _id: id, creator: req.user.userId });
@@ -142,6 +143,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       game.description = filter.clean(description);
       game.genre = genre || game.genre;
       game.maxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : game.maxPlayers;
+      game.year = year ? parseInt(year, 10) : null;
       game.updatedAt = new Date(); // Explicitly set the updatedAt field
   
       // If a new thumbnail is uploaded, update it

@@ -76,28 +76,30 @@ $(document).ready(function () {
                     ? `<p><strong>Last Updated:</strong> ${new Date(game.updatedAt).toLocaleString()}</p>`
                     : '';
         
-                const gameElement = `
-                  <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">
-                                <a href="/game?id=${game._id}" style="color: white;">${escapeHtml(game.title)}</a>
-                            </h3>
-                        </div>
-                        <div class="panel-body">
-                            <div style="position: relative; width: 100%; padding-top: 56.25%;">
-                                <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-                            </div>
-                            <p class="mt-2">${escapeHtml(game.description)}</p>
-                            <p><strong>Genre:</strong> ${escapeHtml(game.genre || 'Not specified')}</p>
-                            <p><strong>Max Players:</strong> ${game.maxPlayers || 'Not specified'}</p>
-                            ${lastUpdatedInfo}
-                            <button class="btn btn-primary btn-sm edit-game" data-game-id="${game._id}">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete</button>
-                        </div>
+                    const gameElement = `
+                    <div class="col-md-4 col-sm-6 mb-4">
+                      <div class="panel panel-primary">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  <a href="/game?id=${game._id}" style="color: white;">${escapeHtml(game.title)}</a>
+                              </h3>
+                          </div>
+                          <div class="panel-body">
+                              <div style="position: relative; width: 100%; padding-top: 56.25%;">
+                                  ${console.log('Game year:', game.year)}
+                                  ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : ''}
+                                  <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                              </div>
+                              <p class="mt-2">${escapeHtml(game.description)}</p>
+                              <p><strong>Genre:</strong> ${escapeHtml(game.genre || 'Not specified')}</p>
+                              <p><strong>Max Players:</strong> ${game.maxPlayers || 'Not specified'}</p>
+                              ${lastUpdatedInfo}
+                              <button class="btn btn-primary btn-sm edit-game" data-game-id="${game._id}">Edit</button>
+                              <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete</button>
+                          </div>
+                      </div>
                     </div>
-                  </div>
-                `;
+                  `;
                 placesContainer.append(gameElement);
             });
         }
@@ -131,11 +133,13 @@ $(document).ready(function () {
     function openEditModal(gameId) {
         const game = games.find(g => g._id === gameId);
         if (game) {
+            console.log('Game being edited:', game);
             $('#edit-game-id').val(game._id);
             $('#edit-title').val(game.title);
             $('#edit-description').val(game.description);
             $(`input[name="edit-genre"][value="${game.genre}"]`).prop('checked', true);
             $('#edit-max-players').val(game.maxPlayers || '');
+            $('#edit-year').val(game.year || '');
             $('#editGameModal').modal('show');
         }
     }
@@ -180,6 +184,7 @@ $(document).ready(function () {
         const description = $('#edit-description').val();
         const genre = $('input[name="edit-genre"]:checked').val();
         const maxPlayers = $('#edit-max-players').val();
+        const year = $('#edit-year').val();
         const thumbnail = $('#edit-thumbnail')[0].files[0];
     
         if (!genre) {
@@ -197,6 +202,7 @@ $(document).ready(function () {
         formData.append('description', description);
         formData.append('genre', genre);
         formData.append('maxPlayers', maxPlayers);
+        formData.append('year', year);
         if (thumbnail) {
             formData.append('thumbnail', thumbnail);
         }
