@@ -44,45 +44,102 @@ $(document).ready(function () {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="embed-responsive embed-responsive-16by9">
-                                ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'}
                                 <img id="game-thumbnail" src="${game.thumbnailUrl || ''}" alt="Game Thumbnail" class="embed-responsive-item">
-                            </div>
-                            <div class="mt-3">
-                                <button id="play-game" class="btn btn-success btn-lg btn-block"><i class="bi bi-play-fill"></i> Play Game</button>
                             </div>
                         </div>
                         <div class="col-md-6">
-                           
-                            <h3>Game Details</h3>
-                            <ul class="list-group">
-                                <li class="list-group-item"><strong>Creator:</strong> <a href="/user-profile?username=${encodeURIComponent(game.creator?.username || '')}">${escapeHtml(game.creator?.username || '')}</a></li>
-                                <li class="list-group-item"><strong>Created:</strong> ${game.createdAt ? new Date(game.createdAt).toLocaleDateString() : 'N/A'}</li>
-                                <li class="list-group-item"><strong>Last Updated:</strong> ${game.updatedAt ? new Date(game.updatedAt).toLocaleDateString() : 'N/A'}</li>
-                                <li class="list-group-item"><strong>Genre:</strong> ${escapeHtml(game.genre || 'Not specified')}</li>
-                                <li class="list-group-item"><strong>Max Players:</strong> ${game.maxPlayers || 'Not specified'}</li>
-                            </ul>
-                            <hr>
-                            <h3>Description</h3>
-                            <p id="game-description" class="lead">${escapeHtml(game.description || '')}</p>
-                        </div>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h3>Comments</h3>
-                            <div id="comments-section">
-                                <!-- Comments will be dynamically loaded here -->
-                                <p class="text-muted">No comments yet. Be the first to comment!</p>
-                            </div>
-                            <form id="comment-form" class="mt-3">
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="3" placeholder="Leave a comment..."></textarea>
+                            <h2>${escapeHtml(game.title || '')}</h2>
+                            <p>by ${escapeHtml(game.creator?.username || '')}</p>
+                            <span class="label label-danger">${game.year || ''}</span>
+                            <button id="play-game" class="btn btn-success btn-lg btn-block mt-3">
+                                <i class="bi bi-play-fill"></i> Play
+                            </button>
+                            <div class="mt-3">
+                                <div class="row">
+                                    <div class="col-xs-6 text-center">
+                                        <i class="bi bi-hand-thumbs-up"></i>&nbsp;0
+                                    </div>
+                                    <div class="col-xs-6 text-center">
+                                        <i class="bi bi-hand-thumbs-down"></i>&nbsp;0
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit Comment</button>
-                            </form>
+                                <div class="progress" style="height: 5px; margin-top: 10px;">
+                                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: 50%"></div>
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" style="width: 50%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+    
+            <ul class="nav nav-tabs nav-justified">
+                <li class="active"><a href="#description" data-toggle="tab" class="btn btn-default btn-block">Description</a></li>
+                <li><a href="#servers" data-toggle="tab" class="btn btn-default btn-block">Servers</a></li>
+                <li><a href="#badges" data-toggle="tab" class="btn btn-default btn-block">Badges</a></li>
+            </ul>
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="description">
+                            <h3>Description</h3>
+                            <p>${escapeHtml(game.description || '')}</p>
+
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Created</th>
+                                        <th>Updated</th>
+                                        <th>Genre</th>
+                                        <th>Visits</th>
+                                        <th>Max Players</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>${game.createdAt ? new Date(game.createdAt).toLocaleDateString() : 'N/A'}</td>
+                                        <td>${game.updatedAt ? new Date(game.updatedAt).toLocaleDateString() : 'N/A'}</td>
+                                        <td>${escapeHtml(game.genre || 'N/A')}</td>
+                                        <td>0</td>
+                                        <td>${game.maxPlayers || 'N/A'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="servers">
+                            <h3>Servers</h3>
+                            <p>Server information will be displayed here.</p>
+                            <!-- Add server display logic here -->
+                        </div>
+                        <div class="tab-pane fade" id="badges">
+                            <h3>Badges</h3>
+                            <p>Badges information will be displayed here.</p>
+                            <!-- Add Badges display logic here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Comments</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="comments-section">
+                        <!-- Comments will be dynamically loaded here -->
+                        <p class="text-muted">No comments yet. Be the first to comment!</p>
+                    </div>
+                    <form id="comment-form" class="mt-3">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" placeholder="Leave a comment..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Comment</button>
+                    </form>
+                </div>
+            </div>
+
+               
+            
         `);
     
         $('#play-game').on('click', function () {
