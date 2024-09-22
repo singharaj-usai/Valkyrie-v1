@@ -14,6 +14,7 @@ $(document).ready(function () {
         fetchUserBlurb();
         fetchFriendsList();
         fetchAndDisplayGames();
+        displaySocialMediaLinks();
       },
       error: function () {
         localStorage.removeItem("username");
@@ -184,6 +185,71 @@ $(document).ready(function () {
 
     gamesContainer.html(gamesHtml);
   }
+
+  function displaySocialMediaLinks() {
+    const socialMediaContainer = $("#social-media-container");
+    socialMediaContainer.empty();
+
+    const socialMediaHtml = `
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Social MEdia Links</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center p-3">
+                                <h4><i class="bi bi-discord"></i> Discord</h4>
+                                <p>Join our Discord server and talk to people in our community!</p>
+                                <a href="#" class="btn btn-primary mt-2">Join Discord</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center p-3">
+                                <h4><i class="bi bi-youtube"></i> YouTube</h4>
+                                <p>Check out some of our videos, which detail some new and upcoming features.</p>
+                                <a href="#" class="btn btn-danger mt-2">Watch Videos</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center p-3">
+                                <h4><i class="bi bi-twitter"></i> Twitter</h4>
+                                <p>We tweet whenever we post a video, and may even hint at some upcoming events on our Twitter.</p>
+                                <a href="#" class="btn btn-info mt-2">Follow Us</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    socialMediaContainer.html(socialMediaHtml);
+
+    // Add custom CSS for hover effect and padding
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .card {
+                transition: all 0.3s ease;
+                height: 100%;
+                margin-bottom: 15px;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            .card-body {
+                padding: 20px;
+            }
+        `)
+        .appendTo("head");
+}
 
   function escapeHtml(unsafe) {
     return unsafe
