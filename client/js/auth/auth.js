@@ -136,13 +136,13 @@ const App = {
         },
         error: () => {
           this.logout();
-          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/terms-of-service") {
+          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about") {
             window.location.href = "/login";
           }
         },
       });
     } else {
-      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/terms-of-service") {
+      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about") {
         window.location.href = "/login";
       } else {
         $("#loading").hide();
