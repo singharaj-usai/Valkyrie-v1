@@ -51,12 +51,10 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     if (!accessToken) {
       return res.status(403).json({ error: 'Access denied. No access token provided.' });
     }
-    jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
-      if (err || decoded.accessKey !== process.env.UPLOAD_ACCESS_KEY) {
+    if (accessToken !== process.env.UPLOAD_ACCESS_KEY) {
         return res.status(403).json({ error: 'Access denied. Invalid access token.' });
-      }
-      next();
-    });
+    }
+    next();
   }, upload.single('thumbnail'), (req, res) => {
     
     if (!req.file) {

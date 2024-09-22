@@ -84,7 +84,7 @@ $(document).ready(function () {
                 processData: false,
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'X-Access-Key': accessKey
+                    'X-Access-Token': accessKey
                 },
                 success: function (response) {
                     showAlert('success', 'Game uploaded successfully!');
