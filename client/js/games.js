@@ -22,10 +22,6 @@ $(document).ready(function () {
         const gamesContainer = $('#games-container');
         gamesContainer.empty();
     
-        // Add a test badge
-        const testBadge = '<span class="badge" style="background-color: #337ab7; font-size: 16px; margin-bottom: 10px;">Test Year Badge</span>';
-        gamesContainer.append(testBadge);
-    
         const panel = $('<div class="panel panel-primary">').appendTo(gamesContainer);
         const panelHeading = $('<div class="panel-heading">').appendTo(panel);
         $('<h3 class="panel-title">').text('Available Games').appendTo(panelHeading);
@@ -33,9 +29,7 @@ $(document).ready(function () {
         const row = $('<div class="row">').appendTo(panelBody);
     
         games.forEach(game => {
-            console.log('Game object:', JSON.stringify(game, null, 2));
-            console.log('Game year:', game.year);
-            console.log('Game properties:', Object.keys(game)); // Log all game props
+         
     
             const gameElement = `
                 <div class="col-md-4 col-sm-6 mb-4">
@@ -49,16 +43,13 @@ $(document).ready(function () {
                         <div class="caption">
                             <h3><a href="/game?id=${game._id}">${game.title}</a></h3>
                             <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
-                            <p>Properties: ${Object.keys(game).join(', ')}</p>
+                       
                         </div>
                     </div>
                 </div>
             `;
             row.append(gameElement);
         });
-    
-        // Add another test badge at the bottom
-        gamesContainer.append(testBadge);
     }
 
     function showError(message) {
