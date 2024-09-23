@@ -19,6 +19,18 @@
         .forum-post-body {
             padding: 15px;
         }
+        .new-topic-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .new-topic-container .btn {
+            font-weight: bold;
+        }
+        #forum-sections {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -28,15 +40,18 @@
         <div class="row">
             <div class="col-md-3">
                 <h3>Forum Sections</h3>
+                <div class="new-topic-container mb-3">
+                    <a href="/forum/new/post" class="btn btn-primary btn-block">
+                        <i class="bi bi-plus-circle"></i> New Topic
+                    </a>
+                </div>
                 <div class="list-group" id="forum-sections">
                     <!-- Forum sections will be dynamically loaded here -->
                 </div>
             </div>
             <div class="col-md-9">
-                <h2>Forum</h2>
-                <a href="/forum/new/post" class="btn btn-primary mb-3">
-                    <i class="bi bi-plus-circle"></i> Create New Post
-                </a>
+                <h2>All Sections</h2>
+                <p id="section-summary"></p>
                 <div id="recent-posts">
                     <!-- Recent posts will be dynamically loaded here -->
                 </div>

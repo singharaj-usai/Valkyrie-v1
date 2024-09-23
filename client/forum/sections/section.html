@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="icon" href="/images/AlphaBlox.ico" type="image/x-icon">
+    <style>
+        .forum-post {
+            margin-bottom: 20px;
+        }
+        .forum-post-header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .forum-post-body {
+            padding: 15px;
+        }
+        .new-topic-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .new-topic-container .btn {
+            font-weight: bold;
+        }
+        #forum-sections {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <div id="navbar-container"></div>
@@ -15,15 +40,18 @@
         <div class="row">
             <div class="col-md-3">
                 <h3>Forum Sections</h3>
+                <div class="new-topic-container mb-3">
+                    <a href="/forum/new/post" class="btn btn-primary btn-block">
+                        <i class="bi bi-plus-circle"></i> New Topic
+                    </a>
+                </div>
                 <div class="list-group" id="forum-sections">
                     <!-- Forum sections will be dynamically loaded here -->
                 </div>
             </div>
             <div class="col-md-9">
                 <h2 id="section-title"></h2>
-                <a href="/forum/new/post" class="btn btn-primary mb-3">
-                    <i class="bi bi-plus-circle"></i> Create New Post
-                </a>
+                <p id="section-summary"></p>
                 <div id="section-posts"></div>
                 <nav aria-label="Page navigation">
                     <ul class="pagination" id="pagination"></ul>

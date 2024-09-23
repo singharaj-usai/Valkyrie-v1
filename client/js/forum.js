@@ -3,12 +3,12 @@ $(document).ready(function() {
     App.updateAuthUI();
 
     const forumSections = [
-        { id: 'all', name: 'All Posts' },
-        { id: 'announcements', name: 'Announcements' },
-        { id: 'general', name: 'General Discussion' },
-        { id: 'game-dev', name: 'Game Development' },
-        { id: 'support', name: 'Support' },
-        { id: 'off-topic', name: 'Off-Topic' }
+        { id: 'all', name: 'All Posts', summary: 'View all posts from all sections of the forum.' },
+        { id: 'announcements', name: 'Announcements', summary: 'Important updates and announcements from the AlphaBlox team.' },
+        { id: 'general', name: 'General Discussion', summary: 'Discuss any topic related to AlphaBlox.' },
+        { id: 'game-dev', name: 'Game Development', summary: 'Share your game development progress, ask questions, and get feedback.' },
+        { id: 'support', name: 'Support', summary: 'Get help with any issues youre experiencing with AlphaBlox.' },
+        { id: 'off-topic', name: 'Off-Topic', summary: 'Discuss anything not directly related to AlphaBlox.' }
     ];
 
     let currentPage = 1;
@@ -295,7 +295,10 @@ $(document).ready(function() {
         console.log('Initializing home page');
         loadForumSections('all');
         loadRecentPosts(1);
-    }    
+        
+        // Add this line to set the summary for the "All Sections" page
+        $('#section-summary').text(forumSections.find(section => section.id === 'all').summary);
+    }
 
     function initSectionPage() {
         const section = window.location.pathname.split('/').pop();
@@ -307,8 +310,9 @@ $(document).ready(function() {
 
     function loadSectionPosts(section, page = 1) {
         console.log('Loading posts for section:', section);
+        const apiUrl = section === 'all' ? '/api/forum/sections' : `/api/forum/sections/${section}`;
         $.ajax({
-            url: `/api/forum/sections/${section}`,
+            url: apiUrl,
             method: 'GET',
             data: { page: page, limit: postsPerPage },
             success: function(response) {
@@ -325,8 +329,9 @@ $(document).ready(function() {
     }
     
     function updateSectionTitle(section) {
-        const sectionName = forumSections.find(s => s.id === section)?.name || 'Unknown Section';
-        $('#section-title').text(sectionName);
+        const sectionInfo = forumSections.find(s => s.id === section) || { name: 'Unknown Section', summary: '' };
+        $('#section-title').text(sectionInfo.name);
+        $('#section-summary').text(sectionInfo.summary);
     }
     
     function displayPagination(totalPages, currentPage, section) {
@@ -370,21 +375,41 @@ $(document).ready(function() {
                 const sectionsList = $('#forum-sections');
                 sectionsList.empty();
                 const currentPath = window.location.pathname;
+                
+                sectionsList.append(`
+                    <a href="/forum/home" class="list-group-item ${currentPath === '/forum/home' ? 'active' : ''}">
+                        <i class="bi bi-grid-3x3-gap-fill"></i> All Sections
+                    </a>
+                `);
+                
                 sections.forEach(section => {
-                    const isActive = (section.id === activeSection) || 
-                                     (section.id === 'all' && currentPath === '/forum/home') ? 'active' : '';
-                    const href = section.id === 'all' ? '/forum/home' : `/forum/sections/${section.id}`;
-                    sectionsList.append(`
-                        <a href="${href}" class="list-group-item ${isActive}">
-                            ${section.name}
-                        </a>
-                    `);
+                    if (section.id !== 'all') {
+                        const isActive = (section.id === activeSection) || 
+                                         (currentPath === `/forum/sections/${section.id}`) ? 'active' : '';
+                        const iconClass = getSectionIconClass(section.id);
+                        sectionsList.append(`
+                            <a href="/forum/sections/${section.id}" class="list-group-item ${isActive}">
+                                <i class="${iconClass}"></i> ${section.name}
+                            </a>
+                        `);
+                    }
                 });
             },
             error: function(xhr, status, error) {
                 console.error('Error loading forum sections:', error);
             }
         });
+    }
+    
+    function getSectionIconClass(sectionId) {
+        const iconMap = {
+            'announcements': 'bi bi-megaphone-fill',
+            'general': 'bi bi-chat-dots-fill',
+            'game-dev': 'bi bi-controller',
+            'support': 'bi bi-question-circle-fill',
+            'off-topic': 'bi bi-chat-left-text-fill'
+        };
+        return iconMap[sectionId] || 'bi bi-circle-fill';
     }
 
 // Update the existing code to handle section pages
