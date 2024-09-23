@@ -114,9 +114,18 @@ $(document).ready(function() {
     }
 
     function initNewPostForm() {
+        // Add breadcrumbs
+        const breadcrumb = $('#post-breadcrumb');
+        breadcrumb.html(`
+            <li><a href="/forum/home">Forum Home</a></li>
+            <li class="active">Create New Post</li>
+        `);
+    
         const sectionSelect = $('#post-section');
         forumSections.forEach(section => {
-            sectionSelect.append(`<option value="${section.id}">${section.name}</option>`);
+            if (section.id !== 'all') {
+                sectionSelect.append(`<option value="${section.id}">${section.name}</option>`);
+            }
         });
     
         $('#new-post-form').submit(function(e) {
@@ -147,6 +156,17 @@ $(document).ready(function() {
                     }
                 }
             });
+        });
+    
+        // Update breadcrumb when section is selected
+        sectionSelect.on('change', function() {
+            const selectedSection = $(this).val();
+            const sectionName = getSectionName(selectedSection);
+            breadcrumb.html(`
+                <li><a href="/forum/home">Forum Home</a></li>
+                <li><a href="/forum/sections/${selectedSection}">${sectionName}</a></li>
+                <li class="active">Create New Post</li>
+            `);
         });
     }
 
@@ -228,6 +248,7 @@ $(document).ready(function() {
             method: 'GET',
             success: function(post) {
                 displayPostForReply(post);
+                updateBreadcrumbs(post);
             },
             error: function(xhr, status, error) {
                 console.error('Error loading post:', error);
@@ -239,15 +260,19 @@ $(document).ready(function() {
     function displayPostForReply(post) {
         const postContainer = $('#original-post');
         postContainer.html(`
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Replying to: ${escapeHtml(post.title)}</h3>
-                </div>
-                <div class="panel-body">
-                    <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
-                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()}</small>
-                </div>
-            </div>
+            <h4>${escapeHtml(post.title)}</h4>
+            <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
+            <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()}</small>
+        `);
+    }
+    
+    function updateBreadcrumbs(post) {
+        const breadcrumb = $('#reply-breadcrumb');
+        breadcrumb.html(`
+            <li><a href="/forum/home">Forum Home</a></li>
+            <li><a href="/forum/sections/${post.section}">${getSectionName(post.section)}</a></li>
+            <li><a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a></li>
+            <li class="active">Reply</li>
         `);
     }
     
