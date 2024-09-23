@@ -85,8 +85,8 @@ $(document).ready(function() {
                         <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
                     </div>
                     <div class="panel-footer">
-                        <span class="badge">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>
-                        <a href="/forum/post?id=${post._id}" class="btn btn-xs btn-primary pull-right">Read More</a>
+                        <a href="/forum/post?id=${post._id}" class="btn btn-xs btn-primary">Read More</a>
+                        <span class="badge pull-right">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>
                     </div>
                 </div>
             `);
