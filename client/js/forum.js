@@ -77,8 +77,9 @@ $(document).ready(function() {
                             <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
                         </h3>
                         <small>
-                            Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} 
+                            Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()} 
                             in ${getSectionName(post.section)}
+                            
                         </small>
                     </div>
                     <div class="panel-body forum-post-body">
@@ -245,7 +246,7 @@ $(document).ready(function() {
             <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">${escapeHtml(post.title)}</h3>
-                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${getSectionName(post.section)}</small>
+                                <small>Posted by  <a href="/user-profile?username=${comment.author.username}">${escapeHtml(comment.author.username)}</a> on ${new Date(comment.createdAt).toLocaleString()}</small>
                 </div>
                 <div class="panel-body">
                     <p>${escapeHtml(post.content)}</p>
@@ -304,8 +305,10 @@ $(document).ready(function() {
         postContainer.html(`
             <h4>${escapeHtml(post.title)}</h4>
             <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
-            <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()}</small>
-        `);
+            <small>Posted by  <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()}</small>
+                            <small>Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()} in ${getSectionName(post.section)}</small>
+
+            `);
     }
     
     function updateBreadcrumbs(post) {
@@ -413,7 +416,7 @@ $(document).ready(function() {
                     <div class="panel panel-primary" style="margin-left: ${level * 20}px; margin-bottom: 15px;">
                         <div class="panel-heading">
                             <h4 class="panel-title">
-                                <small>Posted by ${escapeHtml(comment.author.username)} on ${new Date(comment.createdAt).toLocaleString()}</small>
+                                <small>Posted by  <a href="/user-profile?username=${comment.author.username}">${escapeHtml(comment.author.username)}</a> on ${new Date(comment.createdAt).toLocaleString()}</small>
                             </h4>
                         </div>
                         <div class="panel-body">
