@@ -178,14 +178,66 @@ $(document).ready(function() {
                         <i class="bi bi-hand-thumbs-down"></i> Downvote
                         <span class="downvote-count">${post.downvotes ? post.downvotes.length : 0}</span>
                     </button>
+                    <a href="/forum/new/reply?id=${post._id}" class="btn btn-sm btn-primary">Reply to Post</a>
                 </div>
             </div>
+            <div id="comments-container"></div>
         `);
     
         // Add event listeners for voting buttons
         $('.vote-button').on('click', function() {
             const voteType = $(this).data('vote');
             voteOnPost(post._id, voteType);
+        });
+    
+        // Load comments
+        loadComments(post._id);
+    }
+
+    function initReplyPage() {
+        const postId = new URLSearchParams(window.location.search).get('id');
+        if (postId) {
+            loadPostForReply(postId);
+            setupReplyForm(postId);
+        } else {
+            $('#original-post').html('<p class="text-danger">Invalid post ID.</p>');
+        }
+    }
+    
+    function loadPostForReply(postId) {
+        $.ajax({
+            url: `/api/forum/posts/id/${postId}`,
+            method: 'GET',
+            success: function(post) {
+                displayPostForReply(post);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading post:', error);
+                $('#original-post').html('<p class="text-danger">Error loading post. Please try again later.</p>');
+            }
+        });
+    }
+    
+    function displayPostForReply(post) {
+        const postContainer = $('#original-post');
+        postContainer.html(`
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Replying to: ${escapeHtml(post.title)}</h3>
+                </div>
+                <div class="panel-body">
+                    <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
+                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()}</small>
+                </div>
+            </div>
+        `);
+    }
+    
+    function setupReplyForm(postId) {
+        $('#reply-form').on('submit', function(e) {
+            e.preventDefault();
+            const content = $('#reply-content').val();
+            submitComment(postId, content);
         });
     }
     
@@ -223,7 +275,20 @@ $(document).ready(function() {
             url: `/api/forum/posts/${postId}/comments`,
             method: 'GET',
             success: function(comments) {
-                displayComments(comments);
+                const commentsContainer = $('#comments-container');
+                commentsContainer.html(displayComments(comments, postId));
+                
+                // Add event listeners for reply buttons
+                $('.reply-button').on('click', function() {
+                    const commentId = $(this).data('comment-id');
+                    $(`#reply-form-${commentId}`).toggle();
+                });
+    
+                $('.submit-reply').on('click', function() {
+                    const commentId = $(this).data('comment-id');
+                    const content = $(this).siblings('textarea').val();
+                    submitComment(postId, content, commentId);
+                });
             },
             error: function(xhr, status, error) {
                 console.error('Error loading comments:', error);
@@ -252,7 +317,7 @@ $(document).ready(function() {
         displayCommentForm();
     }
     
-    function displayCommentForm() {
+    function displayCommentForm(postId) {
         const commentFormContainer = $('#comment-form-container');
         commentFormContainer.html(`
             <form id="comment-form">
@@ -267,29 +332,54 @@ $(document).ready(function() {
         $('#comment-form').on('submit', function(e) {
             e.preventDefault();
             const content = $('#comment-content').val();
-            const postId = new URLSearchParams(window.location.search).get('id');
             submitComment(postId, content);
         });
     }
     
-    function submitComment(postId, content) {
+    function submitComment(postId, content, parentCommentId = null) {
         $.ajax({
             url: `/api/forum/posts/${postId}/comments`,
             method: 'POST',
-            data: { content },
+            data: JSON.stringify({ content, parentCommentId }),
+            contentType: 'application/json',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
-                $('#comment-content').val('');
-                loadComments(postId);
+                alert('Reply submitted successfully!');
+                window.location.href = `/forum/post?id=${postId}`;
             },
             error: function(xhr, status, error) {
                 console.error('Error submitting comment:', error);
+                console.error('Server response:', xhr.responseText);
                 alert('Error submitting comment. Please try again later.');
             }
         });
     }
+
+    function displayComments(comments, postId, parentId = null, level = 0) {
+        let html = '';
+        comments.forEach(comment => {
+            if (comment.parentComment === parentId) {
+                html += `
+                    <div class="comment" style="margin-left: ${level * 20}px;">
+                        <p><strong>${escapeHtml(comment.author.username)}</strong> - ${new Date(comment.createdAt).toLocaleString()}</p>
+                        <p>${escapeHtml(comment.content)}</p>
+                        <button class="btn btn-sm btn-primary reply-button" data-comment-id="${comment._id}">Reply</button>
+                        <div class="reply-form" id="reply-form-${comment._id}" style="display: none;">
+                            <textarea class="form-control" rows="2"></textarea>
+                            <button class="btn btn-sm btn-success submit-reply" data-comment-id="${comment._id}">Submit Reply</button>
+                        </div>
+                        <div class="replies">
+                            ${displayComments(comments, postId, comment._id, level + 1)}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        return html;
+    }
+    
 
     function initHomePage() {
         console.log('Initializing home page');
@@ -413,22 +503,20 @@ $(document).ready(function() {
     }
 
 // Update the existing code to handle section pages
-if (window.location.pathname.startsWith('/forum/sections/')) {
-    console.log('Initializing section page');
+if (window.location.pathname === '/forum/home') {
+    initHomePage();
+} else if (window.location.pathname.startsWith('/forum/sections/')) {
     initSectionPage();
-} else if (window.location.pathname.startsWith('/forum/post')) {
-    console.log('Loading individual post');
+} else if (window.location.pathname === '/forum/new/post') {
+    initNewPostForm();
+} else if (window.location.pathname === '/forum/post') {
     const postId = new URLSearchParams(window.location.search).get('id');
     if (postId) {
         loadPost(postId);
     } else {
         $('#post-container').html('<p class="text-danger">Invalid post ID.</p>');
     }
-} else if (window.location.pathname === '/forum/home') {
-    console.log('Loading forum home');
-    initHomePage();
-} else if (window.location.pathname === '/forum/new/post') {
-    console.log('Initializing new post form');
-    initNewPostForm();
+} else if (window.location.pathname === '/forum/new/reply') {
+    initReplyPage();
 }
 });

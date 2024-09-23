@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ForumPost = require('../models/ForumPost');
+const Comment = require('../models/Comment');
 const { isAuthenticated } = require('../middleware/auth');
 
 router.get('/sections', (req, res) => {
@@ -209,13 +210,13 @@ router.get('/posts/:id/comments', async (req, res) => {
 });
 
 // Add a comment to a post
-router.post('/posts/:id/comments', isAuthenticated, async (req, res) => {
+router.post('/posts/:postId/comments', isAuthenticated, async (req, res) => {
     try {
-        const { id } = req.params;
-        const { content } = req.body;
+        const { postId } = req.params;
+        const { content, parentCommentId } = req.body;
         const userId = req.user._id;
 
-        const post = await ForumPost.findById(id);
+        const post = await ForumPost.findById(postId);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -223,20 +224,36 @@ router.post('/posts/:id/comments', isAuthenticated, async (req, res) => {
         const newComment = new Comment({
             content,
             author: userId,
-            post: id
+            post: postId,
+            parentComment: parentCommentId || null
         });
 
         await newComment.save();
+        await ForumPost.findByIdAndUpdate(postId, { $push: { comments: newComment._id } });
 
-        post.comments.push(newComment._id);
-        await post.save();
-
-        const populatedComment = await Comment.findById(newComment._id).populate('author', 'username');
-
-        res.status(201).json(populatedComment);
+        res.status(201).json(newComment);
     } catch (error) {
-        console.error('Error adding comment:', error);
-        res.status(500).json({ message: 'Error adding comment' });
+        console.error('Error creating comment:', error);
+        res.status(500).json({ message: 'Error creating comment' });
+    }
+});
+
+router.get('/posts/:postId/comments', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const comments = await Comment.find({ post: postId })
+            .populate('author', 'username')
+            .populate({
+                path: 'parentComment',
+                populate: { path: 'author', select: 'username' }
+            })
+            .sort({ createdAt: 1 });
+
+        res.json(comments);
+    } catch (error) {
+        console.error('Error creating comment:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: 'Error creating comment', error: error.message });
     }
 });
 

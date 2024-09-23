@@ -17,6 +17,11 @@ const commentSchema = new mongoose.Schema({
         ref: 'ForumPost',
         required: true
     },
+    parentComment: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -27,6 +32,4 @@ const commentSchema = new mongoose.Schema({
     }
 });
 
-const Comment = mongoose.model('Comment', commentSchema);
-
-module.exports = Comment;
+module.exports = mongoose.model('Comment', commentSchema);
