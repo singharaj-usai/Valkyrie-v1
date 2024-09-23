@@ -3,20 +3,26 @@ const router = express.Router();
 const ForumPost = require('../models/ForumPost');
 const { isAuthenticated } = require('../middleware/auth');
 
-// Get recent posts with pagination
-router.get('/posts', async (req, res) => {
+// Get posts for a specific section with pagination
+router.get('/posts/:section?', async (req, res) => {
     try {
+        const { section } = req.params;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const posts = await ForumPost.find()
+        let query = {};
+        if (section && section !== 'all') {
+            query.section = section;
+        }
+
+        const posts = await ForumPost.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .populate('author', 'username');
 
-        const totalPosts = await ForumPost.countDocuments();
+        const totalPosts = await ForumPost.countDocuments(query);
         const totalPages = Math.ceil(totalPosts / limit);
 
         res.json({
@@ -69,6 +75,19 @@ router.get('/posts/:id', async (req, res) => {
         responsePost.downvoteCount = post.downvotes.length;
 
         res.json(responsePost);
+    } catch (error) {
+        console.error('Error fetching forum post:', error);
+        res.status(500).json({ message: 'Error fetching forum post' });
+    }
+});
+
+router.get('/posts/id/:id', async (req, res) => {
+    try {
+        const post = await ForumPost.findById(req.params.id).populate('author', 'username');
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        res.json(post);
     } catch (error) {
         console.error('Error fetching forum post:', error);
         res.status(500).json({ message: 'Error fetching forum post' });

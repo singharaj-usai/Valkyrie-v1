@@ -40,32 +40,33 @@ $(document).ready(function() {
         });
     }
 
-    function displayPosts(posts) {
-        const postsContainer = $('#recent-posts');
+    function displayPosts(posts, containerId = '#recent-posts') {
+        const postsContainer = $(containerId);
         postsContainer.empty();
-
+    
         if (posts.length === 0) {
             postsContainer.html('<p>No posts found.</p>');
             return;
         }
-
+    
         posts.forEach(post => {
             postsContainer.append(`
                 <div class="panel panel-default forum-post">
                     <div class="panel-heading forum-post-header">
                         <h3 class="panel-title">
-                            <a href="/forum/post/${post._id}">${post.title}</a>
+                            <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
                         </h3>
-                        <small>Posted by ${post.author.username} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
+                        <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
                     </div>
                     <div class="panel-body forum-post-body">
-                        <p>${post.content.substring(0, 200)}${post.content.length > 200 ? '...' : ''}</p>
-                        <a href="/forum/post/${post._id}" class="btn btn-sm btn-primary">Read more</a>
+                        <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
+                        <a href="/forum/post?id=${post._id}" class="btn btn-sm btn-primary">Read more</a>
                     </div>
                 </div>
             `);
         });
     }
+    
 
     function displayPagination(totalPages, currentPage) {
         const pagination = $('#pagination');
@@ -139,7 +140,7 @@ $(document).ready(function() {
 
     function loadPost(postId) {
         $.ajax({
-            url: `/api/forum/posts/${postId}`,
+            url: `/api/forum/posts/id/${postId}`,
             method: 'GET',
             success: function(post) {
                 displayPost(post);
@@ -151,35 +152,50 @@ $(document).ready(function() {
             }
         });
     }
+
+    
     
     function displayPost(post) {
         const postContainer = $('#post-container');
+        postContainer.empty();
+    
         postContainer.html(`
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">${escapeHtml(post.title)}</h3>
+                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
                 </div>
                 <div class="panel-body">
                     <p>${escapeHtml(post.content)}</p>
-                    <hr>
-                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
-                    <div class="mt-3">
-                        <button class="btn btn-sm btn-success vote-button" data-vote="up" data-post-id="${post._id}">
-                            <i class="bi bi-hand-thumbs-up"></i> <span class="upvote-count">${post.upvotes}</span>
-                        </button>
-                        <button class="btn btn-sm btn-danger vote-button" data-vote="down" data-post-id="${post._id}">
-                            <i class="bi bi-hand-thumbs-down"></i> <span class="downvote-count">${post.downvotes}</span>
-                        </button>
-                    </div>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-sm btn-success vote-button" data-vote="up">
+                        <i class="bi bi-hand-thumbs-up"></i> Upvote
+                        <span class="upvote-count">${post.upvotes ? post.upvotes.length : 0}</span>
+                    </button>
+                    <button class="btn btn-sm btn-danger vote-button" data-vote="down">
+                        <i class="bi bi-hand-thumbs-down"></i> Downvote
+                        <span class="downvote-count">${post.downvotes ? post.downvotes.length : 0}</span>
+                    </button>
                 </div>
             </div>
         `);
     
+        // Add event listeners for voting buttons
         $('.vote-button').on('click', function() {
             const voteType = $(this).data('vote');
-            const postId = $(this).data('post-id');
-            votePost(postId, voteType);
+            voteOnPost(post._id, voteType);
         });
+    }
+    
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
     
     function votePost(postId, voteType) {
@@ -273,21 +289,81 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // Update the existing code to handle individual post pages
-    if (window.location.pathname.startsWith('/forum/post')) {
-        const postId = new URLSearchParams(window.location.search).get('id');
-        if (postId) {
-            loadPost(postId);
-        } else {
-            $('#post-container').html('<p class="text-danger">Invalid post ID.</p>');
-        }
+
+    function initSectionPage() {
+        const section = window.location.pathname.split('/').pop();
+        loadSectionPosts(section);
     }
 
-    if (window.location.pathname === '/forum/home') {
-        loadForumSections();
-        loadRecentPosts();
-    } else if (window.location.pathname === '/forum/new/post') {
-        initNewPostForm();
+    function loadSectionPosts(section, page = 1) {
+        $.ajax({
+            url: `/api/forum/posts/${section}`,
+            method: 'GET',
+            data: { page: page, limit: postsPerPage },
+            success: function(response) {
+                displayPosts(response.posts, '#section-posts');
+                displayPagination(response.totalPages, page, section);
+                updateSectionTitle(section);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading posts:', error);
+                $('#section-posts').html('<p class="text-danger">Error loading posts. Please try again later.</p>');
+            }
+        });
     }
+    
+    function updateSectionTitle(section) {
+        const sectionName = forumSections.find(s => s.id === section)?.name || 'Unknown Section';
+        $('#section-title').text(sectionName);
+    }
+    
+    function displayPagination(totalPages, currentPage, section) {
+        const pagination = $('#pagination');
+        pagination.empty();
+    
+        if (totalPages <= 1) return;
+    
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+    
+        if (currentPage > 1) {
+            pagination.append(`<li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>`);
+        }
+    
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.append(`<li class="${i === currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`);
+        }
+    
+        if (currentPage < totalPages) {
+            pagination.append(`<li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>`);
+        }
+    
+        pagination.on('click', 'a', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadSectionPosts(section, page);
+        });
+    }
+    
+// Update the existing code to handle section pages
+if (window.location.pathname.startsWith('/forum/section/')) {
+    initSectionPage();
+} else if (window.location.pathname.startsWith('/forum/post')) {
+    const postId = new URLSearchParams(window.location.search).get('id');
+    if (postId) {
+        loadPost(postId);
+    } else {
+        $('#post-container').html('<p class="text-danger">Invalid post ID.</p>');
+    }
+} else if (window.location.pathname === '/forum/home') {
+    loadForumSections();
+    loadRecentPosts();
+} else if (window.location.pathname === '/forum/new/post') {
+    initNewPostForm();
+}
 });
