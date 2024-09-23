@@ -99,7 +99,7 @@ $(document).ready(function () {
   for (let i = 1; i <= totalPages; i++) {
     paginationHtml += `
       <li class="${i === currentPage ? 'active' : ''}">
-        <a href="#" data-page="${i}">${i}
+        <a href="?page=${i}" data-page="${i}">${i}
           ${i === currentPage ? '<span class="sr-only">(current)</span>' : ''}
         </a>
       </li>
@@ -108,7 +108,7 @@ $(document).ready(function () {
 
     paginationHtml += '</ul></nav>';
     $("#pagination").html(paginationHtml);
-  }
+}
 
   function escapeHtml(unsafe) {
     return unsafe
@@ -140,9 +140,10 @@ $(document).ready(function () {
   if (window.location.pathname === "/users") {
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("q") || "";
+    const page = parseInt(urlParams.get('page')) || 1;
     $("#search-input").val(searchTerm);
     if (searchTerm) {
-      performSearch(searchTerm, currentPage);
+        performSearch(searchTerm, page);
     }
   }
 });

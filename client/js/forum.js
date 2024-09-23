@@ -55,7 +55,7 @@ $(document).ready(function() {
             data: { page: page, limit: postsPerPage },
             success: function(response) {
                 displayPosts(response.posts);
-                displayPagination(response.totalPages, page, 'home');
+                displayPagination(response.total, page, 'home');
             },
             error: function(xhr, status, error) {
                 console.error('Error loading posts:', error);
@@ -97,37 +97,31 @@ $(document).ready(function() {
     }
     
 
-    function displayPagination(totalPages, currentPage) {
+    function displayPagination(totalPages, currentPage, section) {
         const pagination = $('#pagination');
         pagination.empty();
-
+    
         if (totalPages <= 1) return;
-
+    
         const maxVisiblePages = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         if (currentPage > 1) {
-            pagination.append(`<li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>`);
+            pagination.append(`<li><a href="?page=${currentPage - 1}">&laquo;</a></li>`);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
-            pagination.append(`<li class="${i === currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`);
+            pagination.append(`<li class="${i === currentPage ? 'active' : ''}"><a href="?page=${i}">${i}</a></li>`);
         }
-
+    
         if (currentPage < totalPages) {
-            pagination.append(`<li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>`);
+            pagination.append(`<li><a href="?page=${currentPage + 1}">&raquo;</a></li>`);
         }
-
-        pagination.on('click', 'a', function(e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            loadRecentPosts(page);
-        });
     }
 
     function initNewPostForm() {
@@ -232,9 +226,6 @@ $(document).ready(function() {
     
     function displayPost(post) {
         const postContainer = $('#post-container');
-        postContainer.empty();
-    
-        // Add breadcrumbs
         const breadcrumb = $('#post-breadcrumb');
         breadcrumb.html(`
             <li><a href="/forum/home">Forum Home</a></li>
@@ -249,7 +240,7 @@ $(document).ready(function() {
                     <small>Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()}</small>
                 </div>
                 <div class="panel-body">
-                    <p>${escapeHtml(post.content)}</p>
+                    <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-sm btn-success vote-button" data-vote="up">
@@ -273,6 +264,10 @@ $(document).ready(function() {
     
         // Load comments
         loadComments(post._id);
+    }
+    
+    function formatContent(content) {
+        return escapeHtml(content).replace(/\n/g, '<br>');
     }
 
     function initReplyPage() {
@@ -416,16 +411,16 @@ $(document).ready(function() {
                     <div class="panel panel-primary" style="margin-left: ${level * 20}px; margin-bottom: 15px;">
                         <div class="panel-heading">
                             <h4 class="panel-title">
-                                <small>Posted by  <a href="/user-profile?username=${comment.author.username}">${escapeHtml(comment.author.username)}</a> on ${new Date(comment.createdAt).toLocaleString()}</small>
+                                <small>Posted by <a href="/user-profile?username=${comment.author.username}">${escapeHtml(comment.author.username)}</a> on ${new Date(comment.createdAt).toLocaleString()}</small>
                             </h4>
                         </div>
                         <div class="panel-body">
-                            <p>${escapeHtml(comment.content)}</p>
+                            <p style="white-space: pre-wrap;">${formatContent(comment.content)}</p>
                         </div>
                         <div class="panel-footer">
                             <button class="btn btn-xs btn-primary reply-button" data-comment-id="${comment._id}">Reply</button>
                             <div class="reply-form" id="reply-form-${comment._id}" style="display: none; margin-top: 10px;">
-                                <textarea class="form-control" rows="3"></textarea>
+                                <textarea class="form-control" rows="3" style="white-space: pre-wrap;"></textarea>
                                 <button class="btn btn-xs btn-success submit-reply" data-comment-id="${comment._id}" style="margin-top: 5px;">Submit Reply</button>
                             </div>
                         </div>
@@ -441,7 +436,9 @@ $(document).ready(function() {
     function initHomePage() {
         console.log('Initializing home page');
         loadForumSections('all');
-        loadRecentPosts(1);
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = parseInt(urlParams.get('page')) || 1;
+        loadRecentPosts(page);
         
         // Add this line to set the summary for the "All Sections" page
         $('#section-summary').text(forumSections.find(section => section.id === 'all').summary);
@@ -452,7 +449,9 @@ $(document).ready(function() {
         console.log('Initializing section page for:', section);
         updateSectionTitle(section);
         loadForumSections(section);
-        loadSectionPosts(section);
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = parseInt(urlParams.get('page')) || 1;
+        loadSectionPosts(section, page);
     }
 
     function loadSectionPosts(section, page = 1) {
@@ -481,38 +480,7 @@ $(document).ready(function() {
         $('#section-summary').text(sectionInfo.summary);
     }
     
-    function displayPagination(totalPages, currentPage, section) {
-        const pagination = $('#pagination');
-        pagination.empty();
-    
-        if (totalPages <= 1) return;
-    
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-    
-        if (currentPage > 1) {
-            pagination.append(`<li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>`);
-        }
-    
-        for (let i = startPage; i <= endPage; i++) {
-            pagination.append(`<li class="${i === currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`);
-        }
-    
-        if (currentPage < totalPages) {
-            pagination.append(`<li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>`);
-        }
-    
-        pagination.on('click', 'a', function(e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            loadSectionPosts(section, page);
-        });
-    }
+   
     
     function loadForumSections(activeSection = null) {
         $.ajax({
