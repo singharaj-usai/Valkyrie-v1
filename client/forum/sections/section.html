@@ -12,14 +12,24 @@
     <div id="navbar-container"></div>
 
     <div class="container" style="margin-top: 70px;">
-        <h2 id="section-title"></h2>
-        <a href="/forum/new/post" class="btn btn-primary mb-3">
-            <i class="bi bi-plus-circle"></i> Create New Post
-        </a>
-        <div id="section-posts"></div>
-        <nav aria-label="Page navigation">
-            <ul class="pagination" id="pagination"></ul>
-        </nav>
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Forum Sections</h3>
+                <div class="list-group" id="forum-sections">
+                    <!-- Forum sections will be dynamically loaded here -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                <h2 id="section-title"></h2>
+                <a href="/forum/new/post" class="btn btn-primary mb-3">
+                    <i class="bi bi-plus-circle"></i> Create New Post
+                </a>
+                <div id="section-posts"></div>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>

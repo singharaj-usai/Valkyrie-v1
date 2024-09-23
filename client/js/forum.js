@@ -3,6 +3,7 @@ $(document).ready(function() {
     App.updateAuthUI();
 
     const forumSections = [
+        { id: 'all', name: 'All Posts' },
         { id: 'announcements', name: 'Announcements' },
         { id: 'general', name: 'General Discussion' },
         { id: 'game-dev', name: 'Game Development' },
@@ -290,10 +291,17 @@ $(document).ready(function() {
         });
     }
 
+    function initHomePage() {
+        console.log('Initializing home page');
+        loadForumSections('all');
+        loadRecentPosts(1);
+    }    
+
     function initSectionPage() {
         const section = window.location.pathname.split('/').pop();
         console.log('Initializing section page for:', section);
         updateSectionTitle(section);
+        loadForumSections(section);
         loadSectionPosts(section);
     }
 
@@ -354,6 +362,31 @@ $(document).ready(function() {
         });
     }
     
+    function loadForumSections(activeSection = null) {
+        $.ajax({
+            url: '/api/forum/sections',
+            method: 'GET',
+            success: function(sections) {
+                const sectionsList = $('#forum-sections');
+                sectionsList.empty();
+                const currentPath = window.location.pathname;
+                sections.forEach(section => {
+                    const isActive = (section.id === activeSection) || 
+                                     (section.id === 'all' && currentPath === '/forum/home') ? 'active' : '';
+                    const href = section.id === 'all' ? '/forum/home' : `/forum/sections/${section.id}`;
+                    sectionsList.append(`
+                        <a href="${href}" class="list-group-item ${isActive}">
+                            ${section.name}
+                        </a>
+                    `);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading forum sections:', error);
+            }
+        });
+    }
+
 // Update the existing code to handle section pages
 if (window.location.pathname.startsWith('/forum/sections/')) {
     console.log('Initializing section page');
@@ -368,8 +401,7 @@ if (window.location.pathname.startsWith('/forum/sections/')) {
     }
 } else if (window.location.pathname === '/forum/home') {
     console.log('Loading forum home');
-    loadForumSections();
-    loadRecentPosts(1);
+    initHomePage();
 } else if (window.location.pathname === '/forum/new/post') {
     console.log('Initializing new post form');
     initNewPostForm();

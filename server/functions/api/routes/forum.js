@@ -3,6 +3,18 @@ const router = express.Router();
 const ForumPost = require('../models/ForumPost');
 const { isAuthenticated } = require('../middleware/auth');
 
+router.get('/sections', (req, res) => {
+    const sections = [
+        { id: 'all', name: 'All Posts' },
+        { id: 'announcements', name: 'Announcements' },
+        { id: 'general', name: 'General Discussion' },
+        { id: 'game-dev', name: 'Game Development' },
+        { id: 'support', name: 'Support' },
+        { id: 'off-topic', name: 'Off-Topic' }
+    ];
+    res.json(sections);
+});
+
 // Get posts for a specific section with pagination
 router.get('/sections/:section?', async (req, res) => {
     try {
