@@ -246,7 +246,7 @@ $(document).ready(function() {
             <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">${escapeHtml(post.title)}</h3>
-                                <small>Posted by  <a href="/user-profile?username=${comment.author.username}">${escapeHtml(comment.author.username)}</a> on ${new Date(comment.createdAt).toLocaleString()}</small>
+                    <small>Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()}</small>
                 </div>
                 <div class="panel-body">
                     <p>${escapeHtml(post.content)}</p>
