@@ -26,6 +26,14 @@ router.get("/user-profile", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/user-profile.html"));
 });
 
+router.get("/forum/home", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../../../client/forum/home.html"));
+});
+
+router.get("/forum/new/post", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../../../client/forum/new/post.html"));
+});
+
 router.use("/api/messages", messagesRoutes); // Add this middleware
 
 // Route to serve the "My Messages" page
