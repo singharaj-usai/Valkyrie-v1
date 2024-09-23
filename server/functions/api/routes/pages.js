@@ -53,6 +53,10 @@ router.get("/messages", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/my/messages.html"));
 });
 
+router.get('/admin/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../../../client/admin/dashboard.html'));
+});
+
 router.get("/messages/compose", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/compose.html"));
 });

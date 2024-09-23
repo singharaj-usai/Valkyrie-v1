@@ -67,6 +67,11 @@ isOnline: {
   type: Boolean,
   default: false
 },
+
+isBanned: {
+  type: Boolean,
+  default: false
+},
 lastActiveAt: {
   type: Date,
   default: Date.now

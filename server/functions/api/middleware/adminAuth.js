@@ -1,21 +1,15 @@
 const User = require('../models/User');
 
-const isAdmin = async (req, res, next) => {
+module.exports = async function isAdmin(req, res, next) {
   try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Unauthorized. Please log in.' });
+    const user = await User.findById(req.user.id);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
     }
-
-    const user = await User.findById(req.session.userId);
-    if (user && user.isAdmin) {
-      next();
-    } else {
-      res.status(403).json({ error: 'Access denied. Admin privileges required.' });
-    }
+    req.adminUser = user;
+    next();
   } catch (error) {
-    console.error('Admin authentication error:', error);
+    console.error('Error checking admin status:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-module.exports = isAdmin;

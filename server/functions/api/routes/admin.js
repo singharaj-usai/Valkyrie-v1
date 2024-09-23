@@ -2,80 +2,147 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Game = require('../models/Game');
+const ForumPost = require('../models/ForumPost');
 
 const isAdmin = require('../middleware/adminAuth');
 const { isAuthenticated } = require('../middleware/auth');
 
 // Apply isAuthenticated middleware to all admin routes
 router.use(isAuthenticated);
+router.use(isAdmin);
 
-// Get all pending game uploads
-router.get('/pending-games', isAdmin, async (req, res) => {
+// Check admin authentication
+router.get('/check-auth', (req, res) => {
+  res.json({ isAdmin: true });
+});
+
+// Promote user to admin
+router.post('/promote-admin/:id', async (req, res) => {
   try {
-    const pendingGames = await Game.find({ status: 'pending' }).populate('creator', 'username');
-    res.json(pendingGames);
+    const userToPromote = await User.findById(req.params.id);
+    if (!userToPromote) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (userToPromote.isAdmin) {
+      return res.status(400).json({ error: 'User is already an admin' });
+    }
+
+    userToPromote.isAdmin = true;
+    await userToPromote.save();
+
+    res.json({ message: 'User promoted to admin successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error promoting user to admin:', error);
+    res.status(500).json({ error: 'Error promoting user to admin' });
   }
 });
 
-// Approve or reject a game
-router.put('/game/:id', isAdmin, async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  if (!['approved', 'rejected'].includes(status)) {
-    return res.status(400).json({ error: 'Invalid status' });
-  }
-
+// Get all forum posts
+router.get('/forum-posts', async (req, res) => {
   try {
-    const game = await Game.findByIdAndUpdate(id, { status }, { new: true });
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-    res.json(game);
+    const posts = await ForumPost.find().populate('author', 'username').sort({ createdAt: -1 });
+    res.json(posts);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error fetching forum posts' });
+  }
+});
+
+// Delete a forum post
+router.delete('/forum-posts/:id', async (req, res) => {
+  try {
+    const post = await ForumPost.findByIdAndDelete(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting forum post' });
   }
 });
 
 // Get all users
-router.get('/users', isAdmin, async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
     const users = await User.find({}, '-password');
     res.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Error fetching users' });
   }
 });
 
-// Ban user
-router.post('/ban/:userId', isAdmin, async (req, res) => {
+// Ban or unban a user
+router.post('/users/:id/ban', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, { isBanned: true }, { new: true });
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isBanned: req.body.ban },
+      { new: true }
+    );
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     res.json(user);
   } catch (error) {
-    console.error('Error banning user:', error);
-    res.status(500).json({ error: 'Error banning user' });
+    res.status(500).json({ error: 'Error updating user ban status' });
   }
 });
 
-// Unban user
-router.post('/unban/:userId', isAdmin, async (req, res) => {
+// Get all games
+router.get('/games', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, { isBanned: false }, { new: true });
+    const games = await Game.find().populate('creator', 'username').sort({ createdAt: -1 });
+    res.json(games);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching games' });
+  }
+});
+
+// Delete a game
+router.delete('/games/:id', async (req, res) => {
+  try {
+    const game = await Game.findByIdAndDelete(req.params.id);
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.json({ message: 'Game deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting game' });
+  }
+});
+
+// Delete a user
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json(user);
+    res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.error('Error unbanning user:', error);
-    res.status(500).json({ error: 'Error unbanning user' });
+    res.status(500).json({ error: 'Error deleting user' });
   }
 });
+
+// Get statistics
+router.get('/statistics', async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalGames = await Game.countDocuments();
+    const totalForumPosts = await ForumPost.countDocuments();
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const activeUsers = await User.countDocuments({ lastActiveAt: { $gte: oneDayAgo } });
+
+    res.json({
+      totalUsers,
+      totalGames,
+      totalForumPosts,
+      activeUsers
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching statistics' });
+  }
+});
+
 
 module.exports = router;

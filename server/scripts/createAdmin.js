@@ -3,27 +3,37 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function createAdminUser() {
+  if (!ADMIN_USERNAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    console.error('Admin credentials not set in environment variables');
+    process.exit(1);
+  }
+
   try {
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    // Register the Counter model
     require('../functions/api/models/Counter');
-    
-    // Now register and import the User model
     require('../functions/api/models/User');
     const User = mongoose.model('User');
 
-    const adminPassword = 'admin123'; // Change this to a secure password
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const existingAdmin = await User.findOne({ isAdmin: true });
+    if (existingAdmin) {
+      console.log('An admin user already exists');
+      process.exit(0);
+    }
+
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
     const adminUser = new User({
-      username: 'admin',
-      email: 'admin@example.com',
+      username: ADMIN_USERNAME,
+      email: ADMIN_EMAIL,
       password: hashedPassword,
       isAdmin: true,
       signupIp: '127.0.0.1',
