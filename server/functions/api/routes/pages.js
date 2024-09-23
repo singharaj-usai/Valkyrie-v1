@@ -40,8 +40,8 @@ router.get("/forum/post", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/forum/post.html"));
 });
 
-router.get("/forum/section/:section", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../../../client/forum/section.html"));
+router.get("/forum/sections/:section", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../../../client/forum/sections/section.html"));
 });
 
 router.use('/api/forum', forumRoutes);

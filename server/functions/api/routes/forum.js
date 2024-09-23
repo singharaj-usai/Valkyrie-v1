@@ -4,7 +4,7 @@ const ForumPost = require('../models/ForumPost');
 const { isAuthenticated } = require('../middleware/auth');
 
 // Get posts for a specific section with pagination
-router.get('/posts/:section?', async (req, res) => {
+router.get('/sections/:section?', async (req, res) => {
     try {
         const { section } = req.params;
         const page = parseInt(req.query.page) || 1;
@@ -16,6 +16,8 @@ router.get('/posts/:section?', async (req, res) => {
             query.section = section;
         }
 
+        console.log('Query:', query);
+
         const posts = await ForumPost.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -24,6 +26,8 @@ router.get('/posts/:section?', async (req, res) => {
 
         const totalPosts = await ForumPost.countDocuments(query);
         const totalPages = Math.ceil(totalPosts / limit);
+
+        console.log('Found posts:', posts.length);
 
         res.json({
             posts,
@@ -147,11 +151,17 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
 router.get('/posts/:id/comments', async (req, res) => {
     try {
         const { id } = req.params;
-        const comments = await Comment.find({ post: id })
-            .populate('author', 'username')
-            .sort({ createdAt: -1 });
+        const post = await ForumPost.findById(id).populate({
+            path: 'comments',
+            populate: { path: 'author', select: 'username' },
+            options: { sort: { createdAt: -1 } }
+        });
 
-        res.json(comments);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.json(post.comments);
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ message: 'Error fetching comments' });

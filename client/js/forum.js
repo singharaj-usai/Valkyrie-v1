@@ -17,7 +17,7 @@ $(document).ready(function() {
         const sectionsList = $('#forum-sections');
         forumSections.forEach(section => {
             sectionsList.append(`
-                <a href="/forum/section/${section.id}" class="list-group-item">
+                <a href="/forum/sections/${section.id}" class="list-group-item">
                     ${section.name}
                 </a>
             `);
@@ -235,7 +235,7 @@ $(document).ready(function() {
         const commentsContainer = $('#comments-container');
         commentsContainer.empty();
     
-        if (comments.length === 0) {
+        if (!comments || comments.length === 0) {
             commentsContainer.html('<p>No comments yet. Be the first to comment!</p>');
         } else {
             comments.forEach(comment => {
@@ -292,15 +292,19 @@ $(document).ready(function() {
 
     function initSectionPage() {
         const section = window.location.pathname.split('/').pop();
+        console.log('Initializing section page for:', section);
+        updateSectionTitle(section);
         loadSectionPosts(section);
     }
 
     function loadSectionPosts(section, page = 1) {
+        console.log('Loading posts for section:', section);
         $.ajax({
-            url: `/api/forum/posts/${section}`,
+            url: `/api/forum/sections/${section}`,
             method: 'GET',
             data: { page: page, limit: postsPerPage },
             success: function(response) {
+                console.log('Received posts:', response.posts);
                 displayPosts(response.posts, '#section-posts');
                 displayPagination(response.totalPages, page, section);
                 updateSectionTitle(section);
@@ -351,9 +355,11 @@ $(document).ready(function() {
     }
     
 // Update the existing code to handle section pages
-if (window.location.pathname.startsWith('/forum/section/')) {
+if (window.location.pathname.startsWith('/forum/sections/')) {
+    console.log('Initializing section page');
     initSectionPage();
 } else if (window.location.pathname.startsWith('/forum/post')) {
+    console.log('Loading individual post');
     const postId = new URLSearchParams(window.location.search).get('id');
     if (postId) {
         loadPost(postId);
@@ -361,9 +367,11 @@ if (window.location.pathname.startsWith('/forum/section/')) {
         $('#post-container').html('<p class="text-danger">Invalid post ID.</p>');
     }
 } else if (window.location.pathname === '/forum/home') {
+    console.log('Loading forum home');
     loadForumSections();
     loadRecentPosts();
 } else if (window.location.pathname === '/forum/new/post') {
+    console.log('Initializing new post form');
     initNewPostForm();
 }
 });
