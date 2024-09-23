@@ -11,6 +11,18 @@ $(document).ready(function() {
         { id: 'off-topic', name: 'Off-Topic', summary: 'Discuss anything not directly related to AlphaBlox.' }
     ];
 
+    function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+        
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
     function getSectionName(sectionId) {
         const sectionMap = {
             'announcements': 'Announcements',
@@ -134,9 +146,33 @@ $(document).ready(function() {
     
         $('#new-post-form').submit(function(e) {
             e.preventDefault();
-            const title = $('#post-title').val();
+            const title = $('#post-title').val().trim();
             const section = $('#post-section').val();
-            const content = $('#post-content').val();
+            const content = $('#post-content').val().trim();
+    
+            // List of bad words
+            const badWords = [
+                "nlgga", "nigga", "sex", "raping", "tits", "wtf", "vag", "diemauer", "brickopolis", ".com", ".cf", "dicc", "nude",
+                "kesner", "nobe", "idiot", "dildo", "cheeks", "anal", "boob", "horny", "tit", "fucking", "gay", "rape",
+                "rapist", "incest", "beastiality", "cum", "maggot", "bloxcity", "bullshit", "fuck", "penis", "dick",
+                "vagina", "faggot", "fag", "nigger", "asshole", "shit", "bitch", "stfu", "cunt", "pussy", "hump",
+                "meatspin", "redtube", "porn", "kys", "xvideos", "hentai", "gangbang", "milf", "whore", "cock",
+                "masturbate"
+            ];
+    
+            // Create a regex pattern with word boundaries
+            const regex = new RegExp(`\\b(${badWords.join('|')})\\b`, 'i');
+    
+            if (regex.test(content)) {
+                $('#alert-container').html(`
+                    <div class="alert alert-danger" role="alert">
+                        Your post contains inappropriate language. Please remove the bad words and try again.
+                    </div>
+                `);
+                return;
+            } else {
+                $('#alert-container').empty();
+            }
     
             $.ajax({
                 url: '/api/forum/posts',
@@ -147,12 +183,25 @@ $(document).ready(function() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 success: function(response) {
-                    alert('Post submitted successfully!');
-                    window.location.href = '/forum/home';
+                    $('#alert-container').html(`
+                        <div class="alert alert-success" role="alert">
+                            Post submitted successfully!
+                        </div>
+                    `);
+                    
+                    setTimeout(function() {
+                        window.location.href = '/forum/home';
+                    }, 3000); // Wait for 3 seconds before redirecting
                 },
                 error: function(xhr, status, error) {
                     console.error('Error submitting post:', error);
-                    if (xhr.status === 401) {
+                    if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.message) {
+                        $('#alert-container').html(`
+                            <div class="alert alert-danger" role="alert">
+                                ${escapeHtml(xhr.responseJSON.message)}
+                            </div>
+                        `);
+                    } else if (xhr.status === 401) {
                         alert('You must be logged in to create a post. Please log in and try again.');
                         window.location.href = '/login';
                     } else {
@@ -160,17 +209,6 @@ $(document).ready(function() {
                     }
                 }
             });
-        });
-    
-        // Update breadcrumb when section is selected
-        sectionSelect.on('change', function() {
-            const selectedSection = $(this).val();
-            const sectionName = getSectionName(selectedSection);
-            breadcrumb.html(`
-                <li><a href="/forum/home">Forum Home</a></li>
-                <li><a href="/forum/sections/${selectedSection}">${sectionName}</a></li>
-                <li class="active">Create New Post</li>
-            `);
         });
     }
 
