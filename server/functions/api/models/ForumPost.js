@@ -42,7 +42,11 @@ const forumPostSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    replyCount: {
+        type: Number,
+        default: 0
+    },
 });
 
 const ForumPost = mongoose.model('ForumPost', forumPostSchema);

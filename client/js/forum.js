@@ -56,26 +56,30 @@ $(document).ready(function() {
         const postsContainer = $(containerId);
         postsContainer.empty();
     
-        if (posts.length === 0) {
-            postsContainer.html('<p>No posts found.</p>');
-            return;
-        }
-    
         posts.forEach(post => {
-            postsContainer.append(`
+            const replyCount = post.replyCount || 0;
+            const postElement = $(`
                 <div class="panel panel-default forum-post">
                     <div class="panel-heading forum-post-header">
                         <h3 class="panel-title">
                             <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
                         </h3>
-                        <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
+                        <small>
+                            Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} 
+                            in ${getSectionName(post.section)}
+                        </small>
                     </div>
                     <div class="panel-body forum-post-body">
                         <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
-                        <a href="/forum/post?id=${post._id}" class="btn btn-sm btn-primary">Read more</a>
+                    </div>
+                    <div class="panel-footer">
+                        <span class="badge">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>
+                        <a href="/forum/post?id=${post._id}" class="btn btn-xs btn-primary pull-right">Read More</a>
                     </div>
                 </div>
             `);
+    
+            postsContainer.append(postElement);
         });
     }
     

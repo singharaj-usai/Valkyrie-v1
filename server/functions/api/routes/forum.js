@@ -63,7 +63,8 @@ router.get('/posts', async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('author', 'username');
+            .populate('author', 'username')
+            .select('title content createdAt section author replyCount');
 
         const totalPosts = await ForumPost.countDocuments();
         const totalPages = Math.ceil(totalPosts / limit);
@@ -229,7 +230,10 @@ router.post('/posts/:postId/comments', isAuthenticated, async (req, res) => {
         });
 
         await newComment.save();
-        await ForumPost.findByIdAndUpdate(postId, { $push: { comments: newComment._id } });
+        await ForumPost.findByIdAndUpdate(postId, { 
+            $push: { comments: newComment._id },
+            $inc: { replyCount: 1 }
+        });
 
         res.status(201).json(newComment);
     } catch (error) {
