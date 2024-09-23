@@ -105,27 +105,183 @@ $(document).ready(function() {
         forumSections.forEach(section => {
             sectionSelect.append(`<option value="${section.id}">${section.name}</option>`);
         });
-
+    
         $('#new-post-form').submit(function(e) {
             e.preventDefault();
             const title = $('#post-title').val();
             const section = $('#post-section').val();
             const content = $('#post-content').val();
-
+    
             $.ajax({
                 url: '/api/forum/posts',
                 method: 'POST',
-                data: { title, section, content },
+                data: JSON.stringify({ title, section, content }),
+                contentType: 'application/json',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 success: function(response) {
                     alert('Post submitted successfully!');
                     window.location.href = '/forum/home';
                 },
                 error: function(xhr, status, error) {
                     console.error('Error submitting post:', error);
-                    alert('Error submitting post. Please try again later.');
+                    if (xhr.status === 401) {
+                        alert('You must be logged in to create a post. Please log in and try again.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Error submitting post. Please try again later.');
+                    }
                 }
             });
         });
+    }
+
+    function loadPost(postId) {
+        $.ajax({
+            url: `/api/forum/posts/${postId}`,
+            method: 'GET',
+            success: function(post) {
+                displayPost(post);
+                loadComments(postId);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading post:', error);
+                $('#post-container').html('<p class="text-danger">Error loading post. Please try again later.</p>');
+            }
+        });
+    }
+    
+    function displayPost(post) {
+        const postContainer = $('#post-container');
+        postContainer.html(`
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">${escapeHtml(post.title)}</h3>
+                </div>
+                <div class="panel-body">
+                    <p>${escapeHtml(post.content)}</p>
+                    <hr>
+                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-success vote-button" data-vote="up" data-post-id="${post._id}">
+                            <i class="bi bi-hand-thumbs-up"></i> <span class="upvote-count">${post.upvotes}</span>
+                        </button>
+                        <button class="btn btn-sm btn-danger vote-button" data-vote="down" data-post-id="${post._id}">
+                            <i class="bi bi-hand-thumbs-down"></i> <span class="downvote-count">${post.downvotes}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+    
+        $('.vote-button').on('click', function() {
+            const voteType = $(this).data('vote');
+            const postId = $(this).data('post-id');
+            votePost(postId, voteType);
+        });
+    }
+    
+    function votePost(postId, voteType) {
+        $.ajax({
+            url: `/api/forum/posts/${postId}/vote`,
+            method: 'POST',
+            data: { voteType },
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            success: function(response) {
+                $(`.upvote-count`).text(response.upvotes);
+                $(`.downvote-count`).text(response.downvotes);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error voting:', error);
+                alert('Error voting. Please try again later.');
+            }
+        });
+    }
+    
+    function loadComments(postId) {
+        $.ajax({
+            url: `/api/forum/posts/${postId}/comments`,
+            method: 'GET',
+            success: function(comments) {
+                displayComments(comments);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading comments:', error);
+                $('#comments-container').html('<p class="text-danger">Error loading comments. Please try again later.</p>');
+            }
+        });
+    }
+    
+    function displayComments(comments) {
+        const commentsContainer = $('#comments-container');
+        commentsContainer.empty();
+    
+        if (comments.length === 0) {
+            commentsContainer.html('<p>No comments yet. Be the first to comment!</p>');
+        } else {
+            comments.forEach(comment => {
+                commentsContainer.append(`
+                    <div class="comment">
+                        <p>${escapeHtml(comment.content)}</p>
+                        <small>Posted by ${escapeHtml(comment.author.username)} on ${new Date(comment.createdAt).toLocaleString()}</small>
+                    </div>
+                `);
+            });
+        }
+    
+        displayCommentForm();
+    }
+    
+    function displayCommentForm() {
+        const commentFormContainer = $('#comment-form-container');
+        commentFormContainer.html(`
+            <form id="comment-form">
+                <div class="form-group">
+                    <label for="comment-content">Add a comment:</label>
+                    <textarea class="form-control" id="comment-content" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Comment</button>
+            </form>
+        `);
+    
+        $('#comment-form').on('submit', function(e) {
+            e.preventDefault();
+            const content = $('#comment-content').val();
+            const postId = new URLSearchParams(window.location.search).get('id');
+            submitComment(postId, content);
+        });
+    }
+    
+    function submitComment(postId, content) {
+        $.ajax({
+            url: `/api/forum/posts/${postId}/comments`,
+            method: 'POST',
+            data: { content },
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            success: function(response) {
+                $('#comment-content').val('');
+                loadComments(postId);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error submitting comment:', error);
+                alert('Error submitting comment. Please try again later.');
+            }
+        });
+    }
+    
+    // Update the existing code to handle individual post pages
+    if (window.location.pathname.startsWith('/forum/post')) {
+        const postId = new URLSearchParams(window.location.search).get('id');
+        if (postId) {
+            loadPost(postId);
+        } else {
+            $('#post-container').html('<p class="text-danger">Invalid post ID.</p>');
+        }
     }
 
     if (window.location.pathname === '/forum/home') {

@@ -23,6 +23,18 @@ const forumPostSchema = new mongoose.Schema({
         required: true,
         enum: ['announcements', 'general', 'game-dev', 'support', 'off-topic']
     },
+    upvotes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    downvotes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment'
+    }],
     createdAt: {
         type: Date,
         default: Date.now
