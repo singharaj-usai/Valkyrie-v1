@@ -40,6 +40,34 @@ router.get('/sections/:section?', async (req, res) => {
     }
 });
 
+router.get('/posts', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const posts = await ForumPost.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'username');
+
+        const totalPosts = await ForumPost.countDocuments();
+        const totalPages = Math.ceil(totalPosts / limit);
+
+        console.log('Found posts:', posts.length);
+
+        res.json({
+            posts,
+            currentPage: page,
+            totalPages
+        });
+    } catch (error) {
+        console.error('Error fetching forum posts:', error);
+        res.status(500).json({ message: 'Error fetching forum posts' });
+    }
+});
+
 // Create a new post
 router.post('/posts', isAuthenticated, async (req, res) => {
     try {

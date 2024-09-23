@@ -31,7 +31,7 @@ $(document).ready(function() {
             data: { page: page, limit: postsPerPage },
             success: function(response) {
                 displayPosts(response.posts);
-                displayPagination(response.totalPages, page);
+                displayPagination(response.totalPages, page, 'home');
             },
             error: function(xhr, status, error) {
                 console.error('Error loading posts:', error);
@@ -369,7 +369,7 @@ if (window.location.pathname.startsWith('/forum/sections/')) {
 } else if (window.location.pathname === '/forum/home') {
     console.log('Loading forum home');
     loadForumSections();
-    loadRecentPosts();
+    loadRecentPosts(1);
 } else if (window.location.pathname === '/forum/new/post') {
     console.log('Initializing new post form');
     initNewPostForm();
