@@ -11,6 +11,17 @@ $(document).ready(function() {
         { id: 'off-topic', name: 'Off-Topic', summary: 'Discuss anything not directly related to AlphaBlox.' }
     ];
 
+    function getSectionName(sectionId) {
+        const sectionMap = {
+            'announcements': 'Announcements',
+            'general': 'General Discussion',
+            'game-dev': 'Game Development',
+            'support': 'Support',
+            'off-topic': 'Off-Topic'
+        };
+        return sectionMap[sectionId] || 'Unknown Section';
+    }
+
     let currentPage = 1;
     const postsPerPage = 10;
 
@@ -160,11 +171,19 @@ $(document).ready(function() {
         const postContainer = $('#post-container');
         postContainer.empty();
     
+        // Add breadcrumbs
+        const breadcrumb = $('#post-breadcrumb');
+        breadcrumb.html(`
+            <li><a href="/forum/home">Forum Home</a></li>
+            <li><a href="/forum/sections/${post.section}">${getSectionName(post.section)}</a></li>
+            <li class="active">${escapeHtml(post.title)}</li>
+        `);
+    
         postContainer.html(`
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">${escapeHtml(post.title)}</h3>
-                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${post.section}</small>
+                    <small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()} in ${getSectionName(post.section)}</small>
                 </div>
                 <div class="panel-body">
                     <p>${escapeHtml(post.content)}</p>
@@ -181,7 +200,6 @@ $(document).ready(function() {
                     <a href="/forum/new/reply?id=${post._id}" class="btn btn-sm btn-primary">Reply to Post</a>
                 </div>
             </div>
-            <div id="comments-container"></div>
         `);
     
         // Add event listeners for voting buttons
@@ -297,44 +315,7 @@ $(document).ready(function() {
         });
     }
     
-    function displayComments(comments) {
-        const commentsContainer = $('#comments-container');
-        commentsContainer.empty();
     
-        if (!comments || comments.length === 0) {
-            commentsContainer.html('<p>No comments yet. Be the first to comment!</p>');
-        } else {
-            comments.forEach(comment => {
-                commentsContainer.append(`
-                    <div class="comment">
-                        <p>${escapeHtml(comment.content)}</p>
-                        <small>Posted by ${escapeHtml(comment.author.username)} on ${new Date(comment.createdAt).toLocaleString()}</small>
-                    </div>
-                `);
-            });
-        }
-    
-        displayCommentForm();
-    }
-    
-    function displayCommentForm(postId) {
-        const commentFormContainer = $('#comment-form-container');
-        commentFormContainer.html(`
-            <form id="comment-form">
-                <div class="form-group">
-                    <label for="comment-content">Add a comment:</label>
-                    <textarea class="form-control" id="comment-content" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit Comment</button>
-            </form>
-        `);
-    
-        $('#comment-form').on('submit', function(e) {
-            e.preventDefault();
-            const content = $('#comment-content').val();
-            submitComment(postId, content);
-        });
-    }
     
     function submitComment(postId, content, parentCommentId = null) {
         $.ajax({
@@ -362,18 +343,24 @@ $(document).ready(function() {
         comments.forEach(comment => {
             if (comment.parentComment === parentId) {
                 html += `
-                    <div class="comment" style="margin-left: ${level * 20}px;">
-                        <p><strong>${escapeHtml(comment.author.username)}</strong> - ${new Date(comment.createdAt).toLocaleString()}</p>
-                        <p>${escapeHtml(comment.content)}</p>
-                        <button class="btn btn-sm btn-primary reply-button" data-comment-id="${comment._id}">Reply</button>
-                        <div class="reply-form" id="reply-form-${comment._id}" style="display: none;">
-                            <textarea class="form-control" rows="2"></textarea>
-                            <button class="btn btn-sm btn-success submit-reply" data-comment-id="${comment._id}">Submit Reply</button>
+                    <div class="panel panel-primary" style="margin-left: ${level * 20}px; margin-bottom: 15px;">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <small>Posted by ${escapeHtml(comment.author.username)} on ${new Date(comment.createdAt).toLocaleString()}</small>
+                            </h4>
                         </div>
-                        <div class="replies">
-                            ${displayComments(comments, postId, comment._id, level + 1)}
+                        <div class="panel-body">
+                            <p>${escapeHtml(comment.content)}</p>
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn btn-xs btn-primary reply-button" data-comment-id="${comment._id}">Reply</button>
+                            <div class="reply-form" id="reply-form-${comment._id}" style="display: none; margin-top: 10px;">
+                                <textarea class="form-control" rows="3"></textarea>
+                                <button class="btn btn-xs btn-success submit-reply" data-comment-id="${comment._id}" style="margin-top: 5px;">Submit Reply</button>
+                            </div>
                         </div>
                     </div>
+                    ${displayComments(comments, postId, comment._id, level + 1)}
                 `;
             }
         });
