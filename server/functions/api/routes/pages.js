@@ -4,6 +4,8 @@ const { isAuthenticated, isNotAuthenticated } = require("../middleware/auth");
 
 const messagesRoutes = require('./messages'); // Add this line
 
+const forumRoutes = require('./forum');
+
 const router = express.Router();
 
 router.get("/navbar", (req, res) => {
@@ -33,6 +35,8 @@ router.get("/forum/home", (req, res) => {
 router.get("/forum/new/post", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../../client/forum/new/post.html"));
 });
+
+router.use('/api/forum', forumRoutes);
 
 router.use("/api/messages", messagesRoutes); // Add this middleware
 
