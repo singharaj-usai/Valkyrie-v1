@@ -195,18 +195,24 @@ function loadUsers() {
             `);
 
             const userList = $('#user-list');
+            const currentAdminId = localStorage.getItem('userId');
             users.forEach(user => {
                 userList.append(`
                     <tr>
                         <td>${escapeHtml(user.username)}</td>
                         <td>${escapeHtml(user.email)}</td>
-                        <td>${new Date(user.signupDate).toLocaleString()}</td>
+                        <td>${new Date(user.createdAt).toLocaleString()}</td>
                         <td>
                             <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
                                 ${user.isBanned ? 'Unban' : 'Ban'}
                             </button>
-                            ${user.isAdmin ? '<span class="label label-success">Admin</span>' : 
-                                `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`}
+                            ${user.isAdmin ? 
+                                (user._id !== currentAdminId ? 
+                                    `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}">Demote Admin</button>` : 
+                                    '<span class="label label-success">Current Admin</span>'
+                                ) : 
+                                `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`
+                            }
                         </td>
                     </tr>
                 `);
@@ -223,15 +229,36 @@ function loadUsers() {
                 promoteToAdmin(userId);
             });
 
-            $('.delete-user').on('click', function() {
+            $('.demote-admin').on('click', function() {
                 const userId = $(this).data('user-id');
-                deleteUser(userId);
+                demoteAdmin(userId);
             });
+
+      
         },
         error: function() {
             contentArea.html('<p class="text-danger">Error loading users.</p>');
         }
     });
+}
+
+function demoteAdmin(userId) {
+    if (confirm('Are you sure you want to demote this user from admin?')) {
+        $.ajax({
+            url: `/api/admin/demote-admin/${userId}`,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            success: function() {
+                alert('User demoted from admin successfully.');
+                loadUsers();
+            },
+            error: function(xhr) {
+                alert(`Error demoting user from admin: ${xhr.responseJSON.error}`);
+            }
+        });
+    }
 }
 
 function toggleUserBan(userId, ban) {

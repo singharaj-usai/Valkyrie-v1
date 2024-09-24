@@ -38,6 +38,31 @@ router.post('/promote-admin/:id', async (req, res) => {
   }
 });
 
+router.post('/demote-admin/:id', async (req, res) => {
+  try {
+      const userToDemote = await User.findById(req.params.id);
+      if (!userToDemote) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      if (!userToDemote.isAdmin) {
+          return res.status(400).json({ error: 'User is not an admin' });
+      }
+
+      if (userToDemote._id.toString() === req.user.id) {
+          return res.status(400).json({ error: 'You cannot demote yourself' });
+      }
+
+      userToDemote.isAdmin = false;
+      await userToDemote.save();
+
+      res.json({ message: 'User demoted from admin successfully' });
+  } catch (error) {
+      console.error('Error demoting user from admin:', error);
+      res.status(500).json({ error: 'Error demoting user from admin' });
+  }
+});
+
 // Get all forum posts
 // Get all forum posts
 router.get('/forum-posts', async (req, res) => {
