@@ -203,7 +203,7 @@ function loadUsers() {
                         <td>${escapeHtml(user.email)}</td>
                         <td>${new Date(user.createdAt).toLocaleString()}</td>
                         <td>
-                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                           <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
                                 ${user.isBanned ? 'Unban' : 'Ban'}
                             </button>
                             ${user.isAdmin ? 
@@ -218,10 +218,14 @@ function loadUsers() {
                 `);
             });
 
-            $('.toggle-ban').on('click', function() {
+            $('.ban-user').on('click', function() {
                 const userId = $(this).data('user-id');
                 const isBanned = $(this).data('is-banned');
-                toggleUserBan(userId, !isBanned);
+                if (isBanned) {
+                    unbanUser(userId);
+                } else {
+                    showBanModal(userId);
+                }
             });
 
             $('.promote-admin').on('click', function() {
@@ -240,6 +244,92 @@ function loadUsers() {
             contentArea.html('<p class="text-danger">Error loading users.</p>');
         }
     });
+}
+
+function showBanModal(userId) {
+    const modal = `
+    <div class="modal fade" id="banUserModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ban User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="banUserForm">
+                        <div class="form-group">
+                            <label for="banReason">Reason for ban:</label>
+                            <textarea class="form-control" id="banReason" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmBan">Ban User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    $('body').append(modal);
+    $('#banUserModal').modal('show');
+
+    $('#confirmBan').on('click', function() {
+        const banReason = $('#banReason').val();
+        if (banReason) {
+            banUser(userId, banReason);
+            $('#banUserModal').modal('hide');
+        } else {
+            alert('Please provide a reason for the ban.');
+        }
+    });
+
+    $('#banUserModal').on('hidden.bs.modal', function() {
+        $(this).remove();
+    });
+}
+
+function banUser(userId, banReason) {
+    $.ajax({
+        url: `/api/admin/users/${userId}/ban`,
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        data: JSON.stringify({ ban: true, banReason }),
+        contentType: 'application/json',
+        success: function() {
+            alert('User banned successfully.');
+            loadUsers();
+        },
+        error: function() {
+            alert('Error banning user. Please try again.');
+        }
+    });
+}
+
+function unbanUser(userId) {
+    if (confirm('Are you sure you want to unban this user?')) {
+        $.ajax({
+            url: `/api/admin/users/${userId}/ban`,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            data: JSON.stringify({ ban: false }),
+            contentType: 'application/json',
+            success: function() {
+                alert('User unbanned successfully.');
+                loadUsers();
+            },
+            error: function() {
+                alert('Error unbanning user. Please try again.');
+            }
+        });
+    }
 }
 
 function demoteAdmin(userId) {

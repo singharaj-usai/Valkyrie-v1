@@ -100,20 +100,25 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// Ban or unban a user
-router.post('/users/:id/ban', async (req, res) => {
+router.post('/users/:userId/ban', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isBanned: req.body.ban },
-      { new: true }
-    );
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json(user);
+      const user = await User.findById(req.params.userId);
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      user.isBanned = req.body.ban;
+      if (req.body.ban) {
+          user.banReason = req.body.banReason;
+      } else {
+          user.banReason = null;
+      }
+
+      await user.save();
+
+      res.json({ message: req.body.ban ? 'User banned successfully' : 'User unbanned successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Error updating user ban status' });
+      res.status(500).json({ error: 'Error updating user ban status' });
   }
 });
 

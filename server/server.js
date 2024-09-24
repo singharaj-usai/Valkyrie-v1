@@ -160,6 +160,13 @@ app.get('/', (req, res) => {
 const adminRoutes = require('./functions/api/routes/admin');
 app.use('/api/admin', adminRoutes);
 
+app.use((req, res, next) => {
+  if (req.path === '/banned') {
+      return next();
+  }
+  isBanned(req, res, next);
+});
+
 const gamesRouter = require('./functions/api/routes/games');
 app.use('/api/games', gamesRouter);
 

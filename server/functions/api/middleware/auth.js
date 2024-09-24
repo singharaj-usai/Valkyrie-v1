@@ -32,4 +32,14 @@ const isNotAuthenticated = (req, res, next) => {
     }
 };
 
-module.exports = { isAuthenticated, isNotAuthenticated };
+const isBanned = async (req, res, next) => {
+  if (req.user && req.user.isBanned) {
+      return res.status(403).json({ 
+          error: 'Your account has been banned', 
+          banReason: req.user.banReason 
+      });
+  }
+  next();
+};
+
+module.exports = { isBanned, isAuthenticated, isNotAuthenticated };
