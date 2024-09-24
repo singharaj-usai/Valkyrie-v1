@@ -207,7 +207,6 @@ function loadUsers() {
                             </button>
                             ${user.isAdmin ? '<span class="label label-success">Admin</span>' : 
                                 `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`}
-                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}">Delete</button>
                         </td>
                     </tr>
                 `);
