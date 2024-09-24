@@ -81,7 +81,7 @@ function loadSection(section) {
             loadForumPosts();
             break;
         case 'users':
-            loadUserManagement();
+            loadUsers();
             break;
         case 'games':
             loadGames();
@@ -170,7 +170,7 @@ function deleteForumPost(postId) {
 
 function loadUsers() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2>User Management</h2><div id="users-list"></div>');
+    contentArea.html('<h2>User Management</h2><div id="user-management"></div>');
 
     $.ajax({
         url: '/api/admin/users',
@@ -179,28 +179,37 @@ function loadUsers() {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         success: function(users) {
-            const usersList = $('#users-list');
+            const userManagement = $('#user-management');
+            userManagement.html(`
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Signup Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list"></tbody>
+                </table>
+            `);
+
+            const userList = $('#user-list');
             users.forEach(user => {
-                usersList.append(`
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">${escapeHtml(user.username)}</h3>
-                        </div>
-                        <div class="panel-body">
-                            <p>Email: ${escapeHtml(user.email)}</p>
-                            <p>Joined: ${new Date(user.createdAt).toLocaleString()}</p>
-                            <button class="btn btn-warning btn-sm toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
-                                ${user.isBanned ? 'Unban' : 'Ban'} User
+                userList.append(`
+                    <tr>
+                        <td>${escapeHtml(user.username)}</td>
+                        <td>${escapeHtml(user.email)}</td>
+                        <td>${new Date(user.signupDate).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                                ${user.isBanned ? 'Unban' : 'Ban'}
                             </button>
-                        </div>
-                         <div class="panel-footer">
-                        <button class="btn btn-warning btn-sm toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
-                            ${user.isBanned ? 'Unban' : 'Ban'} User
-                        </button>
-                        ${user.isAdmin ? '<span class="label label-success">Admin</span>' : 
-                            `<button class="btn btn-info btn-sm promote-admin" data-user-id="${user._id}">Promote to Admin</button>`}
-                        </div>
-                    </div>
+                            ${user.isAdmin ? '<span class="label label-success">Admin</span>' : 
+                                `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`}
+                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}">Delete</button>
+                        </td>
+                    </tr>
                 `);
             });
 
@@ -213,6 +222,11 @@ function loadUsers() {
             $('.promote-admin').on('click', function() {
                 const userId = $(this).data('user-id');
                 promoteToAdmin(userId);
+            });
+
+            $('.delete-user').on('click', function() {
+                const userId = $(this).data('user-id');
+                deleteUser(userId);
             });
         },
         error: function() {
@@ -297,65 +311,7 @@ function deleteGame(gameId) {
     }
 }
 
-function loadUserManagement() {
-    const contentArea = $('#content-area');
-    contentArea.html('<h2>User Management</h2><div id="user-management"></div>');
 
-    $.ajax({
-        url: '/api/admin/users',
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        success: function(users) {
-            const userManagement = $('#user-management');
-            userManagement.html(`
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Signup Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-list"></tbody>
-                </table>
-            `);
-
-            const userList = $('#user-list');
-            users.forEach(user => {
-                userList.append(`
-                    <tr>
-                        <td>${escapeHtml(user.username)}</td>
-                        <td>${escapeHtml(user.email)}</td>
-                        <td>${new Date(user.signupDate).toLocaleString()}</td>
-                        <td>
-                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} toggle-ban" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
-                                ${user.isBanned ? 'Unban' : 'Ban'}
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}">Delete</button>
-                        </td>
-                    </tr>
-                `);
-            });
-
-            $('.toggle-ban').on('click', function() {
-                const userId = $(this).data('user-id');
-                const isBanned = $(this).data('is-banned');
-                toggleUserBan(userId, !isBanned);
-            });
-
-            $('.delete-user').on('click', function() {
-                const userId = $(this).data('user-id');
-                deleteUser(userId);
-            });
-        },
-        error: function() {
-            contentArea.html('<p class="text-danger">Error loading users.</p>');
-        }
-    });
-}
 
 function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
