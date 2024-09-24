@@ -201,7 +201,7 @@ function loadUsers() {
                     <tr>
                         <td>${escapeHtml(user.username)}</td>
                         <td>${escapeHtml(user.email)}</td>
-                        <td>${new Date(user.createdAt).toLocaleString()}</td>
+                        <td>${new Date(user.signupDate).toLocaleString()}</td>
                         <td>
                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
                                 ${user.isBanned ? 'Unban' : 'Ban'}
