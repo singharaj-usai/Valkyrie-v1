@@ -34,23 +34,50 @@
     <link rel="stylesheet" href="./css/particles.css">
     <link rel="icon" href="/images/AlphaBlox.ico" type="image/x-icon">
 
+    
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script></head>
 <body>
-
     <div id="loading">Loading...</div>
     <div id="particles-js"></div>
     <div id="content" style="display: none">
         <div id="navbar-container"></div>
-        
-        <div class="container" style="margin-top: 70px">
-            <div class="alert alert-danger" role="alert">
+
+    <div class="container mt-5">
+        <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading">Your account has been banned</h4>
-            <p>Reason: <%= banReason %></p>
+            <p id="ban-reason"></p>
             <hr>
             <p class="mb-0">If you believe this is an error, please contact support.</p>
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: '/api/users/check-ban',
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                success: function(response) {
+                    if (response.isBanned) {
+                        $('#ban-reason').text(`Reason: ${response.banReason}`);
+                    } else {
+                        window.location.href = '/';
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status !== 403) {
+                        window.location.href = '/';
+                    }
+                }
+            });
+        });
+    </script>
+        <!-- Scripts -->
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="./js/auth/auth.js?v=VERSION_NUMBER"></script>
+        <script src="./js/particles-config.js"></script>
 </body>
 </html>

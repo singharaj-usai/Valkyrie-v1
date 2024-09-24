@@ -1,4 +1,6 @@
 $(document).ready(function() {
+    checkUserBan();
+
     // Check if the user is authenticated and has admin privileges
     checkAdminAuth();
 
@@ -330,6 +332,26 @@ function unbanUser(userId) {
             }
         });
     }
+}
+
+function checkUserBan() {
+    $.ajax({
+        url: '/api/users/check-ban',
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        success: function(response) {
+            if (response.isBanned) {
+                window.location.href = '/banned';
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 403) {
+                window.location.href = '/banned';
+            }
+        }
+    });
 }
 
 function demoteAdmin(userId) {
