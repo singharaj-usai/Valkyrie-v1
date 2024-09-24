@@ -67,7 +67,7 @@ function checkAdminAuth() {
         }
       });
     }
-  }
+}
 
 function loadSection(section) {
     const contentArea = $('#content-area');
@@ -110,14 +110,16 @@ function loadForumPosts() {
         success: function(posts) {
             const postsList = $('#forum-posts-list');
             posts.forEach(post => {
+                const sectionName = getSectionName(post.section);
                 postsList.append(`
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">${escapeHtml(post.title)}</h3>
                         </div>
                         <div class="panel-body">
-                            <p>${escapeHtml(post.content.substring(0, 200))}...</p>
-                            <p><small>Posted by ${escapeHtml(post.author.username)} on ${new Date(post.createdAt).toLocaleString()}</small></p>
+                            <p>${escapeHtml(post.content ? post.content.substring(0, 200) : '')}...</p>
+                            <p><small>Posted by ${escapeHtml(post.author ? post.author.username : 'Unknown')} on ${post.createdAt ? new Date(post.createdAt).toLocaleString() : 'Unknown date'}</small></p>
+                            <p><strong>Section:</strong> ${escapeHtml(sectionName)}</p>
                             <button class="btn btn-danger btn-sm delete-post" data-post-id="${post._id}">Delete Post</button>
                         </div>
                     </div>
@@ -129,10 +131,22 @@ function loadForumPosts() {
                 deleteForumPost(postId);
             });
         },
-        error: function() {
-            contentArea.html('<p class="text-danger">Error loading forum posts.</p>');
+        error: function(xhr, status, error) {
+            console.error('Error loading forum posts:', error);
+            contentArea.html(`<p class="text-danger">Error loading forum posts: ${error}</p>`);
         }
     });
+}
+
+function getSectionName(sectionId) {
+    const sectionMap = {
+        'announcements': 'Announcements',
+        'general': 'General Discussion',
+        'game-dev': 'Game Development',
+        'support': 'Support',
+        'off-topic': 'Off-Topic'
+    };
+    return sectionMap[sectionId] || 'Unknown Section';
 }
 
 function deleteForumPost(postId) {
@@ -156,7 +170,7 @@ function deleteForumPost(postId) {
 
 function loadUsers() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2>Users</h2><div id="users-list"></div>');
+    contentArea.html('<h2>User Management</h2><div id="users-list"></div>');
 
     $.ajax({
         url: '/api/admin/users',
@@ -423,6 +437,7 @@ function logout() {
 }
 
 function escapeHtml(unsafe) {
+    if (unsafe == null) return '';
     return unsafe
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")

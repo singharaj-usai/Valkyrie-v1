@@ -39,9 +39,13 @@ router.post('/promote-admin/:id', async (req, res) => {
 });
 
 // Get all forum posts
+// Get all forum posts
 router.get('/forum-posts', async (req, res) => {
   try {
-    const posts = await ForumPost.find().populate('author', 'username').sort({ createdAt: -1 });
+    const posts = await ForumPost.find()
+      .populate('author', 'username')
+      .populate('section', 'name')
+      .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching forum posts' });
