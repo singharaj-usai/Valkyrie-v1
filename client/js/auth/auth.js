@@ -437,6 +437,7 @@ claimCurrency: function () {
           success: (response) => {
             localStorage.setItem("token", response.token);
             localStorage.setItem("username", response.username);
+            localStorage.setItem('userId', response.userId);
             this.showAlert("success", "Logged in successfully. Redirecting...");
             setTimeout(() => {
               window.location.href = '/';
