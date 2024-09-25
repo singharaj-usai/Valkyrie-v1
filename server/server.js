@@ -164,7 +164,7 @@ app.use('/api/admin', adminRoutes);
 const gamesRouter = require('./functions/api/routes/games');
 app.use('/api/games', gamesRouter);
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 
 const uploadsDir = process.env.NODE_ENV === 'production' 
