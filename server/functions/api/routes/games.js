@@ -96,7 +96,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             if (unlinkError) console.error('Error deleting file:', unlinkError);
           });
         }
-        res.status(500).json({ error: 'Error saving game', details: error.message });
+        res.status(500).json({ error: 'Error saving game', details: error.message, stack: error.stack });
       });
   });
 

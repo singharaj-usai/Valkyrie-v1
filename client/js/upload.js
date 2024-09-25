@@ -100,6 +100,9 @@ $(document).ready(function () {
                         if (xhr.responseJSON.details) {
                             errorMessage += ': ' + xhr.responseJSON.details;
                         }
+                        if (xhr.responseJSON.stack) {
+                            console.error('Error stack:', xhr.responseJSON.stack);
+                        }
                     } else if (xhr.status === 0) {
                         errorMessage = 'Network error. Please check your internet connection.';
                     } else if (xhr.status === 403) {

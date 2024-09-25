@@ -163,8 +163,6 @@ app.use('/api/admin', adminRoutes);
 const gamesRouter = require('./functions/api/routes/games');
 app.use('/api/games', gamesRouter);
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
 const uploadsDir = process.env.NODE_ENV === 'production' 
   ? '/tmp/uploads'  // Use /tmp in production (Vercel)
   : path.join(__dirname, '../uploads');  // Use local path in development
@@ -172,6 +170,8 @@ const uploadsDir = process.env.NODE_ENV === 'production'
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+app.use('/uploads', express.static(uploadsDir));
 
 const User = require('./functions/api/models/User');
 
