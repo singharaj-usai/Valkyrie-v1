@@ -152,7 +152,23 @@ $(document).ready(function() {
                 "rapist", "incest", "beastiality", "cum", "maggot", "bloxcity", "bullshit", "fuck", "penis", "dick",
                 "vagina", "faggot", "fag", "nigger", "asshole", "shit", "bitch", "stfu", "cunt", "pussy", "hump",
                 "meatspin", "redtube", "porn", "kys", "xvideos", "hentai", "gangbang", "milf", "whore", "cock",
-                "masturbate"
+                "masturbate", "arse", "bastard", "bollocks", "damn", "piss", "twat", "wanker", "slut", "motherfucker",
+                "dickhead", "prick", "spunk", "tosser", "arsehole", "bellend", "knobhead", "minge", "munter", "sod",
+                "bugger", "feck", "flange", "jizz", "knob", "muff", "quim", "shag", "skank", "slag", "spastic", "turd",
+                "wank", "pedo", "pedophile", "lolita", "loli", "shota", "futa", "futanari", "ecchi", "ahegao", "bukakke",
+                "creampie", "rimjob", "blowjob", "handjob", "footjob", "fellatio", "cunnilingus", "anilingus", "smegma",
+                "scat", "golden shower", "cleveland steamer", "rusty trombone", "dirty sanchez", "alabama hot pocket",
+                "donkey punch", "pearl necklace", "money shot", "facial", "scissoring", "tribadism", "fisting", "pegging",
+                "bdsm", "bondage", "dominatrix", "submissive", "masochist", "sadist", "fetish", "kink", "orgy", "swingers",
+                "cuckold", "hotwife", "throatpie", "deepthroat", "gape", "prolapse", "sounding", "felching", "snowballing",
+                "teabagging", "queef", "squirt", "grool", "creampie", "bukkake", "gokkun", "goatse", "tubgirl", "blumpkin",
+                "arse", "arsehole", "ass", "asshat", "asshole", "asswipe", "ballsack", "bastard", "beaner", "bitch",
+                "blowjob", "bollocks", "boner", "bullshit", "butthole", "chink", "clusterfuck", "cocksucker", "cracker",
+                "crap", "cumshot", "dago", "damn", "douchebag", "dyke", "fag", "faggot", "feck", "fellate", "fellatio",
+                "felching", "fuck", "fudgepacker", "flange", "goddamn", "homo", "jizz", "kike", "knobend",
+                "kraut", "kunt", "kyke", "mick", "minge", "motherfucker", "munter", "nigger", "nigga", "paki", "piss",
+                "pissed", "prick", "pube", "pussy", "queer", "scrotum", "shit", "shithead", "slut", "smegma", "spic",
+                "spunk", "tosser", "turd", "twat", "vittu", "wank", "wanker", "whore", "wog"
             ];
     
             // Create a regex pattern with word boundaries
