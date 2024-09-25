@@ -14,6 +14,8 @@ $(document).on('click', '.unfriend', function() {
 });
 
 function sendFriendAction(url, successMessage) {
+    const token = localStorage.getItem('token');
+
     $.ajax({
         url: url,
         method: 'POST',
