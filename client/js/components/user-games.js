@@ -77,7 +77,7 @@ function displayPlaces(places, category) {
               <div class="row">
                 <div class="col-xs-12 col-sm-6">
                   <a href="/game?id=${place._id}">
-                    <img src="${place.thumbnailUrl || 'placeholder-image.jpg'}" alt="${escapeHtml(place.title)}" class="img-responsive" style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
+                    <img src="${place.thumbnailUrl ? (place.thumbnailUrl.startsWith('http') ? place.thumbnailUrl : '/' + place.thumbnailUrl.replace(/^\//, '')) : '/images/placeholder-image.jpg'}" alt="${escapeHtml(place.title)}" class="img-responsive" style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
                   </a>
                   <a href="/game?id=${place._id}" class="btn btn-success btn-block" style="margin-top: 10px;">Play</a>
                 </div>
