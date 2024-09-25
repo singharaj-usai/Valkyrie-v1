@@ -158,10 +158,10 @@ $(document).ready(function() {
             // Create a regex pattern with word boundaries
             const regex = new RegExp(`\\b(${badWords.join('|')})\\b`, 'i');
     
-            if (regex.test(content)) {
+            if (regex.test(content) || regex.test(title)) {
                 $('#alert-container').html(`
                     <div class="alert alert-danger" role="alert">
-                        Your post contains inappropriate language. Please remove the bad words and try again.
+                        Your post title or content contains inappropriate language. Please remove the bad words and try again.
                     </div>
                 `);
                 return;
