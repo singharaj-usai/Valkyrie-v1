@@ -85,13 +85,22 @@ router.get('/forum-posts', async (req, res) => {
 router.delete('/forum-replies/:id', async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
-    if (comment) {
-      await Comment.findByIdAndDelete(req.params.id);
-      await ForumPost.findByIdAndUpdate(comment.post, { $pull: { comments: comment._id }, $inc: { replyCount: -1 } });
-      res.json({ message: 'Reply deleted successfully' });
-    } else {
+    if (!comment) {
       return res.status(404).json({ error: 'Reply not found' });
     }
+
+    const postId = comment.post;
+
+    // Delete the comment
+    await Comment.findByIdAndDelete(req.params.id);
+
+    // Update the post to remove the comment reference and decrease the reply count
+    await ForumPost.findByIdAndUpdate(postId, {
+      $pull: { comments: comment._id },
+      $inc: { replyCount: -1 }
+    });
+
+    res.json({ message: 'Reply deleted successfully' });
   } catch (error) {
     console.error('Error deleting forum reply:', error);
     res.status(500).json({ error: 'Error deleting forum reply' });
