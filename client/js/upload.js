@@ -64,19 +64,19 @@ $(document).ready(function () {
     function initializeUploadForm() {
         $('#upload-form').on('submit', function (e) {
             e.preventDefault();
-
+    
             const formData = new FormData(this);
             formData.append('year', $('input[name="year"]:checked').val());
             const token = localStorage.getItem('token');
             const accessKey = localStorage.getItem('uploadAccessKey');
-
+    
             // Validate file size
             const thumbnailFile = $('#thumbnail')[0].files[0];
             if (thumbnailFile && thumbnailFile.size > 20 * 1024 * 1024) {
                 showAlert('danger', 'Thumbnail file size must be less than 20MB');
                 return;
             }
-
+    
             $.ajax({
                 url: '/api/games/upload',
                 method: 'POST',
@@ -100,6 +100,12 @@ $(document).ready(function () {
                         if (xhr.responseJSON.details) {
                             errorMessage += ': ' + xhr.responseJSON.details;
                         }
+                    } else if (xhr.status === 0) {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Access denied. Please check your access key.';
+                    } else if (xhr.status >= 500) {
+                        errorMessage = 'Server error. Please try again later.';
                     }
                     console.error('Upload error:', errorMessage);
                     showAlert('danger', 'Error uploading game: ' + errorMessage);
