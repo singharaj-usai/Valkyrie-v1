@@ -70,6 +70,10 @@ router.get('/forum-posts', async (req, res) => {
     const posts = await ForumPost.find()
       .populate('author', 'username')
       .populate('section', 'name')
+      .populate({
+        path: 'comments',
+        populate: { path: 'author', select: 'username' }
+      })
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
@@ -77,14 +81,40 @@ router.get('/forum-posts', async (req, res) => {
   }
 });
 
+// Delete a forum reply
+router.delete('/forum-replies/:id', async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id);
+    if (comment) {
+      await Comment.findByIdAndDelete(req.params.id);
+      await ForumPost.findByIdAndUpdate(comment.post, { $pull: { comments: comment._id }, $inc: { replyCount: -1 } });
+      res.json({ message: 'Reply deleted successfully' });
+    } else {
+      return res.status(404).json({ error: 'Reply not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting forum reply:', error);
+    res.status(500).json({ error: 'Error deleting forum reply' });
+  }
+});
+
 // Delete a forum post
 router.delete('/forum-posts/:id', async (req, res) => {
   try {
     const post = await ForumPost.findByIdAndDelete(req.params.id);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+    if (post) {
+      await ForumPost.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Post deleted successfully' });
+    } else {
+      const comment = await Comment.findById(req.params.id);
+      if (comment) {
+        await Comment.findByIdAndDelete(req.params.id);
+        await ForumPost.findByIdAndUpdate(comment.post, { $pull: { comments: comment._id }, $inc: { replyCount: -1 } });
+        res.json({ message: 'Reply deleted successfully' });
+      } else {
+        return res.status(404).json({ error: 'Post or reply not found' });
+      }
     }
-    res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Error deleting forum post' });
   }

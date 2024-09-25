@@ -191,12 +191,16 @@ async function resetUserIdsIfNeeded() {
 // Update your 404 handler
 app.use((req, res, next) => {
   if (MAINTENANCE_MODE) {
-    res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+    const bypassCookie = req.cookies.maintenanceBypass;
+    if (bypassCookie && decryptSecretKey(bypassCookie) === SECRET_KEY) {
+      res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
+    } else {
+      res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+    }
   } else {
     res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
   }
 });
-
 // Call this function after the server starts
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, async () => {
