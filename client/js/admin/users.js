@@ -1,6 +1,6 @@
 function loadUsers() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2>User Management</h2><div id="user-management"></div>');
+    contentArea.html('<h2 class="text-primary">User Management</h2><div id="user-management"></div>');
 
     $.ajax({
         url: '/api/admin/users',
@@ -12,49 +12,59 @@ function loadUsers() {
             displayUsers(users);
         },
         error: function() {
-            contentArea.html('<p class="text-danger">Error loading users.</p>');
+            contentArea.html('<div class="alert alert-danger" role="alert">Error loading users.</div>');
         }
     });
 }
 
 function displayUsers(users) {
     const userManagement = $('#user-management');
-    userManagement.html(`
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Signup Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="user-list"></tbody>
-        </table>
-    `);
+    userManagement.empty();
 
-    const userList = $('#user-list');
     const currentAdminId = localStorage.getItem('userId');
     users.forEach(user => {
-        userList.append(`
-            <tr>
-                <td>${escapeHtml(user.username)}</td>
-                <td>${escapeHtml(user.email)}</td>
-                <td>${new Date(user.signupDate).toLocaleString()}</td>
-                <td>
-                   <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
-                        ${user.isBanned ? 'Unban' : 'Ban'}
-                    </button>
-                    ${user.isAdmin ? 
-                        (user._id !== currentAdminId ? 
-                            `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}">Demote Admin</button>` : 
-                            '<span class="label label-success">Current Admin</span>'
-                        ) : 
-                        `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`
-                    }
-                </td>
-            </tr>
+        const panel = $(`
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> ${escapeHtml(user.email)}</p>
+                            <p><strong>Signup Date:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="label label-${user.isBanned ? 'danger' : 'success'}">
+                                    ${user.isBanned ? 'Banned' : 'Active'}
+                                </span>
+                            </p>
+                            <p><strong>Role:</strong> 
+                                <span class="label label-${user.isAdmin ? 'primary' : 'default'}">
+                                    ${user.isAdmin ? 'Admin' : 'User'}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-group-vertical btn-block" role="group">
+                                <button class="btn btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                                    ${user.isBanned ? 'Unban User' : 'Ban User'}
+                                </button>
+                                ${user.isAdmin ? 
+                                    (user._id !== currentAdminId ? 
+                                        `<button class="btn btn-danger demote-admin" data-user-id="${user._id}">Demote from Admin</button>` : 
+                                        '<button class="btn btn-success" disabled>Current Admin</button>'
+                                    ) : 
+                                    `<button class="btn btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`
+                                }
+                                <button class="btn btn-danger delete-user" data-user-id="${user._id}">Delete User</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `);
+
+        userManagement.append(panel);
     });
 
     addUserEventListeners();
@@ -80,6 +90,11 @@ function addUserEventListeners() {
         const userId = $(this).data('user-id');
         demoteAdmin(userId);
     });
+
+    $('.delete-user').on('click', function() {
+        const userId = $(this).data('user-id');
+        deleteUser(userId);
+    });
 }
 
 function showBanModal(userId) {
@@ -88,21 +103,19 @@ function showBanModal(userId) {
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Ban User</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Ban User</h4>
                 </div>
                 <div class="modal-body">
                     <form id="banUserForm">
                         <div class="form-group">
                             <label for="banReason">Reason for ban:</label>
-                            <textarea class="form-control" id="banReason" required></textarea>
+                            <textarea class="form-control" id="banReason" rows="3" required></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-danger" id="confirmBan">Ban User</button>
                 </div>
             </div>
@@ -138,11 +151,11 @@ function banUser(userId, banReason) {
         data: JSON.stringify({ ban: true, banReason }),
         contentType: 'application/json',
         success: function() {
-            alert('User banned successfully.');
+            showAlert('success', 'User banned successfully.');
             loadUsers();
         },
         error: function() {
-            alert('Error banning user. Please try again.');
+            showAlert('danger', 'Error banning user. Please try again.');
         }
     });
 }
@@ -158,11 +171,11 @@ function unbanUser(userId) {
             data: JSON.stringify({ ban: false }),
             contentType: 'application/json',
             success: function() {
-                alert('User unbanned successfully.');
+                showAlert('success', 'User unbanned successfully.');
                 loadUsers();
             },
             error: function() {
-                alert('Error unbanning user. Please try again.');
+                showAlert('danger', 'Error unbanning user. Please try again.');
             }
         });
     }
@@ -177,11 +190,11 @@ function promoteToAdmin(userId) {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         success: function() {
-          alert('User promoted to admin successfully.');
+          showAlert('success', 'User promoted to admin successfully.');
           loadUsers();
         },
         error: function(xhr) {
-          alert(`Error promoting user to admin: ${xhr.responseJSON.error}`);
+          showAlert('danger', `Error promoting user to admin: ${xhr.responseJSON.error}`);
         }
       });
     }
@@ -196,11 +209,11 @@ function demoteAdmin(userId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function() {
-                alert('User demoted from admin successfully.');
+                showAlert('success', 'User demoted from admin successfully.');
                 loadUsers();
             },
             error: function(xhr) {
-                alert(`Error demoting user from admin: ${xhr.responseJSON.error}`);
+                showAlert('danger', `Error demoting user from admin: ${xhr.responseJSON.error}`);
             }
         });
     }
@@ -215,12 +228,21 @@ function deleteUser(userId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function() {
-                alert('User deleted successfully.');
-                loadUserManagement();
+                showAlert('success', 'User deleted successfully.');
+                loadUsers();
             },
             error: function() {
-                alert('Error deleting user. Please try again.');
+                showAlert('danger', 'Error deleting user. Please try again.');
             }
         });
     }
+}
+
+function showAlert(type, message) {
+    const alertDiv = $(`<div class="alert alert-${type} alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            ${message}
+                        </div>`);
+    $('#user-management').prepend(alertDiv);
+    setTimeout(() => alertDiv.alert('close'), 5000);
 }

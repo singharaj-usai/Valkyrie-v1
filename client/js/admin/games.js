@@ -1,6 +1,6 @@
 function loadGames() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2>Games</h2><div id="games-list"></div>');
+    contentArea.html('<h2 class="text-primary">Game Management</h2><div id="games-list" class="row"></div>');
 
     $.ajax({
         url: '/api/admin/games',
@@ -12,7 +12,7 @@ function loadGames() {
             displayGames(games);
         },
         error: function() {
-            contentArea.html('<p class="text-danger">Error loading games.</p>');
+            contentArea.html('<div class="alert alert-danger" role="alert">Error loading games.</div>');
         }
     });
 }
@@ -21,14 +21,20 @@ function displayGames(games) {
     const gamesList = $('#games-list');
     games.forEach(game => {
         gamesList.append(`
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">${escapeHtml(game.title)}</h3>
-                </div>
-                <div class="panel-body">
-                    <p>Creator: ${escapeHtml(game.creator.username)}</p>
-                    <p>Created: ${new Date(game.createdAt).toLocaleString()}</p>
-                    <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete Game</button>
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">${escapeHtml(game.title)}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>Creator:</strong> ${escapeHtml(game.creator.username)}</p>
+                        <p><strong>Created:</strong> ${new Date(game.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div class="panel-footer">
+                        <button class="btn btn-danger btn-block delete-game" data-game-id="${game._id}">
+                            <i class="glyphicon glyphicon-trash"></i> Delete Game
+                        </button>
+                    </div>
                 </div>
             </div>
         `);
@@ -49,12 +55,21 @@ function deleteGame(gameId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function() {
-                alert('Game deleted successfully.');
+                showAlert('success', 'Game deleted successfully.');
                 loadGames();
             },
             error: function() {
-                alert('Error deleting game. Please try again.');
+                showAlert('danger', 'Error deleting game. Please try again.');
             }
         });
     }
+}
+
+function showAlert(type, message) {
+    const alertDiv = $(`<div class="alert alert-${type} alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            ${message}
+                        </div>`);
+    $('#games-list').before(alertDiv);
+    setTimeout(() => alertDiv.alert('close'), 5000);
 }

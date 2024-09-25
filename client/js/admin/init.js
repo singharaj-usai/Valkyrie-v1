@@ -44,7 +44,48 @@ function loadSection(section) {
 
 function loadOverview() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2>Overview</h2><p>Welcome to the admin dashboard. Select a section from the sidebar to manage different aspects of the website.</p>');
+    contentArea.html(`
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Welcome to the Admin Dashboard</h3>
+            </div>
+            <div class="panel-body">
+                <p>Select a section from the sidebar to manage different aspects of the website.</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Forum Posts</h4>
+                            </div>
+                            <div class="panel-body">
+                                <p>Manage and moderate forum discussions.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Users</h4>
+                            </div>
+                            <div class="panel-body">
+                                <p>View and manage user accounts.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-warning">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Games</h4>
+                            </div>
+                            <div class="panel-body">
+                                <p>Oversee and manage game listings.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
 }
 
 function logout() {
