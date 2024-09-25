@@ -19,6 +19,8 @@ function loadForumPosts() {
 
 function displayForumPosts(posts) {
     const postsList = $('#forum-posts-list');
+    postsList.empty(); // Clear existing posts
+
     posts.forEach(post => {
         const sectionName = getSectionName(post.section);
         const postElement = $(`
@@ -54,6 +56,17 @@ function displayForumPosts(posts) {
         });
 
         postsList.append(postElement);
+
+        // Add event listeners for delete buttons
+        postElement.find('.delete-post').on('click', function() {
+            const postId = $(this).data('post-id');
+            deleteForumPost(postId);
+        });
+
+        postElement.find('.delete-reply').on('click', function() {
+            const replyId = $(this).data('reply-id');
+            deleteForumReply(replyId);
+        });
     });
 }
 
@@ -65,31 +78,40 @@ function deleteForumPost(postId) {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            success: function() {
+            success: function(response) {
+                console.log('Delete post response:', response);
                 alert('Post deleted successfully.');
                 loadForumPosts();
             },
-            error: function() {
-                alert('Error deleting post. Please try again.');
+            error: function(xhr, status, error) {
+                console.error('Error deleting post:', error);
+                console.error('Server response:', xhr.responseText);
+                let errorMessage = 'Error deleting post. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.details) {
+                    errorMessage += ' Details: ' + xhr.responseJSON.details;
+                }
+                alert(errorMessage);
             }
         });
     }
 }
 
-function deleteForumReply(parentCommentId) {
+function deleteForumReply(replyId) {
     if (confirm('Are you sure you want to delete this reply?')) {
         $.ajax({
-            url: `/api/admin/forum-replies/${parentCommentId}`,
+            url: `/api/admin/forum-replies/${replyId}`,
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
+                console.log('Delete reply response:', response);
                 alert('Reply deleted successfully.');
                 loadForumPosts();
             },
             error: function(xhr, status, error) {
                 console.error('Error deleting reply:', error);
+                console.error('Server response:', xhr.responseText);
                 alert('Error deleting reply. Please try again.');
             }
         });

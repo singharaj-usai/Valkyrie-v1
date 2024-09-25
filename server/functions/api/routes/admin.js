@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Game = require('../models/Game');
 const ForumPost = require('../models/ForumPost');
-
+const Comment = require('../models/Comment');
 const isAdmin = require('../middleware/adminAuth');
 const { isAuthenticated } = require('../middleware/auth');
 
@@ -81,51 +81,49 @@ router.get('/forum-posts', async (req, res) => {
   }
 });
 
+// Delete a forum post
+router.delete('/forum-posts/:id', async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    
+    // Delete all comments associated with the post, if any
+    if (post.comments && post.comments.length > 0) {
+      await Comment.deleteMany({ _id: { $in: post.comments } });
+    }
+    
+    // Delete the post
+    await ForumPost.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Post and associated replies deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting forum post:', error);
+    res.status(500).json({ error: 'Error deleting forum post', details: error.message });
+  }
+});
 // Delete a forum reply
 router.delete('/forum-replies/:id', async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.id);
-    if (!comment) {
+    const reply = await Comment.findById(req.params.id);
+    if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
     }
-
-    const postId = comment.post;
-
-    // Delete the comment
-    await Comment.findByIdAndDelete(req.params.id);
-
-    // Update the post to remove the comment reference and decrease the reply count
-    await ForumPost.findByIdAndUpdate(postId, {
-      $pull: { comments: comment._id },
+    
+    // Update the post to remove the comment reference and decrease reply count
+    await ForumPost.findByIdAndUpdate(reply.post, {
+      $pull: { comments: reply._id },
       $inc: { replyCount: -1 }
     });
-
+    
+    // Delete the reply
+    await Comment.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Reply deleted successfully' });
   } catch (error) {
     console.error('Error deleting forum reply:', error);
     res.status(500).json({ error: 'Error deleting forum reply' });
-  }
-});
-
-// Delete a forum post
-router.delete('/forum-posts/:id', async (req, res) => {
-  try {
-    const post = await ForumPost.findByIdAndDelete(req.params.id);
-    if (post) {
-      await ForumPost.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Post deleted successfully' });
-    } else {
-      const comment = await Comment.findById(req.params.id);
-      if (comment) {
-        await Comment.findByIdAndDelete(req.params.id);
-        await ForumPost.findByIdAndUpdate(comment.post, { $pull: { comments: comment._id }, $inc: { replyCount: -1 } });
-        res.json({ message: 'Reply deleted successfully' });
-      } else {
-        return res.status(404).json({ error: 'Post or reply not found' });
-      }
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error deleting forum post' });
   }
 });
 
