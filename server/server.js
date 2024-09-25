@@ -89,6 +89,7 @@ let isConnected = false;
 async function connectToDatabase() {
   if (!isConnected) {
     try {
+      console.log('Attempting to connect to MongoDB...');
       await connectDB(MONGODB_URI);
       isConnected = true;
       console.log('Connected to MongoDB');
@@ -163,7 +164,6 @@ app.use('/api/admin', adminRoutes);
 const gamesRouter = require('./functions/api/routes/games');
 app.use('/api/games', gamesRouter);
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 const uploadsDir = process.env.NODE_ENV === 'production' 
   ? '/tmp/uploads'  // Use /tmp in production (Vercel)
@@ -172,6 +172,8 @@ const uploadsDir = process.env.NODE_ENV === 'production'
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 const User = require('./functions/api/models/User');
 

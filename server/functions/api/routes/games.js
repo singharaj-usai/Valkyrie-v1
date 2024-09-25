@@ -20,10 +20,8 @@ const storage = multer.diskStorage({
     }
   });
   
-  const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
-  });
+  const upload = multer({ dest: process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads/' });
+
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -96,7 +94,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             if (unlinkError) console.error('Error deleting file:', unlinkError);
           });
         }
-        res.status(500).json({ error: 'Error saving game', details: error.message, stack: error.stack });
+        res.status(500).json({ error: 'Error saving game', details: error.message });
       });
   });
 
