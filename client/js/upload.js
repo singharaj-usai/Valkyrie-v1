@@ -88,6 +88,7 @@ $(document).ready(function () {
                     'X-Access-Token': accessKey
                 },
                 success: function (response) {
+                    console.log('Upload response:', response);
                     showAlert('success', 'Game uploaded successfully!');
                     setTimeout(() => {
                         window.location.href = `/game?id=${response.gameId}`;
