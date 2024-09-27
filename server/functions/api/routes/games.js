@@ -20,10 +20,8 @@ const storage = multer.diskStorage({
     }
   });
   
-  const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
-  });
+  const upload = multer({ dest: process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads/' });
+
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -64,7 +62,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     const { title, description, genre, maxPlayers } = req.body;
   
     if (!title || !description || !genre || !maxPlayers) {
-      return res.status(400).json({ error: 'Title, description, genre, and max players are required' });
+      return res.status(400).json({ error: 'Title, description, genre, max players, and year are required' });
     }
   
     // censor bad words
@@ -73,6 +71,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     }
   
     const thumbnailUrl = `/uploads/${req.file.filename}`;
+    console.log('Saved thumbnailUrl:', thumbnailUrl);
   
     const game = new Game({
       title: filter.clean(title),
@@ -80,7 +79,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       thumbnailUrl,
       creator: req.user.userId,
       genre,
-      maxPlayers: parseInt(maxPlayers, 12)
+      maxPlayers: parseInt(maxPlayers, 10),
+    //  year: parseInt(year, 10)
     });
   
     game.save()
@@ -142,6 +142,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       game.description = filter.clean(description);
       game.genre = genre || game.genre;
       game.maxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : game.maxPlayers;
+     // game.year = year ? parseInt(year, 10) : null;
       game.updatedAt = new Date(); // Explicitly set the updatedAt field
   
       // If a new thumbnail is uploaded, update it
