@@ -12,16 +12,18 @@ const filter = new Filter();
 
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, path.join(__dirname, '../../../../uploads'))
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname)
-    }
-  });
-  
-  const upload = multer({ dest: process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads/' });
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../../../../uploads'))
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
+});
 
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -59,9 +61,9 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       return res.status(400).json({ error: 'Thumbnail file is required' });
     }
   
-    const { title, description, genre, maxPlayers, year } = req.body;
+    const { title, description, genre, maxPlayers } = req.body;
   
-    if (!title || !description || !genre || !maxPlayers || !year) {
+    if (!title || !description || !genre || !maxPlayers) {
       return res.status(400).json({ error: 'Title, description, genre, max players, and year are required' });
     }
   
@@ -71,6 +73,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     }
   
     const thumbnailUrl = `/uploads/${req.file.filename}`;
+    console.log('Saved thumbnailUrl:', thumbnailUrl);
   
     const game = new Game({
       title: filter.clean(title),
@@ -79,7 +82,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       creator: req.user.userId,
       genre,
       maxPlayers: parseInt(maxPlayers, 10),
-      year: parseInt(year, 10)
+    //  year: parseInt(year, 10)
     });
   
     game.save()
@@ -128,7 +131,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   router.put('/:id', authenticateToken, upload.single('thumbnail'), async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, description, genre, maxPlayers, year } = req.body;
+      const { title, description, genre, maxPlayers } = req.body;
   
       // Check if the game exists and belongs to the current user
       const game = await Game.findOne({ _id: id, creator: req.user.userId });
@@ -141,7 +144,6 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       game.description = filter.clean(description);
       game.genre = genre || game.genre;
       game.maxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : game.maxPlayers;
-      game.year = year ? parseInt(year, 10) : null;
       game.updatedAt = new Date(); // Explicitly set the updatedAt field
   
       // If a new thumbnail is uploaded, update it
