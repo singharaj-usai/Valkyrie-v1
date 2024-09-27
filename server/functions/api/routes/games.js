@@ -12,18 +12,18 @@ const filter = new Filter();
 
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, path.join(__dirname, '../../../../uploads'))
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname)
-    }
-  });
-  
-  const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
-  });
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../../../../uploads'))
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -51,12 +51,10 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     if (!accessToken) {
       return res.status(403).json({ error: 'Access denied. No access token provided.' });
     }
-    jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
-      if (err || decoded.accessKey !== process.env.UPLOAD_ACCESS_KEY) {
+    if (accessToken !== process.env.UPLOAD_ACCESS_KEY) {
         return res.status(403).json({ error: 'Access denied. Invalid access token.' });
-      }
-      next();
-    });
+    }
+    next();
   }, upload.single('thumbnail'), (req, res) => {
     
     if (!req.file) {
@@ -66,7 +64,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     const { title, description, genre, maxPlayers } = req.body;
   
     if (!title || !description || !genre || !maxPlayers) {
-      return res.status(400).json({ error: 'Title, description, genre, and max players are required' });
+      return res.status(400).json({ error: 'Title, description, genre, max players, and year are required' });
     }
   
     // censor bad words
@@ -75,6 +73,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     }
   
     const thumbnailUrl = `/uploads/${req.file.filename}`;
+    console.log('Saved thumbnailUrl:', thumbnailUrl);
   
     const game = new Game({
       title: filter.clean(title),
@@ -82,7 +81,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       thumbnailUrl,
       creator: req.user.userId,
       genre,
-      maxPlayers: parseInt(maxPlayers, 12)
+      maxPlayers: parseInt(maxPlayers, 10),
+    //  year: parseInt(year, 10)
     });
   
     game.save()

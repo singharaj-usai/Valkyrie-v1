@@ -24,7 +24,9 @@ $(document).ready(function () {
     });
 
     $('#access-key-modal').on('hide.bs.modal', function (e) {
-        window.location.href = '/';
+        if (!localStorage.getItem('uploadAccessKey')) {
+            window.location.href = '/';
+        }
     });
 
     function showAccessKeyModal() {
@@ -64,6 +66,7 @@ $(document).ready(function () {
             e.preventDefault();
 
             const formData = new FormData(this);
+            formData.append('year', $('input[name="year"]:checked').val());
             const token = localStorage.getItem('token');
             const accessKey = localStorage.getItem('uploadAccessKey');
 
@@ -82,9 +85,10 @@ $(document).ready(function () {
                 processData: false,
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'x-access-token': accessKey
+                    'X-Access-Token': accessKey
                 },
                 success: function (response) {
+                    console.log('Upload response:', response);
                     showAlert('success', 'Game uploaded successfully!');
                     setTimeout(() => {
                         window.location.href = `/game?id=${response.gameId}`;
