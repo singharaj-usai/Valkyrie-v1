@@ -12,18 +12,16 @@ const filter = new Filter();
 
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../../../uploads'))
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname)
-  }
-});
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname, '../../../../uploads'))
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + '-' + file.originalname)
+    }
+  });
+  
+  const upload = multer({ dest: process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads/' });
 
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
-});
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -144,6 +142,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       game.description = filter.clean(description);
       game.genre = genre || game.genre;
       game.maxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : game.maxPlayers;
+     // game.year = year ? parseInt(year, 10) : null;
       game.updatedAt = new Date(); // Explicitly set the updatedAt field
   
       // If a new thumbnail is uploaded, update it

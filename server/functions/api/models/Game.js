@@ -40,12 +40,7 @@ const gameSchema = new mongoose.Schema({
         min: 1,
         max: 12
     },
-    year: {
-        type: Number,
-        required: true,
-        min: 2010,
-        max: 2018
-    },
+ 
     updatedAt: {
         type: Date,
         default: Date.now
