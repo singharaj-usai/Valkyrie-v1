@@ -66,7 +66,6 @@ $(document).ready(function () {
             e.preventDefault();
 
             const formData = new FormData(this);
-            formData.append('year', $('input[name="year"]:checked').val());
             const token = localStorage.getItem('token');
             const accessKey = localStorage.getItem('uploadAccessKey');
 
