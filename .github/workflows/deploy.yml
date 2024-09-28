@@ -25,5 +25,4 @@ jobs:
             cd Valkyrie/Valk.Website/AlphaBloxWeb        # Navigate to your project directory
             git pull origin main        # Pull the latest code from GitHub
             npm install                 # Install any new dependencies
-            docker-compose down         # Stop running containers if using Docker
-            docker-compose up -d        # Restart the app in detached mode
+            docker-compose restart app         # Stop running app not webserver
