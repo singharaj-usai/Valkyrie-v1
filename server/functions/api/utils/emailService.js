@@ -45,9 +45,9 @@ const sendVerificationEmail = async (email, token, baseUrl) => {
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USERNAME}>`,
     to: email,
-    subject: 'Verify Your Email - Alphablox',
+    subject: 'Verify Your Email - Valkyrie',
     html: `
-      <h1>Welcome to Alphablox!</h1>
+      <h1>Welcome to Valkyrie!</h1>
       <p>Please click the link below to verify your email address:</p>
       <a href="${verificationLink}">Verify Email</a>
     `,
@@ -70,7 +70,7 @@ const sendPasswordResetEmail = async (email, token, baseUrl) => {
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USERNAME}>`,
     to: email,
-    subject: 'Reset Your Password - Alphablox',
+    subject: 'Reset Your Password - Valkyrie',
     html: `
       <h1>Reset Your Password</h1>
       <p>Click the link below to reset your password:</p>

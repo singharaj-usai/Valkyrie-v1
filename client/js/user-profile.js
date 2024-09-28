@@ -35,7 +35,7 @@ $(document).ready(function () {
         });
         document.getElementById(
           "profile-title"
-        ).textContent = `${user.username}'s Profile - AlphaBlox`;
+        ).textContent = `${user.username}'s Profile - Valkyrie`;
       },
       error: function (xhr, status, error) {
         console.error("Error fetching user profile:", xhr.responseText);
@@ -94,9 +94,9 @@ $(document).ready(function () {
         </div>
         <div class="panel-body text-center">
           <p>${onlineStatus}</p>
-          <p><a href="https://www.alphablox.net/user-profile?username=${encodeURIComponent(
+          <p><a href="https://www.valk.fun/user-profile?username=${encodeURIComponent(
             user.username
-          )}">https://www.alphablox.net/user-profile?username=${encodeURIComponent(
+          )}">https://www.valk.fun/user-profile?username=${encodeURIComponent(
       user.username
     )}</a></p>
                     <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 

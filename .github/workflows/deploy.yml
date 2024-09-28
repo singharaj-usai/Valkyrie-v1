@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}  # Your VPS user stored as a secret
           key: ${{ secrets.SSH_PRIVATE_KEY }}  # Your SSH private key stored as a secret
           script: |
-            cd Valkyrie/Valk.Website/AlphaBloxWeb        # Navigate to your project directory
+            cd Valkyrie/Valk.Website/ValkyrieWeb        # Navigate to your project directory
             git pull origin main        # Pull the latest code from GitHub
             npm install                 # Install any new dependencies
             docker-compose restart app         # Stop running app not webserver

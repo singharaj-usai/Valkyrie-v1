@@ -1,10 +1,10 @@
 const forumSections = [
     { id: 'all', name: 'All Posts', summary: 'View all posts from all sections of the forum.' },
-    { id: 'announcements', name: 'Announcements', summary: 'Important updates and announcements from the AlphaBlox team.' },
-    { id: 'general', name: 'General Discussion', summary: 'Discuss any topic related to AlphaBlox.' },
+    { id: 'announcements', name: 'Announcements', summary: 'Important updates and announcements from the Valkyrie team.' },
+    { id: 'general', name: 'General Discussion', summary: 'Discuss any topic related to Valkyrie.' },
     { id: 'game-dev', name: 'Game Development', summary: 'Share your game development progress, ask questions, and get feedback.' },
-    { id: 'support', name: 'Support', summary: 'Get help with any issues youre experiencing with AlphaBlox.' },
-    { id: 'off-topic', name: 'Off-Topic', summary: 'Discuss anything not directly related to AlphaBlox.' }
+    { id: 'support', name: 'Support', summary: 'Get help with any issues youre experiencing with Valkyrie.' },
+    { id: 'off-topic', name: 'Off-Topic', summary: 'Discuss anything not directly related to Valkyrie.' }
 ];
 
 function loadForumSections(activeSection = null) {
