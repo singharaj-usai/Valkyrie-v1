@@ -142,7 +142,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       game.description = filter.clean(description);
       game.genre = genre || game.genre;
       game.maxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : game.maxPlayers;
-      game.year = year ? parseInt(year, 10) : game.year;
+      game.year = year ? parseInt(year, 10) : null;
       game.updatedAt = new Date(); // Explicitly set the updatedAt field
   
       // If a new thumbnail is uploaded, update it
