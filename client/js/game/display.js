@@ -20,6 +20,7 @@ const GameDisplay = {
                         <div class="col-md-6">
                             <h2>${GameUtils.escapeHtml(game.title || '')}</h2>
                             <p>by ${GameUtils.escapeHtml(game.creator?.username || '')}</p>
+                            <span class="label label-danger">${game.year || ''}</span>
 
                             <button id="play-game" class="btn btn-success btn-lg btn-block mt-3">
                                 <i class="bi bi-play-fill"></i> Play
