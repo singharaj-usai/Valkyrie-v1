@@ -1,7 +1,9 @@
 <style>
     #user-submenu {
-        top: 50px;
-        z-index: 999;
+        position: fixed;
+        left: 0;
+        right: 0;
+        z-index: 1029;
         border-top: none;
         border-radius: 0;
         margin-bottom: 0;
@@ -21,12 +23,20 @@
         padding-top: 15px;
     }
 
+    :root {
+    --user-submenu-top: 50px;
+}
+
+#user-submenu {
+    top: var(--user-submenu-top);
+}
+
     body {
         padding-top: 100px;
     }
 
     .navbar-fixed-top + .navbar-fixed-top {
-        top: 50px;
+        top: auto;
     }
 
     @media (max-width: 767px) {
@@ -106,7 +116,7 @@ body {
         </div>
     </div>
 </nav>
-<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top hidden-xs" style="top: 65px; display: none;">
+<nav id="user-submenu" class="navbar navbar-inverse navbar-fixed-top hidden-xs">
     <div class="container">
         <ul class="nav navbar-nav">
             <li><a href="/"><i class="bi bi-house-door"></i> Home</a></li>
@@ -114,7 +124,7 @@ body {
             <li><a href="/places"><i class="bi bi-map"></i> Places</a></li>
             <li><a href="/my/friends"><i class="bi bi-people"></i> Friends</a></li>
             <li><a href="/my/messages"><i class="bi bi-envelope"></i> Messages</a></li>
-            <li><a href="#"><i class="bi bi-gear"></i> Settings</a></li>
+            <li><a href="/settings"><i class="bi bi-gear"></i> Settings</a></li>
         </ul>
     </div>
 </nav>
@@ -148,3 +158,21 @@ body {
     window.addEventListener('resize', updateAnnouncementPosition);
     document.addEventListener('DOMContentLoaded', updateAnnouncementPosition);
 </script> -->
+
+<script>
+  function updateSubmenuPosition() {
+    const mainNavbar = document.querySelector('.navbar-default');
+    const userSubmenu = document.getElementById('user-submenu');
+    if (mainNavbar && userSubmenu) {
+        const mainNavbarHeight = mainNavbar.offsetHeight;
+        const submenuTop = getComputedStyle(document.documentElement).getPropertyValue('--user-submenu-top').trim();
+        
+        userSubmenu.style.top = `calc(${submenuTop} + ${mainNavbarHeight - parseInt(submenuTop)}px)`;
+        document.body.style.paddingTop = (mainNavbarHeight + userSubmenu.offsetHeight) + 'px';
+    }
+}
+window.addEventListener('resize', updateSubmenuPosition);
+document.addEventListener('DOMContentLoaded', updateSubmenuPosition);
+</script>
+
+<script src="/js/theme-loader.js"></script>

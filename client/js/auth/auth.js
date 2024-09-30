@@ -25,8 +25,6 @@ const App = {
       this.updateAuthUI();
       this.checkForAnnouncements();
       this.initParticles();
-
-
     });
   },
 

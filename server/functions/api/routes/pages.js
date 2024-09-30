@@ -54,6 +54,9 @@ router.get("/privacy", (req, res) => sendHtmlFile(res, "pages/legal/privacy/priv
 // Components
 router.get("/navbar", (req, res) => sendHtmlFile(res, "components/navbar.html"));
 
+// Settings page
+router.get("/settings", (req, res) => sendHtmlFile(res, "pages/settings/settings.html"));
+
 // API routes
 router.use('/api/forum', forumRoutes);
 router.use("/api/messages", messagesRoutes);
