@@ -27,7 +27,9 @@ function displayGames(games) {
                         <h3 class="panel-title">${escapeHtml(game.title)}</h3>
                     </div>
                     <div class="panel-body">
-                        <img src="${game.thumbnailUrl || '/images/default-game-thumbnail.png'}" alt="${escapeHtml(game.title)} thumbnail" class="img-responsive mb-2" style="width: 100%; height: 150px; object-fit: cover;">
+                        <div style="width: 100%; padding-top: 56.25%; position: relative; overflow: hidden;">
+                            <img src="${game.thumbnailUrl || '/images/default-game-thumbnail.png'}" alt="${escapeHtml(game.title)} thumbnail" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                        </div>
                         <p><strong>Creator:</strong> ${escapeHtml(game.creator.username)}</p>
                         <p><strong>Created:</strong> ${new Date(game.createdAt).toLocaleString()}</p>
                     </div>
