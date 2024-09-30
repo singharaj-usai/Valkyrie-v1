@@ -27,11 +27,11 @@ router.get("/forum/new/reply", (req, res) => sendHtmlFile(res, "pages/forum/new/
 router.get("/forum/post", (req, res) => sendHtmlFile(res, "pages/forum/post.html"));
 router.get("/forum/sections/:section", (req, res) => sendHtmlFile(res, "pages/forum/sections/section.html"));
 
-// Catalog and Places pages
+// Catalog  page
 router.get("/catalog", (req, res) => sendHtmlFile(res, "pages/catalog/catalog.html"));
-router.get("/places", (req, res) => sendHtmlFile(res, "pages/places/places.html"));
 
 // User's personal pages
+router.get("/my/places", (req, res) => sendHtmlFile(res, "pages/my/places/places.html"));
 router.get("/my/friends", (req, res) => sendHtmlFile(res, "pages/my/friends.html"));
 router.get("/my/messages", (req, res) => sendHtmlFile(res, "pages/my/messages.html"));
 router.get("/messages/compose", (req, res) => sendHtmlFile(res, "pages/my/compose/compose.html"));
