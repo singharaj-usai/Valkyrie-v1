@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Valkyrie</title>
+    <title>Login - Valkyrie</title>
     
     <!-- Meta Tags -->
     <meta name="description" content="Valkyrie is your ultimate platform for creating and sharing immersive gaming experiences. Join us to unleash your creativity and connect with gamers worldwide.">
@@ -53,76 +53,48 @@
         }
     </style>
 </head>
-<body class="bg-default">
+<body>
     <div id="loading">Loading...</div>
     <div id="particles-js"></div>
+    
     <div id="content" style="display: none;">
         <div class="container" style="margin-top: 50px;">
             <div id="navbar-container"></div>
-
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 col-md-offset-3">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            <h2 class="panel-title">Welcome to Valkyrie</h2>
+                            <h2 class="panel-title">Login</h2>
                         </div>
                         <div class="panel-body">
-                            <p>Create an account and socialize with each other using the forums and message system</p>
-                            <p>Customize your character with the items found in the Catalog</p>
-                            <p>Make friends through our friend system</p>
-                            <p>Play games with each other, privately and publicly</p>
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/zEu7XzKdm70" title="YouTube video" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h2 class="panel-title">Sign Up</h2>
-                        </div>
-                        <div class="panel-body">
+                            <div id="verified-message" class="alert alert-success" style="display: none;">Your email has been verified. You can now log in.</div>
                             <div id="alert-container"></div>
-                            <form id="signup-form">
+                            <form id="login-form">
                                 <div class="form-group">
                                     <label for="username">Username</label>
-                                    <input type="text" class="form-control" id="username" required placeholder="Username" minlength="3" maxlength="18">
-                                    <p class="help-block">Username must be between 3 and 18 characters.</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required placeholder="Email">
-                                    <p class="help-block">Enter valid email address</p>
+                                    <input type="text" class="form-control" id="username" required minlength="3" maxlength="30">
                                 </div>
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" required placeholder="******" minlength="6">
-                                    <p class="help-block">Password must be at least 4 characters long.</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirm-password">Confirm Password</label>
-                                    <input type="password" class="form-control" id="confirm-password" required placeholder="******" minlength="6">
-                                    <p class="help-block">Confirm password.</p>
+                                    <input type="password" class="form-control" id="password" required minlength="6">
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-5">
-                                        <button type="submit" class="btn btn-success btn-block">Sign Up</button>
+                                        <button type="submit" class="btn btn-success btn-block">Login</button>
                                     </div>
                                     <div class="col-xs-2 text-center">
                                         <p style="margin-top: 6px;">or</p>
                                     </div>
                                     <div class="col-xs-5">
-                                        <a href="./login" class="btn btn-primary btn-block">Login</a>
+                                        <a href="/register" class="btn btn-primary btn-block">Sign Up</a>
                                     </div>
-                                </div>
+                                </div>  
                                 <div class="form-group">
                                     <p class="text-muted">This site is protected by reCAPTCHA and the Google
                                         <a href="https://policies.google.com/privacy">Privacy Policy</a> and
                                         <a href="https://policies.google.com/terms">Terms of Service</a> apply.
                                     </p>
-                                </div>
+                                </div>             
                             </form>
                         </div>
                     </div>
@@ -134,19 +106,12 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
-    <script src="./js/particles-config.js"></script>
-    <script src="./js/auth/auth.js"></script>
+    <script src="/js/particles-config.js"></script>
+    <script src="/js/auth/auth.js"></script>
     <script>
         $(document).ready(function() {
-            if (localStorage.getItem("username")) {
-                window.location.href = '/';
-            } else {
-                $('#loading').hide();
-                $('#content').show();
-                App.init();
-                App.initForms();
-            }
+            App.init();
+            App.initForms();
         });
     </script>
 </body>

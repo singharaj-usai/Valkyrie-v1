@@ -96,7 +96,7 @@ const App = {
 
   // Load navbar
   loadNavbar: function () {
-    $.get("/navbar.html", (data) => {
+    $.get("/html/components/navbar.html", (data) => {
       $("#navbar-container").html(data);
       this.updateAuthUI();
       if (typeof updateAnnouncementPosition === 'function') {
@@ -660,7 +660,7 @@ claimCurrency: function () {
   },
   
   loadFooter: function() {
-    $.get("/footer.html", (data) => {
+    $.get("/html/components/footer.html", (data) => {
       $("body").append(data);
       this.updateUserCount();
       setInterval(() => this.updateUserCount(), 60000); // Update every minute

@@ -64,7 +64,7 @@ app.use((req, res, next) => {
     if (!bypassCookie || decryptSecretKey(bypassCookie) !== SECRET_KEY) {
 
     console.log('Maintenance mode is active, serving maintenance page');
-    return res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+    return res.sendFile(path.join(__dirname, '../client/html/pages/maintenance/maintenance.html'));
   }
 }
   next();
@@ -155,7 +155,7 @@ app.get('*', (req, res, next) => {
 app.use('/', pageRoutes);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
+  res.sendFile(path.join(__dirname, '../client/html/pages/home/index.html'));
 });
 
 const adminRoutes = require('./functions/api/routes/admin');
@@ -196,12 +196,12 @@ app.use((req, res, next) => {
   if (MAINTENANCE_MODE) {
     const bypassCookie = req.cookies.maintenanceBypass;
     if (bypassCookie && decryptSecretKey(bypassCookie) === SECRET_KEY) {
-      res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
+      res.status(404).sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
     } else {
-      res.sendFile(path.join(__dirname, '../client/maintenance.html'));
+      res.sendFile(path.join(__dirname, '../client/html/pages/maintenance/maintenance.html'));
     }
   } else {
-    res.status(404).sendFile(path.join(__dirname, '../client/404.html'));
+    res.status(404).sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
   }
 });
 
