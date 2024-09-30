@@ -139,7 +139,7 @@ $(document).ready(function () {
             $('#edit-description').val(game.description);
             $(`input[name="edit-genre"][value="${game.genre}"]`).prop('checked', true);
             $('#edit-max-players').val(game.maxPlayers || '');
-            $('#edit-year').val(game.year || '');
+            $(`input[name="edit-year"][value="${game.year}"]`).prop('checked', true);
             $('#editGameModal').modal('show');
         }
     }
@@ -184,11 +184,16 @@ $(document).ready(function () {
         const description = $('#edit-description').val();
         const genre = $('input[name="edit-genre"]:checked').val();
         const maxPlayers = $('#edit-max-players').val();
-        const year = $('#edit-year').val();
+        const year = $('input[name="edit-year"]:checked').val();
         const thumbnail = $('#edit-thumbnail')[0].files[0];
     
         if (!genre) {
             showError('Please select a genre');
+            return;
+        }
+
+        if (!year) {
+            showError('Please select a year');
             return;
         }
     
