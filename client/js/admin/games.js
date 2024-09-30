@@ -41,9 +41,39 @@ function displayGames(games) {
         `);
     });
 
+    $('body').append(`
+        <div class="modal fade" id="deleteGameModal" tabindex="-1" role="dialog" aria-labelledby="deleteGameModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="deleteGameModalLabel">Confirm Deletion</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the game "<span id="title"></span>"?</p>
+                        <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+
     $('.delete-game').on('click', function() {
         const gameId = $(this).data('game-id');
+        const gameTitle = $(this).data('game-title');
+        $('#gameTitle').text(gameTitle);
+        $('#confirmDelete').data('game-id', gameId);
+        $('#deleteGameModal').modal('show');
+    });
+
+    $('#confirmDelete').on('click', function() {
+        const gameId = $(this).data('game-id');
         deleteGame(gameId);
+        $('#deleteGameModal').modal('hide');
     });
 }
 
