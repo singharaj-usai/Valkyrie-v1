@@ -32,7 +32,7 @@ function displayPosts(posts, containerId = '#recent-posts') {
                                     <th style="width: 40%">Topic</th>
                                     <th style="width: 20%">Author</th>
                                     <th style="width: 10%">Replies</th>
-                                    <th style="width: 30%">Last Post</th>
+                                    <th style="width: 30%">Posted On</th>
                                 </tr>
                             </thead>
                             <tbody>
