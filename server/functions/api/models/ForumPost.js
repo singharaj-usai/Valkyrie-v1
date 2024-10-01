@@ -44,7 +44,9 @@ const forumPostSchema = new mongoose.Schema({
             vote: {
                 type: String,
                 enum: ['up', 'down']
-            }
+            },
+            username: String,
+            userId: Number
         }],
         default: []
     },

@@ -146,6 +146,8 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
         const { id } = req.params;
         const { voteType } = req.body;
         const userId = req.user._id;
+        const username = req.user.username;
+        const userIdNumber = req.user.userId;
 
         if (!['up', 'down'].includes(voteType)) {
             return res.status(400).json({ message: 'Invalid vote type' });
@@ -168,13 +170,15 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
         if (voteType === 'up') {
             if (!existingVote) {
                 post.upvotes += 1;
-                post.userVotes.push({ user: userId, vote: 'up' });
+                post.userVotes.push({ user: userId, vote: 'up', username, userId: userIdNumber });
                 message = 'Upvote added successfully';
                 changed = true;
             } else if (existingVote.vote === 'down') {
                 post.upvotes += 1;
                 post.downvotes = Math.max(post.downvotes - 1, 0);
                 existingVote.vote = 'up';
+                existingVote.username = username;
+                existingVote.userId = userIdNumber;
                 message = 'Vote changed from downvote to upvote';
                 changed = true;
             } else {
@@ -183,13 +187,15 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
         } else if (voteType === 'down') {
             if (!existingVote) {
                 post.downvotes += 1;
-                post.userVotes.push({ user: userId, vote: 'down' });
+                post.userVotes.push({ user: userId, vote: 'down', username, userId: userIdNumber });
                 message = 'Downvote added successfully';
                 changed = true;
             } else if (existingVote.vote === 'up') {
                 post.downvotes += 1;
                 post.upvotes = Math.max(post.upvotes - 1, 0);
                 existingVote.vote = 'down';
+                existingVote.username = username;
+                existingVote.userId = userIdNumber;
                 message = 'Vote changed from upvote to downvote';
                 changed = true;
             } else {
