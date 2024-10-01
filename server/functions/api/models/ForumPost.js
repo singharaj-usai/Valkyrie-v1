@@ -23,14 +23,32 @@ const forumPostSchema = new mongoose.Schema({
         required: true,
         enum: ['announcements', 'general', 'game-dev', 'support', 'off-topic']
     },
-    upvotes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    downvotes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    }],
+    subSection: {
+        type: String,
+        required: false,
+    },
+    upvotes: {
+        type: Number,
+        default: 0
+    },
+    downvotes: {
+        type: Number,
+        default: 0
+    },
+    userVotes: {
+        type: [{
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            vote: {
+                type: String,
+                enum: ['up', 'down']
+            }
+        }],
+        default: []
+    },
+    
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comment'

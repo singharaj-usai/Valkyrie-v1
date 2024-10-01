@@ -117,8 +117,8 @@ router.get('/posts/:id', async (req, res) => {
         }
 
         const responsePost = post.toObject();
-        responsePost.upvoteCount = post.upvotes.length;
-        responsePost.downvoteCount = post.downvotes.length;
+        responsePost.upvotes = post.upvotes || 0;
+        responsePost.downvotes = post.downvotes || 0;
 
         res.json(responsePost);
     } catch (error) {
@@ -152,26 +152,31 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        const hasUpvoted = post.upvotes.includes(userId);
-        const hasDownvoted = post.downvotes.includes(userId);
+        const userVoteIndex = post.userVotes.findIndex(vote => vote.user.toString() === userId.toString());
 
         if (voteType === 'up') {
-            if (hasUpvoted) {
-                post.upvotes.pull(userId);
+            if (userVoteIndex === -1) {
+                post.upvotes += 1;
+                post.userVotes.push({ user: userId, vote: 'up' });
+            } else if (post.userVotes[userVoteIndex].vote === 'down') {
+                post.upvotes += 1;
+                post.downvotes -= 1;
+                post.userVotes[userVoteIndex].vote = 'up';
             } else {
-                post.upvotes.addToSet(userId);
-                if (hasDownvoted) {
-                    post.downvotes.pull(userId);
-                }
+                post.upvotes -= 1;
+                post.userVotes.splice(userVoteIndex, 1);
             }
         } else if (voteType === 'down') {
-            if (hasDownvoted) {
-                post.downvotes.pull(userId);
+            if (userVoteIndex === -1) {
+                post.downvotes += 1;
+                post.userVotes.push({ user: userId, vote: 'down' });
+            } else if (post.userVotes[userVoteIndex].vote === 'up') {
+                post.downvotes += 1;
+                post.upvotes -= 1;
+                post.userVotes[userVoteIndex].vote = 'down';
             } else {
-                post.downvotes.addToSet(userId);
-                if (hasUpvoted) {
-                    post.upvotes.pull(userId);
-                }
+                post.downvotes -= 1;
+                post.userVotes.splice(userVoteIndex, 1);
             }
         } else {
             return res.status(400).json({ message: 'Invalid vote type' });
@@ -180,12 +185,13 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
         await post.save();
 
         res.json({
-            upvotes: post.upvotes.length,
-            downvotes: post.downvotes.length
+            upvotes: post.upvotes,
+            downvotes: post.downvotes,
+            userVote: userVoteIndex !== -1 ? post.userVotes[userVoteIndex].vote : 'none'
         });
     } catch (error) {
         console.error('Error voting on post:', error);
-        res.status(500).json({ message: 'Error voting on post' });
+        res.status(500).json({ message: 'Error voting on post', error: error.message });
     }
 });
 

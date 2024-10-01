@@ -38,8 +38,10 @@ function displayPost(post) {
         <li class="active">${escapeHtml(post.title)}</li>
     `);
 
+    const userVote = post.userVote || 'none';
+
     postContainer.html(`
-        <div class="panel panel-info">
+        <div id="post-${post._id}" class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">${escapeHtml(post.title)}</h3>
                 <small>Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()}</small>
@@ -48,13 +50,13 @@ function displayPost(post) {
                 <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
             </div>
             <div class="panel-footer">
-                <button class="btn btn-sm btn-success vote-button" data-vote="up">
+                <button class="btn btn-sm btn-success vote-button ${userVote === 'up' ? 'active' : ''}" data-vote="up">
                     <i class="bi bi-hand-thumbs-up"></i> Upvote
-                    <span class="upvote-count">${post.upvotes ? post.upvotes.length : 0}</span>
+                    <span class="upvote-count">${post.upvotes || 0}</span>
                 </button>
-                <button class="btn btn-sm btn-danger vote-button" data-vote="down">
+                <button class="btn btn-sm btn-danger vote-button ${userVote === 'down' ? 'active' : ''}" data-vote="down">
                     <i class="bi bi-hand-thumbs-down"></i> Downvote
-                    <span class="downvote-count">${post.downvotes ? post.downvotes.length : 0}</span>
+                    <span class="downvote-count">${post.downvotes || 0}</span>
                 </button>
                 <a href="/forum/new/reply?id=${post._id}" class="btn btn-sm btn-primary">Reply to Post</a>
             </div>
@@ -64,7 +66,7 @@ function displayPost(post) {
     // Add event listeners for voting buttons
     $('.vote-button').on('click', function() {
         const voteType = $(this).data('vote');
-        voteOnPost(post._id, voteType);
+        votePost(post._id, voteType);
     });
 
     // Load comments
@@ -99,13 +101,18 @@ function votePost(postId, voteType) {
     $.ajax({
         url: `/api/forum/posts/${postId}/vote`,
         method: 'POST',
-        data: { voteType },
+        data: JSON.stringify({ voteType }),
+        contentType: 'application/json',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         success: function(response) {
-            $(`.upvote-count`).text(response.upvotes);
-            $(`.downvote-count`).text(response.downvotes);
+            $(`#post-${postId} .upvote-count`).text(response.upvotes);
+            $(`#post-${postId} .downvote-count`).text(response.downvotes);
+            $(`#post-${postId} .vote-button`).removeClass('active');
+            if (response.userVote !== 'none') {
+                $(`#post-${postId} .vote-button[data-vote="${response.userVote}"]`).addClass('active');
+            }
         },
         error: function(xhr, status, error) {
             console.error('Error voting:', error);
