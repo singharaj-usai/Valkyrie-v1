@@ -451,13 +451,9 @@ router.get("/user-count", async (req, res) => {
   }
 });
 
-router.post("/claim-daily-currency", async (req, res) => {
+router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
   try {
-    const userId = req.session.userId;
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
+    const userId = req.user.userId;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -472,7 +468,12 @@ router.post("/claim-daily-currency", async (req, res) => {
       await user.save();
       res.json({ success: true, newBalance: user.currency, lastClaimDate: user.lastCurrencyClaimDate });
     } else {
-      res.status(400).json({ error: "Currency can only be claimed once per day" });
+      const nextClaimTime = lastClaim.clone().add(24, 'hours');
+      const timeUntilNextClaim = nextClaimTime.diff(now);
+      res.status(400).json({ 
+        error: "Currency can only be claimed once per day",
+        lastClaimDate: user.lastCurrencyClaimDate 
+      });
     }
   } catch (error) {
     console.error("Error claiming daily currency:", error);

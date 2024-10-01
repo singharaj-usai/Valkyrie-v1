@@ -218,10 +218,10 @@ const App = {
     const username = localStorage.getItem("username");
     const token = localStorage.getItem("token");
     const authContainer = $("#auth-container");
-  
+
     if (username && token) {
       $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
-  
+
       $.ajax({
         url: "/api/user-info",
         method: "GET",
@@ -230,15 +230,22 @@ const App = {
           authContainer.html(`
             <span class="navbar-text">
               Welcome, ${this.escapeHtml(username)} 
-              <i class="bi bi-coin" id="currency-icon"></i> 
-              <span id="currency-amount">${response.currency}</span>
-              <span id="currency-countdown" style="margin-left: 10px; font-size: 0.9em; color: #6c757d;"></span>
+              <span id="currency-container" data-toggle="tooltip" data-placement="bottom" title="">
+                <i class="bi bi-coin" id="currency-icon"></i> 
+                <span id="currency-amount">${response.currency}</span>
+              </span>
             </span>
             <button id="logout" class="btn btn-sm btn-danger ml-2 navbar-btn">Logout</button>
           `);
           this.updateCurrencyTooltip(response.lastCurrencyClaimDate);
           this.initLogout();
           $('#user-submenu').show();
+
+          // Initialize the tooltip
+          $('#currency-container').tooltip({
+            trigger: 'hover',
+            html: true
+          });
         },
         error: (xhr, status, error) => {
           console.error("Error fetching user info:", error);
@@ -255,59 +262,73 @@ const App = {
     if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
   },
 
-updateCurrencyTooltip: function (lastClaimDate) {
-  const countdownElement = $('#currency-countdown');
+  // Update the currency tooltip with countdown
+  updateCurrencyTooltip: function (lastClaimDate) {
+    const tooltipElement = $('#currency-container');
 
-  const updateCountdown = () => {
-    const now = new Date();
-    const lastClaim = new Date(lastClaimDate);
-    const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
-    let timeUntilNextClaim = nextClaimTime - now;
+    const updateCountdown = () => {
+      const now = new Date();
+      const lastClaim = new Date(lastClaimDate);
+      const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
+      let timeUntilNextClaim = nextClaimTime - now;
 
-    if (timeUntilNextClaim < 0) {
-      timeUntilNextClaim = 0;
-    }
+      if (timeUntilNextClaim <= 0) {
+        tooltipElement.attr('data-original-title', 'Currency available! Click to claim.');
+        tooltipElement.tooltip('fixTitle');
+        this.claimCurrency();
+        clearInterval(this.currencyInterval);
+        return;
+      }
 
-    const hours = Math.floor(timeUntilNextClaim / (60 * 60 * 1000));
-    const minutes = Math.floor((timeUntilNextClaim % (60 * 60 * 1000)) / (60 * 1000));
-    const seconds = Math.floor((timeUntilNextClaim % (60 * 1000)) / 1000);
+      const hours = Math.floor(timeUntilNextClaim / (60 * 60 * 1000));
+      const minutes = Math.floor((timeUntilNextClaim % (60 * 60 * 1000)) / (60 * 1000));
+      const seconds = Math.floor((timeUntilNextClaim % (60 * 1000)) / 1000);
 
-    const countdownText = timeUntilNextClaim > 0
-      ? `Next currency in ${hours}h ${minutes}m ${seconds}s`
-      : 'Currency available!';
+      const tooltipText = `Next currency in ${hours}h ${minutes}m ${seconds}s`;
+      tooltipElement.attr('data-original-title', tooltipText);
+      tooltipElement.tooltip('fixTitle');
+    };
 
-    countdownElement.text(countdownText);
-
-    // Automatically claim currency when countdown reaches zero
-    if (timeUntilNextClaim <= 0) {
-      this.claimCurrency();
+    // Clear any existing interval
+    if (this.currencyInterval) {
       clearInterval(this.currencyInterval);
-      countdownElement.text('Currency available!');
     }
-  };
 
-  // Initial countdown update
-  updateCountdown();
+    // Initial countdown update
+    updateCountdown();
 
-  // Update countdown every second
-  this.currencyInterval = setInterval(updateCountdown, 1000);
-},
-
-claimCurrency: function () {
-  const token = localStorage.getItem("token");
-  $.ajax({
-    url: "/api/claim-daily-currency",
-    method: "POST",
-    headers: { "Authorization": `Bearer ${token}` },
-    success: (response) => {
-      $("#currency-amount").text(response.newBalance);
-      this.updateCurrencyTooltip(response.lastClaimDate);
-    },
-    error: (xhr) => {
-      console.error("Error claiming currency:", xhr.responseText);
-    },
-  });
-},
+    // Update countdown every second
+    this.currencyInterval = setInterval(updateCountdown, 1000);
+  },
+  
+  // Claim currency when available
+  claimCurrency: function () {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. User might not be logged in.");
+      return;
+    }
+    $.ajax({
+      url: "/api/claim-daily-currency",
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
+      success: (response) => {
+        $("#currency-amount").text(response.newBalance);
+        this.updateCurrencyTooltip(response.lastClaimDate);
+        $('#currency-container').tooltip('show');
+      },
+      error: (xhr) => {
+        console.error("Error claiming currency:", xhr.responseText);
+        if (xhr.status === 400) {
+          // If currency was already claimed, update the tooltip with the correct time
+          const errorData = JSON.parse(xhr.responseText);
+          if (errorData.lastClaimDate) {
+            this.updateCurrencyTooltip(errorData.lastClaimDate);
+          }
+        }
+      },
+    });
+  },
 
   // Handle user logout
   logout: function () {
