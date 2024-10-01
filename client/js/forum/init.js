@@ -21,7 +21,7 @@ $(document).ready(function() {
 });
 
 function initHomePage() {
-    console.log('Initializing home page');
+   // console.log('Initializing home page');
     loadForumSections('all');
     const urlParams = new URLSearchParams(window.location.search);
     const page = parseInt(urlParams.get('page')) || 1;
@@ -32,7 +32,7 @@ function initHomePage() {
 
 function initSectionPage() {
     const section = window.location.pathname.split('/').pop();
-    console.log('Initializing section page for:', section);
+  //  console.log('Initializing section page for:', section);
     updateSectionTitle(section);
     loadForumSections(section);
     const urlParams = new URLSearchParams(window.location.search);

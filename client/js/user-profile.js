@@ -419,7 +419,7 @@ $(document).ready(function () {
     // Initialize Bootstrap tabs
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       // You can add logic here to load items dynamically if needed
-      console.log('Tab switched to: ' + $(e.target).attr('href'));
+   //   console.log('Tab switched to: ' + $(e.target).attr('href'));
     });
   }
   

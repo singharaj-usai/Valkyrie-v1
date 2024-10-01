@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    console.log('Friends page initialized');
+    //console.log('Friends page initialized');
     const token = localStorage.getItem('token');
 
     if (!token) {

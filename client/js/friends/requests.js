@@ -1,5 +1,5 @@
 function fetchFriendRequests() {
-    console.log('Fetching friend requests');
+   // console.log('Fetching friend requests');
     const token = localStorage.getItem('token');
     $.ajax({
         url: '/api/friend-requests',
@@ -8,7 +8,7 @@ function fetchFriendRequests() {
             "Authorization": `Bearer ${token}`
         },
         success: function(requests) {
-            console.log('Friend requests received:', requests);
+         //   console.log('Friend requests received:', requests);
             displayFriendRequests(requests);
         },
         error: function(xhr, status, error) {

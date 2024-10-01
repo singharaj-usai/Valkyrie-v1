@@ -96,7 +96,7 @@ function deleteForumPost(postId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
-                console.log('Delete post response:', response);
+//                console.log('Delete post response:', response);
                 showAlert('success', 'Post deleted successfully.');
                 loadForumPosts();
             },
@@ -122,7 +122,7 @@ function deleteForumReply(replyId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
-                console.log('Delete reply response:', response);
+           //     console.log('Delete reply response:', response);
                 showAlert('success', 'Reply deleted successfully.');
                 loadForumPosts();
             },

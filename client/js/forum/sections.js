@@ -53,14 +53,14 @@ function getSectionIconClass(sectionId) {
 }
 
 function loadSectionPosts(section, page = 1) {
-    console.log('Loading posts for section:', section);
+   // console.log('Loading posts for section:', section);
     const apiUrl = section === 'all' ? '/api/forum/sections' : `/api/forum/sections/${section}`;
     $.ajax({
         url: apiUrl,
         method: 'GET',
         data: { page: page, limit: postsPerPage },
         success: function(response) {
-            console.log('Received posts:', response.posts);
+          //  console.log('Received posts:', response.posts);
             displayPosts(response.posts, '#section-posts');
             displayPagination(response.totalPages, page, section);
             updateSectionTitle(section);

@@ -16,7 +16,7 @@ const GamesDisplay = {
     },
 
     createGameElement: function(game) {
-        console.log('Game thumbnailUrl:', game.thumbnailUrl);
+       // console.log('Game thumbnailUrl:', game.thumbnailUrl);
         return `
             <div class="col-md-3 col-sm-6 mb-4">
                 <div class="thumbnail" style="position: relative;">

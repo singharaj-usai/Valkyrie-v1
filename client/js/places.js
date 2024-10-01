@@ -86,7 +86,6 @@ $(document).ready(function () {
                           </div>
                           <div class="panel-body">
                               <div style="position: relative; width: 100%; padding-top: 56.25%;">
-                                  ${console.log('Game year:', game.year)}
                                   ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : ''}
                                   <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
                               </div>
@@ -133,7 +132,6 @@ $(document).ready(function () {
     function openEditModal(gameId) {
         const game = games.find(g => g._id === gameId);
         if (game) {
-            console.log('Game being edited:', game);
             $('#edit-game-id').val(game._id);
             $('#edit-title').val(game.title);
             $('#edit-description').val(game.description);
@@ -152,7 +150,7 @@ $(document).ready(function () {
             return;
         }
 
-        console.log(`Sending DELETE request for game ID: ${gameId}`);
+       // console.log(`Sending DELETE request for game ID: ${gameId}`);
 
         $.ajax({
             url: `/api/games/${gameId}`,
@@ -161,7 +159,7 @@ $(document).ready(function () {
                 'Authorization': `Bearer ${token}`
             },
             success: function (response) {
-                console.log('Game deleted successfully:', response);
+            //    console.log('Game deleted successfully:', response);
                 fetchUserGames(); // Refresh the games list
                 showSuccess('Game deleted successfully');
             },
