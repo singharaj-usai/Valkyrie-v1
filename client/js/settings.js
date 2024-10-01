@@ -3,20 +3,36 @@ $(document).ready(function() {
     App.init();
     loadUserSettings();
 
+    // gender picker
+    $('.gender-option').on('click', function() {
+        $('.gender-option').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
     // Handle save settings button click
     $('#save-settings').on('click', saveUserSettings);
+    
 });
 
 function loadUserSettings() {
     const theme = localStorage.getItem('theme') || 'cyborg';
     $('#theme-select').val(theme);
     applyTheme(theme);
+
+    const gender = localStorage.getItem('gender') || 'other';
+    $(`#gender-picker input[value="${gender}"]`).prop('checked', true);
+
 }
 
 function saveUserSettings() {
     const theme = $('#theme-select').val();
+    const gender = $('#gender-picker input:checked').val();
+
     localStorage.setItem('theme', theme);
+    localStorage.setItem('gender', gender);
+
     applyTheme(theme);
+    
     showAlert('Settings saved successfully!', 'success');
 }
 
