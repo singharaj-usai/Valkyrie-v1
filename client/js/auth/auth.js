@@ -1,6 +1,6 @@
 let VERSION;
 
-$.getScript('./js/version.js', function() {
+$.getScript('/js/version.js', function() {
   VERSION = window.VERSION;
 });
 
