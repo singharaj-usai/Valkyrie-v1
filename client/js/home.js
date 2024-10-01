@@ -193,7 +193,7 @@ $(document).ready(function () {
     const socialMediaHtml = `
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Social MEdia Links</h3>
+                <h3 class="panel-title">Social Media Links</h3>
             </div>
             <div class="panel-body">
                 <div class="row">
