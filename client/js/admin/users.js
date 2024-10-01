@@ -1,6 +1,6 @@
 function loadUsers() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2 class="text-primary">User Management</h2><div id="user-management"></div>');
+    contentArea.html('<h2 class="text-primary">User Management</h2><div id="user-management" class="row"></div>');
 
     $.ajax({
         url: '/api/admin/users',
@@ -24,40 +24,36 @@ function displayUsers(users) {
     const currentAdminId = localStorage.getItem('userId');
     users.forEach(user => {
         const panel = $(`
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">${escapeHtml(user.username)}</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Email:</strong> ${escapeHtml(user.email)}</p>
-                            <p><strong>Signup Date:</strong> ${new Date(user.signupDate).toLocaleString()}</p>
-                            <p><strong>Status:</strong> 
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="user-info">
+                            <p><i class="fa fa-envelope"></i> ${escapeHtml(user.email)}</p>
+                            <p><i class="fa fa-calendar"></i> ${new Date(user.signupDate).toLocaleString()}</p>
+                            <p>
                                 <span class="label label-${user.isBanned ? 'danger' : 'success'}">
-                                    ${user.isBanned ? 'Banned' : 'Active'}
+                                    <i class="fa fa-${user.isBanned ? 'ban' : 'check'}"></i> ${user.isBanned ? 'Banned' : 'Active'}
                                 </span>
-                            </p>
-                            <p><strong>Role:</strong> 
                                 <span class="label label-${user.isAdmin ? 'primary' : 'default'}">
-                                    ${user.isAdmin ? 'Admin' : 'User'}
+                                    <i class="fa fa-${user.isAdmin ? 'shield' : 'user'}"></i> ${user.isAdmin ? 'Admin' : 'User'}
                                 </span>
                             </p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="btn-group-vertical btn-block" role="group">
-                                <button class="btn btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
-                                    ${user.isBanned ? 'Unban User' : 'Ban User'}
-                                </button>
-                                ${user.isAdmin ? 
-                                    (user._id !== currentAdminId ? 
-                                        `<button class="btn btn-danger demote-admin" data-user-id="${user._id}">Demote from Admin</button>` : 
-                                        '<button class="btn btn-success" disabled>Current Admin</button>'
-                                    ) : 
-                                    `<button class="btn btn-info promote-admin" data-user-id="${user._id}">Promote to Admin</button>`
-                                }
-                                <button class="btn btn-danger delete-user" data-user-id="${user._id}">Delete User</button>
-                            </div>
+                        <div class="user-actions mt-3">
+                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                                <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
+                            </button>
+                            ${user.isAdmin ? 
+                                (user._id !== currentAdminId ? 
+                                    `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote from Admin</button>` : 
+                                    '<button class="btn btn-sm btn-success" disabled><i class="fa fa-user-circle"></i> Current Admin</button>'
+                                ) : 
+                                `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>`
+                            }
+                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}"><i class="fa fa-trash"></i> Delete User</button>
                         </div>
                     </div>
                 </div>
@@ -104,7 +100,7 @@ function showBanModal(userId) {
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Ban User</h4>
+                    <h4 class="modal-title"><i class="fa fa-ban"></i> Ban User</h4>
                 </div>
                 <div class="modal-body">
                     <form id="banUserForm">
@@ -116,7 +112,7 @@ function showBanModal(userId) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmBan">Ban User</button>
+                    <button type="button" class="btn btn-danger" id="confirmBan"><i class="fa fa-check"></i> Ban User</button>
                 </div>
             </div>
         </div>
@@ -243,6 +239,6 @@ function showAlert(type, message) {
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             ${message}
                         </div>`);
-    $('#user-management').prepend(alertDiv);
+    $('#user-management').before(alertDiv);
     setTimeout(() => alertDiv.alert('close'), 5000);
 }
