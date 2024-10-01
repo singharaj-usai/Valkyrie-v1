@@ -116,9 +116,12 @@ router.get('/posts/:id', async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
+        const postCount = await ForumPost.countUserPosts(post.author._id);
+
         const responsePost = post.toObject();
         responsePost.upvotes = post.upvotes || 0;
         responsePost.downvotes = post.downvotes || 0;
+        responsePost.author.postCount = postCount;
 
         res.json(responsePost);
     } catch (error) {
@@ -292,6 +295,16 @@ router.get('/posts/:postId/comments', async (req, res) => {
         console.error('Error creating comment:', error);
         console.error('Error stack:', error.stack);
         res.status(500).json({ message: 'Error creating comment', error: error.message });
+    }
+});
+
+router.get('/user-post-count/:userId', async (req, res) => {
+    try {
+    const postCount = await ForumPost.countUserPosts(req.params.userId);
+    res.json(postCount);
+    } catch (error) {
+    console.error('Error fetching user post count:', error);
+    res.status(500).json({ message: 'Error fetching user post count' });
     }
 });
 

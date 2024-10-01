@@ -69,6 +69,10 @@ const forumPostSchema = new mongoose.Schema({
     },
 });
 
+forumPostSchema.statics.countUserPosts = function(userId) {
+    return this.countDocuments({ author: userId });
+};
+
 const ForumPost = mongoose.model('ForumPost', forumPostSchema);
 
 module.exports = ForumPost;

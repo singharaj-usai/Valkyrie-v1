@@ -19,8 +19,21 @@ function loadPost(postId) {
         url: `/api/forum/posts/id/${postId}`,
         method: 'GET',
         success: function(post) {
-            displayPost(post);
-            loadComments(postId);
+            // Fetch post count for the post author
+            $.ajax({
+                url: `/api/forum/user-post-count/${post.author._id}`,
+                method: 'GET',
+                success: function(postCount) {
+                    post.author.postCount = postCount;
+                    displayPost(post);
+                    loadComments(postId);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching author post count:', error);
+                    displayPost(post);
+                    loadComments(postId);
+                }
+            });
         },
         error: function(xhr, status, error) {
             console.error('Error loading post:', error);
@@ -41,13 +54,25 @@ function displayPost(post) {
     const userVote = post.userVote || 'none';
 
     postContainer.html(`
-        <div id="post-${post._id}" class="panel panel-info">
+        <div id="post-${post._id}" class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">${escapeHtml(post.title)}</h3>
-                <small>Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()}</small>
+                <span>
+                    <h3 class="panel-title" style="display: inline-block; margin-right: 10px;">Original Post:</h3>
+                    <small>Posted on ${new Date(post.createdAt).toLocaleString()}</small>
+                </span>
             </div>
             <div class="panel-body">
-                <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
+                <div class="row">
+                    <div class="col-md-2 col-sm-3 text-center">
+                        <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
+                        <h5><a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a></h5>
+                        <p id="user-status-${post.author._id}" class="small">Loading status...</p>
+                        <p class="small">Posts: ${post.author.postCount || 0}</p>
+                    </div>
+                    <div class="col-md-10 col-sm-9">
+                        <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
+                    </div>
+                </div>
             </div>
             <div class="panel-footer">
                 <button class="btn btn-sm btn-success vote-button ${userVote === 'up' ? 'active' : ''}" data-vote="up">
@@ -67,6 +92,14 @@ function displayPost(post) {
     $('.vote-button').on('click', function() {
         const voteType = $(this).data('vote');
         votePost(post._id, voteType);
+    });
+
+    // Load user status
+    fetchUserStatus(post.author.username).then(isOnline => {
+        const onlineStatus = isOnline 
+            ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
+            : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
+        $(`#user-status-${post.author._id}`).html(onlineStatus);
     });
 
     // Load comments
