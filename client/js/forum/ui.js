@@ -1,32 +1,77 @@
+
 function displayPosts(posts, containerId = '#recent-posts') {
     const postsContainer = $(containerId);
     postsContainer.empty();
 
-    posts.forEach(post => {
-        const replyCount = post.replyCount || 0;
-        const postElement = $(`
-            <div class="panel panel-default forum-post">
-                <div class="panel-heading forum-post-header">
-                    <h3 class="panel-title">
-                        <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
-                    </h3>
-                    <small>
-                        Posted by <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a> on ${new Date(post.createdAt).toLocaleString()} 
-                        in ${getSectionName(post.section)}
-                        
-                    </small>
-                </div>
-                <div class="panel-body forum-post-body">
-                    <p>${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</p>
-                </div>
-                <div class="panel-footer">
-                    <a href="/forum/post?id=${post._id}" class="btn btn-xs btn-primary">Read More</a>
-                    <span class="badge pull-right">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>
-                </div>
-            </div>
-        `);
+    const sections = {};
 
-        postsContainer.append(postElement);
+    posts.forEach(post => {
+        if (!sections[post.section]) {
+            sections[post.section] = [];
+        }
+        sections[post.section].push(post);
+    });
+
+    //  order of sections
+    const sectionOrder = ['announcements', 'general', 'game-dev', 'support', 'off-topic'];
+
+    sectionOrder.forEach(sectionId => {
+        if (sections[sectionId] && sections[sectionId].length > 0) {
+            const sectionPosts = sections[sectionId];
+            const sectionName = getSectionName(sectionId);
+
+            const sectionTable = $(`
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">${sectionName}</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Topic</th>
+                                    <th style="width: 20%">Author</th>
+                                    <th style="width: 10%">Replies</th>
+                                    <th style="width: 30%">Last Post</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `);
+
+            const tableBody = sectionTable.find('tbody');
+
+            sectionPosts.forEach(post => {
+                const replyCount = post.replyCount || 0;
+                const lastComment = post.lastComment || post; 
+                const lastPostDate = new Date(lastComment.createdAt).toLocaleString();
+                const lastPostAuthor = lastComment.author ? lastComment.author.username : post.author.username;
+
+                const row = $(`
+                    <tr>
+                        <td>
+                            <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
+                        </td>
+                        <td>
+                            <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a>
+                        </td>
+                        <td>${replyCount}</td>
+                        <td>
+                            ${lastPostDate}
+                            <br>
+                            by <a href="/user-profile?username=${lastPostAuthor}">${escapeHtml(lastPostAuthor)}</a>
+                        </td>
+                    </tr>
+                `);
+
+                tableBody.append(row);
+            });
+
+            postsContainer.append(sectionTable);
+        }
     });
 }
 
