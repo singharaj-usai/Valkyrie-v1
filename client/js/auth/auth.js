@@ -241,10 +241,11 @@ const App = {
           this.initLogout();
           $('#user-submenu').show();
 
-          // Initialize the tooltip
+          // Initialize the tooltip with HTML support
           $('#currency-container').tooltip({
             trigger: 'hover',
-            html: true
+            html: true,
+            container: 'body'
           });
         },
         error: (xhr, status, error) => {
@@ -273,7 +274,8 @@ const App = {
       let timeUntilNextClaim = nextClaimTime - now;
 
       if (timeUntilNextClaim <= 0) {
-        tooltipElement.attr('data-original-title', 'Currency available! Click to claim.');
+        // Currency is available; automatically claim it
+        tooltipElement.attr('data-original-title', 'Currency available! Granting now...');
         tooltipElement.tooltip('fixTitle');
         this.claimCurrency();
         clearInterval(this.currencyInterval);
@@ -286,10 +288,16 @@ const App = {
 
       const tooltipText = `Next currency in ${hours}h ${minutes}m ${seconds}s`;
       tooltipElement.attr('data-original-title', tooltipText);
+
+      // If the tooltip is currently visible, update its content directly
+      if ($('.tooltip.in').length && tooltipElement.is(':hover')) {
+        $('.tooltip.in .tooltip-inner').html(tooltipText);
+      }
+
       tooltipElement.tooltip('fixTitle');
     };
 
-    // Clear any existing interval
+    // Clear any existing interval to prevent multiple intervals running
     if (this.currencyInterval) {
       clearInterval(this.currencyInterval);
     }
@@ -300,7 +308,6 @@ const App = {
     // Update countdown every second
     this.currencyInterval = setInterval(updateCountdown, 1000);
   },
-  
   // Claim currency when available
   claimCurrency: function () {
     const token = localStorage.getItem("token");
@@ -315,7 +322,7 @@ const App = {
       success: (response) => {
         $("#currency-amount").text(response.newBalance);
         this.updateCurrencyTooltip(response.lastClaimDate);
-        $('#currency-container').tooltip('show');
+        $('#currency-container').tooltip('show').attr('data-original-title', 'Currency granted!').tooltip('fixTitle');
       },
       error: (xhr) => {
         console.error("Error claiming currency:", xhr.responseText);
