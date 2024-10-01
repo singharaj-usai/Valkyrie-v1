@@ -1,6 +1,6 @@
 function loadForumPosts() {
     const contentArea = $('#content-area');
-    contentArea.html('<h2 class="text-primary">Forum Posts and Replies</h2><div id="forum-posts-list"></div>');
+    contentArea.html('<h2 class="text-primary">Forum Posts and Replies</h2><div id="forum-posts-list" class="mt-4"></div>');
 
     $.ajax({
         url: '/api/admin/forum-posts',
@@ -24,14 +24,14 @@ function displayForumPosts(posts) {
     posts.forEach(post => {
         const sectionName = getSectionName(post.section);
         const postElement = $(`
-            <div class="panel panel-primary">
+            <div class="panel panel-primary mb-4">
                 <div class="panel-heading">
                     <h3 class="panel-title">${escapeHtml(post.title)}</h3>
                 </div>
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-9">
-                            <p>${escapeHtml(post.content ? post.content.substring(0, 200) : '')}...</p>
+                            <p class="lead">${escapeHtml(post.content ? post.content.substring(0, 200) : '')}...</p>
                         </div>
                         <div class="col-md-3">
                             <ul class="list-group">
@@ -39,7 +39,9 @@ function displayForumPosts(posts) {
                                 <li class="list-group-item"><strong>Section:</strong> ${sectionName}</li>
                                 <li class="list-group-item"><strong>Created:</strong> ${new Date(post.createdAt).toLocaleString()}</li>
                             </ul>
-                            <button class="btn btn-danger btn-block delete-post" data-post-id="${post._id}">Delete Post</button>
+                            <button class="btn btn-danger btn-block mt-3 delete-post" data-post-id="${post._id}">
+                                <i class="glyphicon glyphicon-trash"></i> Delete Post
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -53,7 +55,7 @@ function displayForumPosts(posts) {
         const repliesList = postElement.find('.replies-list');
         post.comments.forEach(reply => {
             repliesList.append(`
-                <div class="panel panel-info">
+                <div class="panel panel-info mb-2">
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-9">
@@ -64,7 +66,9 @@ function displayForumPosts(posts) {
                                     <li class="list-group-item"><strong>Author:</strong> ${escapeHtml(reply.author.username)}</li>
                                     <li class="list-group-item"><strong>Created:</strong> ${new Date(reply.createdAt).toLocaleString()}</li>
                                 </ul>
-                                <button class="btn btn-danger btn-block delete-reply" data-reply-id="${reply._id}">Delete Reply</button>
+                                <button class="btn btn-warning btn-block mt-2 delete-reply" data-reply-id="${reply._id}">
+                                    <i class="glyphicon glyphicon-remove"></i> Delete Reply
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -96,7 +100,6 @@ function deleteForumPost(postId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
-//                console.log('Delete post response:', response);
                 showAlert('success', 'Post deleted successfully.');
                 loadForumPosts();
             },
@@ -122,7 +125,6 @@ function deleteForumReply(replyId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             success: function(response) {
-           //     console.log('Delete reply response:', response);
                 showAlert('success', 'Reply deleted successfully.');
                 loadForumPosts();
             },
@@ -147,9 +149,9 @@ function getSectionName(sectionId) {
 }
 
 function showAlert(type, message) {
-    const alertElement = $(`<div class="alert alert-${type} alert-dismissible" role="alert">
+    const alertElement = $(`<div class="alert alert-${type} alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        ${message}
+        <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}
     </div>`);
     $('#content-area').prepend(alertElement);
     setTimeout(() => alertElement.alert('close'), 5000);
