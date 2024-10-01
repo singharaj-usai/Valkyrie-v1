@@ -52,7 +52,7 @@ function displayGames(games) {
                         <h4 class="modal-title" id="deleteGameModalLabel">Confirm Deletion</h4>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you want to delete the game "<span id="title"></span>"?</p>
+                        <p>Are you sure you want to delete the game "<span id="delete-game-title"></span>"?</p>
                         <p class="text-danger"><strong>This action cannot be undone.</strong></p>
                     </div>
                     <div class="modal-footer">
@@ -66,16 +66,19 @@ function displayGames(games) {
 
     $('.delete-game').on('click', function() {
         const gameId = $(this).data('game-id');
-        const gameTitle = $(this).data('game-title');
-        $('#gameTitle').text(gameTitle);
-        $('#confirmDelete').data('game-id', gameId);
-        $('#deleteGameModal').modal('show');
+        const game = games.find(g => g._id === gameId);
+        if (game) {
+            gameToDelete = game;
+            $('#delete-game-title').text(game.title);
+            $('#deleteGameModal').modal('show');
+        }
     });
 
     $('#confirmDelete').on('click', function() {
-        const gameId = $(this).data('game-id');
-        deleteGame(gameId);
-        $('#deleteGameModal').modal('hide');
+        if (gameToDelete) {
+            deleteGame(gameToDelete._id);
+            $('#deleteGameModal').modal('hide');
+        }
     });
 }
 
