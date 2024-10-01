@@ -147,47 +147,68 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
         const { voteType } = req.body;
         const userId = req.user._id;
 
+        if (!['up', 'down'].includes(voteType)) {
+            return res.status(400).json({ message: 'Invalid vote type' });
+        }
+
         const post = await ForumPost.findById(id);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        const userVoteIndex = post.userVotes.findIndex(vote => vote.user.toString() === userId.toString());
+        // Ensure upvotes and downvotes are numbers
+        if (typeof post.upvotes !== 'number') post.upvotes = 0;
+        if (typeof post.downvotes !== 'number') post.downvotes = 0;
+
+        const existingVote = post.userVotes.find(vote => vote.user.toString() === userId.toString());
+
+        let message = '';
+        let changed = false;
 
         if (voteType === 'up') {
-            if (userVoteIndex === -1) {
+            if (!existingVote) {
                 post.upvotes += 1;
                 post.userVotes.push({ user: userId, vote: 'up' });
-            } else if (post.userVotes[userVoteIndex].vote === 'down') {
+                message = 'Upvote added successfully';
+                changed = true;
+            } else if (existingVote.vote === 'down') {
                 post.upvotes += 1;
-                post.downvotes -= 1;
-                post.userVotes[userVoteIndex].vote = 'up';
+                post.downvotes = Math.max(post.downvotes - 1, 0);
+                existingVote.vote = 'up';
+                message = 'Vote changed from downvote to upvote';
+                changed = true;
             } else {
-                post.upvotes -= 1;
-                post.userVotes.splice(userVoteIndex, 1);
+                message = 'You have already upvoted this post';
             }
         } else if (voteType === 'down') {
-            if (userVoteIndex === -1) {
+            if (!existingVote) {
                 post.downvotes += 1;
                 post.userVotes.push({ user: userId, vote: 'down' });
-            } else if (post.userVotes[userVoteIndex].vote === 'up') {
+                message = 'Downvote added successfully';
+                changed = true;
+            } else if (existingVote.vote === 'up') {
                 post.downvotes += 1;
-                post.upvotes -= 1;
-                post.userVotes[userVoteIndex].vote = 'down';
+                post.upvotes = Math.max(post.upvotes - 1, 0);
+                existingVote.vote = 'down';
+                message = 'Vote changed from upvote to downvote';
+                changed = true;
             } else {
-                post.downvotes -= 1;
-                post.userVotes.splice(userVoteIndex, 1);
+                message = 'You have already downvoted this post';
             }
-        } else {
-            return res.status(400).json({ message: 'Invalid vote type' });
         }
 
-        await post.save();
+        if (changed) {
+            await post.save();
+        }
+
+        const updatedVote = post.userVotes.find(vote => vote.user.toString() === userId.toString());
 
         res.json({
             upvotes: post.upvotes,
             downvotes: post.downvotes,
-            userVote: userVoteIndex !== -1 ? post.userVotes[userVoteIndex].vote : 'none'
+            userVote: updatedVote ? updatedVote.vote : 'none',
+            message: message,
+            changed: changed
         });
     } catch (error) {
         console.error('Error voting on post:', error);
