@@ -19,6 +19,8 @@ function loadGames() {
 
 function displayGames(games) {
     const gamesList = $('#games-list');
+    gamesList.empty(); // Clear existing games before appending new ones
+
     games.forEach(game => {
         gamesList.append(`
             <div class="col-md-4 col-sm-6 mb-4">
@@ -32,6 +34,7 @@ function displayGames(games) {
                         </div>
                         <p><strong>Creator:</strong> ${escapeHtml(game.creator.username)}</p>
                         <p><strong>Created:</strong> ${new Date(game.createdAt).toLocaleString()}</p>
+                        <p><strong>Description:</strong> ${escapeHtml(game.description || 'No description provided.')}</p>
                     </div>
                     <div class="panel-footer">
                         <button class="btn btn-danger btn-block delete-game" data-game-id="${game._id}">
