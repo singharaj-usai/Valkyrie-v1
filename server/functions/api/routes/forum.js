@@ -229,7 +229,7 @@ router.get('/posts/:id/comments', async (req, res) => {
         const post = await ForumPost.findById(id).populate({
             path: 'comments',
             populate: { path: 'author', select: 'username' },
-            options: { sort: { createdAt: -1 } }
+            options: { sort: { createdAt: 1 } }
         });
 
         if (!post) {
