@@ -50,35 +50,44 @@ function loadOverview() {
                 <h3 class="panel-title">Welcome to the Admin Dashboard</h3>
             </div>
             <div class="panel-body">
-                <p>Select a section from the sidebar to manage different aspects of the website.</p>
+                <p class="lead">Select a section from the sidebar or click on a panel below to manage different aspects of the website.</p>
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="panel panel-info">
+                        <div class="panel panel-info clickable-panel" data-section="forum-posts">
                             <div class="panel-heading">
-                                <h4 class="panel-title">Forum Posts</h4>
+                                <h4 class="panel-title"><i class="fa fa-comments"></i> Forum Posts</h4>
                             </div>
                             <div class="panel-body">
                                 <p>Manage and moderate forum discussions.</p>
+                                <button class="btn btn-info btn-block">
+                                    <span class="underline">Go to Forum Posts</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="panel panel-success">
+                        <div class="panel panel-success clickable-panel" data-section="users">
                             <div class="panel-heading">
-                                <h4 class="panel-title">Users</h4>
+                                <h4 class="panel-title"><i class="fa fa-users"></i> Users</h4>
                             </div>
                             <div class="panel-body">
                                 <p>View and manage user accounts.</p>
+                                <button class="btn btn-success btn-block">
+                                    <span class="underline">Go to Users</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="panel panel-warning">
+                        <div class="panel panel-warning clickable-panel" data-section="games">
                             <div class="panel-heading">
-                                <h4 class="panel-title">Games</h4>
+                                <h4 class="panel-title"><i class="fa fa-gamepad"></i> Games</h4>
                             </div>
                             <div class="panel-body">
                                 <p>Oversee and manage game listings.</p>
+                                <button class="btn btn-warning btn-block">
+                                    <span class="underline">Go to Games</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -86,6 +95,24 @@ function loadOverview() {
             </div>
         </div>
     `);
+
+    // Add click event listeners to the panels
+    $('.clickable-panel').on('click', function() {
+        const section = $(this).data('section');
+        $('.nav-sidebar li').removeClass('active');
+        $(`.nav-sidebar a[data-section="${section}"]`).parent().addClass('active');
+        loadSection(section);
+    });
+
+    // Add custom CSS for underline
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`
+            .underline {
+                text-decoration: underline;
+            }
+        `)
+        .appendTo('head');
 }
 
 function logout() {
