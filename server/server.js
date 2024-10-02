@@ -183,9 +183,8 @@ app.post('/moderation/filtertext', (req, res) => {
         message: "",
         success: true,
         data: {
-            additionalProp1: censoredText, // Can represent the original text or censored version
-            additionalProp2: "ok",         // Example for the 'blacklist' or fixed response
-            additionalProp3: "extra info"  // Any additional information
+            white: whiteText, // Can represent the original text or censored version
+            black: whiteText,
         }
     };
   
