@@ -180,9 +180,12 @@ app.post('/moderation/filtertext', (req, res) => {
     const whiteText = text;  // Original posted text
   
     const response = {
+        message: "",
+        success: true,
         data: {
-            white: whiteText,
-            black: "ok"
+            additionalProp1: censoredText, // Can represent the original text or censored version
+            additionalProp2: "ok",         // Example for the 'blacklist' or fixed response
+            additionalProp3: "extra info"  // Any additional information
         }
     };
   
