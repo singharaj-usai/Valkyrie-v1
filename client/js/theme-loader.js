@@ -10,6 +10,11 @@
             submenuTop = '50px'; // Adjust this value as needed for the Cyborg theme
         }
         document.documentElement.style.setProperty('--user-submenu-top', submenuTop);
+
+        // Trigger submenu position update
+        if (typeof updateSubmenuPosition === 'function') {
+            updateSubmenuPosition();
+        }
     }
 
     const theme = localStorage.getItem('theme') || 'paper';
