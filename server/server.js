@@ -141,6 +141,13 @@ app.use('/', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, '../client')));
 
+// Serve static files from the images directory
+app.use('/images', express.static(path.join(__dirname, '../images'), {
+  setHeaders: (res, path) => {
+    res.set('X-Content-Type-Options', 'nosniff');
+  }
+}));
+
 // Handle clean URLs for HTML files
 app.get('*', (req, res, next) => {
   const filePath = path.join(__dirname, '../client', req.path + '.html');
