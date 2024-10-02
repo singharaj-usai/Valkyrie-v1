@@ -60,7 +60,7 @@ function decryptSecretKey(encryptedKey) {
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
 
-  if (req.path.startsWith('/game/players/') || req.path === '/images/Valkyrie404.png') {
+  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path === '/images/Valkyrie404.png') {
     return next();  // Skip maintenance check for these routes
   }
   
@@ -172,6 +172,21 @@ app.get('/', (req, res) => {
 
 app.get('/game/players/:id', (req, res) => {
     res.json({ ChatFilter: 'blacklist' });
+});
+
+app.post('/moderation/filtertext', (req, res) => {
+    const { text } = req.body; // Extract 'text' from the request body
+  
+    const whiteText = text;  // Original posted text
+  
+    const response = {
+        data: {
+            white: whiteText,
+            black: "ok"
+        }
+    };
+  
+    res.json(response);
 });
 
 const adminRoutes = require('./functions/api/routes/admin');
