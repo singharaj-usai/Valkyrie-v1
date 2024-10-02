@@ -59,6 +59,11 @@ function decryptSecretKey(encryptedKey) {
 // Add this middleware before your routes
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
+
+  if (req.path.startsWith('/game/players/')) {
+    return next();  // Skip maintenance check for this route
+  }
+  
   if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
     const bypassCookie = req.cookies.maintenanceBypass;
     if (!bypassCookie || decryptSecretKey(bypassCookie) !== SECRET_KEY) {
