@@ -59,6 +59,11 @@ function decryptSecretKey(encryptedKey) {
 // Add this middleware before your routes
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
+
+  if (req.path.startsWith('/game/players/')) {
+    return next();  // Skip maintenance check for this route
+  }
+  
   if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
     const bypassCookie = req.cookies.maintenanceBypass;
     if (!bypassCookie || decryptSecretKey(bypassCookie) !== SECRET_KEY) {
@@ -163,6 +168,10 @@ app.use('/', pageRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/html/pages/home/index.html'));
+});
+
+app.get('/game/players/:id', (req, res) => {
+    res.json({ ChatFilter: 'blacklist' });
 });
 
 const adminRoutes = require('./functions/api/routes/admin');
