@@ -165,6 +165,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/html/pages/home/index.html'));
 });
 
+app.get('/game/players/:id', (req, res) => {
+    res.json({ ChatFilter: 'blacklist' });
+});
+
 const adminRoutes = require('./functions/api/routes/admin');
 app.use('/api/admin', adminRoutes);
 
