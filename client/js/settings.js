@@ -38,9 +38,16 @@ function saveUserSettings() {
 
 function applyTheme(theme) {
     localStorage.setItem('theme', theme);
-    const themeLoader = document.createElement('script');
-    themeLoader.src = '/js/theme-loader.js';
-    document.head.appendChild(themeLoader);
+    document.documentElement.setAttribute('data-theme', theme);
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    themeStylesheet.href = `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/${theme}/bootstrap.min.css`;
+    
+    // Update CSS variable for user-submenu top position
+    let submenuTop = '65px'; // Default value
+    if (theme === 'cyborg') {
+        submenuTop = '50px'; // Adjust this value as needed for the Cyborg theme
+    }
+    document.documentElement.style.setProperty('--user-submenu-top', submenuTop);
 }
 
 function showAlert(message, type) {
