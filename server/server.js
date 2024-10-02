@@ -60,8 +60,8 @@ function decryptSecretKey(encryptedKey) {
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
 
-  if (req.path.startsWith('/game/players/')) {
-    return next();  // Skip maintenance check for this route
+  if (req.path.startsWith('/game/players/') || req.path === '/images/Valkyrie404.png') {
+    return next();  // Skip maintenance check for these routes
   }
   
   if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
