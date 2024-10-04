@@ -41,13 +41,15 @@
     "express-validator": "^7.2.0",
     "fs": "^0.0.1-security",
     "googleapis": "^144.0.0",
+    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.6.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
     "path": "^0.12.7",
-    "request-ip": "^3.3.0"
+    "request-ip": "^3.3.0",
+    "socket.io": "^4.8.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
