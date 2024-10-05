@@ -53,53 +53,59 @@ $(document).ready(function () {
     
         if (games.length === 0) {
             const noPlacesHtml = `
-                <div class="col-md-12">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">My Places</h3>
-                        </div>
-                        <div class="panel-body text-center">
-                            <i class="bi bi-emoji-frown" style="font-size: 64px; color: #999; margin-bottom: 20px;"></i>
-                            <h3>No Places Yet</h3>
-                            <p class="lead">You haven't created any places yet. Start building your first game!</p>
-                            <a href="/upload" class="btn btn-primary btn-lg mt-3">
-                                <i class="bi bi-plus-circle"></i> Create Your First Place
-                            </a>
-                        </div>
-                    </div>
+                <div class="list-group-item text-center">
+                    <h4>No Places Yet</h4>
+                    <p>You haven't created any places yet. Start building your first game!</p>
+                    <a href="/upload" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Your First Place
+                    </a>
                 </div>
             `;
             placesContainer.html(noPlacesHtml);
         } else {
+            const tableHtml = `
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Thumbnail</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Genre</th>
+                            <th>Max Players</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="games-table-body">
+                    </tbody>
+                </table>
+            `;
+            placesContainer.html(tableHtml);
+            
+            const tableBody = $('#games-table-body');
             games.forEach(game => {
                 const lastUpdatedInfo = game.updatedAt && game.createdAt !== game.updatedAt
-                    ? `<p><strong>Last Updated:</strong> ${new Date(game.updatedAt).toLocaleString()}</p>`
-                    : '';
-        
-                    const gameElement = `
-                    <div class="col-md-4 col-sm-6 mb-4">
-                      <div class="panel panel-primary">
-                          <div class="panel-heading">
-                              <h3 class="panel-title">
-                                  <a href="/game?id=${game._id}" style="color: white;">${escapeHtml(game.title)}</a>
-                              </h3>
-                          </div>
-                          <div class="panel-body">
-                              <div style="position: relative; width: 100%; padding-top: 56.25%;">
-                                  ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>` : ''}
-                                  <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-                              </div>
-                              <p class="mt-2">${escapeHtml(game.description)}</p>
-                              <p><strong>Genre:</strong> ${escapeHtml(game.genre || 'Not specified')}</p>
-                              <p><strong>Max Players:</strong> ${game.maxPlayers || 'Not specified'}</p>
-                              ${lastUpdatedInfo}
-                              <button class="btn btn-primary btn-sm edit-game" data-game-id="${game._id}">Edit</button>
-                              <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete</button>
-                          </div>
-                      </div>
-                    </div>
-                  `;
-                placesContainer.append(gameElement);
+                    ? new Date(game.updatedAt).toLocaleString()
+                    : 'N/A';
+                const gameRow = `
+                <tr>
+                    <td>
+                        <a href="/game?id=${game._id}">
+                            <img src="${game.thumbnailUrl}" alt="${escapeHtml(game.title)}" class="img-responsive" style="width: 100px; height: auto;">
+                        </a>
+                    </td>
+                    <td>${escapeHtml(game.title)}</td>
+                    <td>${escapeHtml(game.description)}</td>
+                    <td>${escapeHtml(game.genre || 'Not specified')}</td>
+                    <td>${game.maxPlayers || 'Not specified'}</td>
+                    <td>${lastUpdatedInfo}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm edit-game" data-game-id="${game._id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-game" data-game-id="${game._id}">Delete</button>
+                    </td>
+                </tr>
+                `;
+                tableBody.append(gameRow);
             });
         }
     
@@ -121,8 +127,8 @@ $(document).ready(function () {
         });
     }
 
-       // Add this new event listener for the confirm delete button in the modal
-       $('#confirm-delete-game').on('click', function() {
+    // Add this new event listener for the confirm delete button in the modal
+    $('#confirm-delete-game').on('click', function() {
         if (gameToDelete) {
             deleteGame(gameToDelete._id);
             $('#deleteGameModal').modal('hide');
