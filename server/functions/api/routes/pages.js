@@ -31,7 +31,7 @@ router.get("/forum/sections/:section", (req, res) => sendHtmlFile(res, "pages/fo
 router.get("/catalog", (req, res) => sendHtmlFile(res, "pages/catalog/catalog.html"));
 
 // User's personal pages
-router.get("/my/places", (req, res) => sendHtmlFile(res, "pages/my/places/places.html"));
+router.get("/my/create", (req, res) => sendHtmlFile(res, "pages/my/create/create.html"));
 router.get("/my/friends", (req, res) => sendHtmlFile(res, "pages/my/friends.html"));
 router.get("/my/messages", (req, res) => sendHtmlFile(res, "pages/my/messages.html"));
 router.get("/messages/compose", (req, res) => sendHtmlFile(res, "pages/my/compose/compose.html"));
