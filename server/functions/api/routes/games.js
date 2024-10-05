@@ -107,7 +107,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
 
         // Upload .rbxl file to S3
         const rbxlKey = `${assetHash}`; // more hidden
-        const AssetLocation = `https://c2.rblx18.com/${assetId}`;
+        const AssetLocation = `https://c2.rblx18.com/${assetHash}`;
         await s3.upload({
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: rbxlKey,
