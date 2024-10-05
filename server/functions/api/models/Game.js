@@ -50,13 +50,8 @@ const gameSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    
-    rbxlFile: {
-        type: String,
-        required: true
-    },
     assetId: {
-        type: String,
+        type: Number,
         required: true,
         unique: true
     },
