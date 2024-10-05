@@ -9,20 +9,26 @@ const jwt = require('jsonwebtoken');
 const Filter = require("bad-words");
 const crypto = require('crypto'); // Add this line to import the crypto module
 
+const AWS = require('aws-sdk');
 
 
 const filter = new Filter();
 
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      const uploadPath = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : path.join(__dirname, '../../../../uploads');
-      cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname);
-    }
+// Configure AWS
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
 });
+
+const s3 = new AWS.S3();
+
+
+
+
+const storage = multer.memoryStorage();
+
 
 const upload = multer({ 
     storage: storage,
@@ -64,7 +70,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     {name: 'thumbnail', maxCount: 1},
     {name: 'rbxlFile', maxCount: 1}
 
-  ]), (req, res) => {
+  ]), async (req, res) => {
     if (!req.files['thumbnail'] || !req.files['rbxlFile']) {
       return res.status(400).json({ error: 'Both thumbnail and .rbxl file are required' });
   }
@@ -80,47 +86,43 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
     }
   
-    const thumbnailUrl = `/uploads/${req.files['thumbnail'][0].filename}`;
-    console.log('Saved thumbnailUrl:', thumbnailUrl);
+       const assetId = generateAssetId();
 
-    const rbxlFileUrl = `/uploads/${req.files['rbxlFile'][0].filename}`;
-    console.log('Saved rbxlFileUrl:', rbxlFileUrl);
-  
-    const assetId = generateAssetId();
+    try {
+        // Upload thumbnail to local storage
+        const thumbnailUrl = `/uploads/${Date.now()}-${req.files['thumbnail'][0].originalname}`;
+        fs.writeFileSync(path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)), req.files['thumbnail'][0].buffer);
 
+        // Upload .rbxl file to S3
+        const rbxlKey = `rbxl-files/${assetId}.rbxl`;
+        await s3.upload({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: rbxlKey,
+            Body: req.files['rbxlFile'][0].buffer,
+            ContentType: 'application/octet-stream'
+        }).promise();
 
-    const game = new Game({
-      title: filter.clean(title),
-      description: filter.clean(description),
-      thumbnailUrl,
-      rbxlFile: rbxlFileUrl,
-      assetId,
-      creator: req.user.userId,
-      genre,
-      maxPlayers: parseInt(maxPlayers, 10),
-      year: parseInt(year, 10)
-    });
-  
-    game.save()
-      .then(() => User.findByIdAndUpdate(req.user.userId, { $push: { games: game._id } }))
-      .then(() => {
-        res.status(201).json({ gameId: game._id });
-      })
-      .catch(error => {
+        const game = new Game({
+            title: filter.clean(title),
+            description: filter.clean(description),
+            thumbnailUrl,
+            rbxlFile: rbxlKey,
+            assetId,
+            creator: req.user.userId,
+            genre,
+            maxPlayers: parseInt(maxPlayers, 10),
+            year: parseInt(year, 10)
+        });
+
+        await game.save();
+        await User.findByIdAndUpdate(req.user.userId, { $push: { games: game._id } });
+
+        res.status(201).json({ gameId: game._id, assetId: game.assetId });
+    } catch (error) {
         console.error('Error saving game:', error);
-        if (req.files['thumbnail'] && req.files['thumbnail'][0].path) {
-          fs.unlink(req.files['thumbnail'][0].path, (unlinkError) => {
-              if (unlinkError) console.error('Error deleting thumbnail:', unlinkError);
-          });
-      }
-      if (req.files['rbxlFile'] && req.files['rbxlFile'][0].path) {
-          fs.unlink(req.files['rbxlFile'][0].path, (unlinkError) => {
-              if (unlinkError) console.error('Error deleting .rbxl file:', unlinkError);
-          });
-      }
         res.status(500).json({ error: 'Error saving game', details: error.message });
-      });
-  });
+    }
+});
 
   // DELETE /api/games/:id
   router.delete('/:id', authenticateToken, async (req, res) => {
