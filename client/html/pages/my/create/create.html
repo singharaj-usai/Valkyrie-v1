@@ -41,10 +41,26 @@
         <div class="row">
             <div class="col-md-2">
                 <!-- Sidebar -->
-                <div class="new-build-container">
-                    <a href="#" class="btn btn-primary btn-block">
-                        <i class="bi bi-plus-circle"></i> Build New
-                    </a>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Create</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dropdown">
+                            <button class="btn btn-success btn-block dropdown-toggle" type="button" id="buildNewDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <i class="bi bi-plus-circle"></i> Build New
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="buildNewDropdown">
+                                <li><a href="/upload/place"><i class="bi bi-building"></i> Place</a></li>
+                                <li><a href="/upload/tshirt"><i class="bi bi-palette"></i> T-Shirt</a></li>
+                                <li><a href="/upload/shirt"><i class="bi bi-palette"></i> Shirt</a></li>
+                                <li><a href="/upload/pants"><i class="bi bi-palette"></i> Pants</a></li>
+                                <li><a href="/upload/audio"><i class="bi bi-music-note-beamed"></i> Audio</a></li>
+                                <li><a href="/upload/model"><i class="bi bi-box"></i> Model</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="list-group">
                     <a href="#" class="list-group-item active">My Games</a>
