@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const Game = require('../models/Game');
 const User = require('../models/User');
+const Asset = require('../models/Asset');
+const Counter = require('../models/Counter');
 const jwt = require('jsonwebtoken');
 const Filter = require("bad-words");
 const crypto = require('crypto'); // Add this line to import the crypto module
@@ -57,6 +59,15 @@ const authenticateToken = (req, res, next) => {
     }
 });
 
+async function getNextAssetId() {
+    const counter = await Counter.findOneAndUpdate(
+        { _id: 'assetId' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+    );
+    return counter.seq;
+}
+
 router.post('/upload', authenticateToken, (req, res, next) => {
     const accessToken = req.headers['x-access-token'];
     if (!accessToken) {
@@ -86,7 +97,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
     }
   
-       const assetId = generateAssetId();
+       const assetHash = generateAssetId(); // rename this to generateAssetHash
+       const assetId = await getNextAssetId();
 
     try {
         // Upload thumbnail to local storage
@@ -94,7 +106,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         fs.writeFileSync(path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)), req.files['thumbnail'][0].buffer);
 
         // Upload .rbxl file to S3
-        const rbxlKey = `rbxl-files/${assetId}.rbxl`;
+        const rbxlKey = `${assetHash}`; // more hidden
+        const AssetLocation = `https://c2.rblx18.com/${assetId}`;
         await s3.upload({
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: rbxlKey,
@@ -102,11 +115,19 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             ContentType: 'application/octet-stream'
         }).promise();
 
+      const asset = new Asset({
+            assetId: assetId,
+            FileLocation: AssetLocation,
+            creator: req.user.userId
+        });
+
+        await asset.save();
+
         const game = new Game({
             title: filter.clean(title),
             description: filter.clean(description),
             thumbnailUrl,
-            rbxlFile: rbxlKey,
+            //rbxlFile: rbxlKey, no longer needed
             assetId,
             creator: req.user.userId,
             genre,
