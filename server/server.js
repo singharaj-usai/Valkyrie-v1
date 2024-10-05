@@ -140,6 +140,8 @@ app.use((err, req, res, next) => {
 
 app.use('/api', authRoutes);
 
+
+
 // Serve static files from the client directory
 app.use('/', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -198,6 +200,10 @@ const gamesRouter = require('./functions/api/routes/games');
 app.use('/api/games', gamesRouter);
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+
+const chatRoutes = require('./functions/api/routes/chat');
+app.use('/api/chat', chatRoutes);
 
 const uploadsDir = process.env.NODE_ENV === 'production' 
   ? '/tmp/uploads'  // Use /tmp in production (Vercel)
