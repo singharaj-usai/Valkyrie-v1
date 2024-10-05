@@ -5,32 +5,36 @@ const path = require('path');
 const MongoStore = require('connect-mongo');
 const fs = require('fs');
 const crypto = require('crypto');
+const dotenv = require('dotenv');
 
 
+// load env vars
+dotenv.config();
+
+// Import  api funcs and stuff
 const connectDB = require('./functions/api/config/database');
 const authRoutes = require('./functions/api/routes/auth');
 const pageRoutes = require('./functions/api/routes/pages');
+const adminRoutes = require('./functions/api/routes/admin');
+const gamesRouter = require('./functions/api/routes/games');
+const chatRoutes = require('./functions/api/routes/chat');
+const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
+const User = require('./functions/api/models/User');
 
-
-
+// Init Expressjs
 const app = express();
 const port = process.env.PORT || 3000;
 
-require('dotenv').config();
+// Environment vars
 const MONGODB_URI = process.env.MONGODB_URI;
-
-// Add this near the top of your server.js file
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
-console.log('MAINTENANCE_MODE:', MAINTENANCE_MODE);
+const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
 
-// Use cookie-parser middleware
+
+// Use  middlewares
 app.use(cookieParser());
-
-// Add body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
 
 // encrypt secret key
 function encryptSecretKey(key) {
@@ -56,7 +60,7 @@ function decryptSecretKey(encryptedKey) {
   return decrypted;
 }
 
-// Add this middleware before your routes
+// Maintenance mode middleware
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
 
@@ -75,18 +79,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/api/verify-secret-key', (req, res) => {
-  const { secretKey } = req.body;
-  if (secretKey === SECRET_KEY) {
-    const encryptedKey = encryptSecretKey(SECRET_KEY);
-    res.cookie('maintenanceBypass', encryptedKey, 
-      
-      { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: "strict" }); // Set cookie for 24 hours
-    res.json({ success: true });
-  } else {
-    res.json({ success: false });
-  }
-});
 
 
 let isConnected = false;
@@ -114,9 +106,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
-app.use(updateUserStatus);
-
+// session config
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
@@ -133,13 +123,20 @@ app.use(session({
   }
 }));
 
+// update user status
+app.use(updateUserStatus);
+
+// error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error', details: err.message || 'Unknown error' });
 });
 
 app.use('/api', authRoutes);
-
+app.use('/', pageRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/games', gamesRouter);
+app.use('/api/chat', chatRoutes);
 
 
 // Serve static files from the client directory
@@ -155,6 +152,8 @@ app.use('/images', express.static(path.join(__dirname, '../images'), {
   }
 }));
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Handle clean URLs for HTML files
 app.get('*', (req, res, next) => {
   const filePath = path.join(__dirname, '../client', req.path + '.html');
@@ -166,7 +165,6 @@ app.get('*', (req, res, next) => {
   }
 });
 
-app.use('/', pageRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/html/pages/home/index.html'));
@@ -193,17 +191,22 @@ app.post('/moderation/filtertext', (req, res) => {
     res.json(response);
 });
 
-const adminRoutes = require('./functions/api/routes/admin');
-app.use('/api/admin', adminRoutes);
+app.post('/api/verify-secret-key', (req, res) => {
+  const { secretKey } = req.body;
+  if (secretKey === SECRET_KEY) {
+    const encryptedKey = encryptSecretKey(SECRET_KEY);
+    res.cookie('maintenanceBypass', encryptedKey, 
+      
+      { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: "strict" }); // Set cookie for 24 hours
+    res.json({ success: true });
+  } else {
+    res.json({ success: false });
+  }
+});
 
-const gamesRouter = require('./functions/api/routes/games');
-app.use('/api/games', gamesRouter);
-
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 
-const chatRoutes = require('./functions/api/routes/chat');
-app.use('/api/chat', chatRoutes);
+
 
 const uploadsDir = process.env.NODE_ENV === 'production' 
   ? '/tmp/uploads'  // Use /tmp in production (Vercel)
@@ -215,7 +218,6 @@ if (!fs.existsSync(uploadsDir)) {
 
 //app.use('/uploads', express.static(uploadsDir));
 
-const User = require('./functions/api/models/User');
 
 async function resetUserIdsIfNeeded() {
   try {
@@ -230,7 +232,7 @@ async function resetUserIdsIfNeeded() {
   }
 }
 
-// Update your 404 handler
+//  404 handler
 app.use((req, res, next) => {
   if (MAINTENANCE_MODE) {
     const bypassCookie = req.cookies.maintenanceBypass;
