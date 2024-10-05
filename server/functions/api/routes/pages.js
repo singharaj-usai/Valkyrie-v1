@@ -37,7 +37,7 @@ router.get("/my/messages", (req, res) => sendHtmlFile(res, "pages/my/messages.ht
 router.get("/messages/compose", (req, res) => sendHtmlFile(res, "pages/my/compose/compose.html"));
 
 // Upload page
-router.get("/upload", (req, res) => sendHtmlFile(res, "pages/upload/upload.html"));
+router.get("/upload/place", (req, res) => sendHtmlFile(res, "pages/upload/place.html"));
 
 // Games pages
 router.get("/games", (req, res) => sendHtmlFile(res, "pages/games/games.html"));
