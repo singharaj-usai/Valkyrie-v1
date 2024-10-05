@@ -7,21 +7,27 @@ const Game = require('../models/Game');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const Filter = require("bad-words");
+const crypto = require('crypto'); // Add this line to import the crypto module
+
+
 
 const filter = new Filter();
 
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, path.join(__dirname, '../../../../uploads'))
+      const uploadPath = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : path.join(__dirname, '../../../../uploads');
+      cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname)
+      cb(null, Date.now() + '-' + file.originalname);
     }
-  });
-  
-  const upload = multer({ dest: process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads/' });
+});
 
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -44,6 +50,7 @@ const authenticateToken = (req, res, next) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 router.post('/upload', authenticateToken, (req, res, next) => {
     const accessToken = req.headers['x-access-token'];
     if (!accessToken) {
@@ -53,11 +60,14 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         return res.status(403).json({ error: 'Access denied. Invalid access token.' });
     }
     next();
-  }, upload.single('thumbnail'), (req, res) => {
-    
-    if (!req.file) {
-      return res.status(400).json({ error: 'Thumbnail file is required' });
-    }
+  }, upload.fields([
+    {name: 'thumbnail', maxCount: 1},
+    {name: 'rbxlFile', maxCount: 1}
+
+  ]), (req, res) => {
+    if (!req.files['thumbnail'] || !req.files['rbxlFile']) {
+      return res.status(400).json({ error: 'Both thumbnail and .rbxl file are required' });
+  }
   
     const { title, description, genre, maxPlayers, year } = req.body;
   
@@ -70,13 +80,21 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
     }
   
-    const thumbnailUrl = `/uploads/${req.file.filename}`;
+    const thumbnailUrl = `/uploads/${req.files['thumbnail'][0].filename}`;
     console.log('Saved thumbnailUrl:', thumbnailUrl);
+
+    const rbxlFileUrl = `/uploads/${req.files['rbxlFile'][0].filename}`;
+    console.log('Saved rbxlFileUrl:', rbxlFileUrl);
   
+    const assetId = generateAssetId();
+
+
     const game = new Game({
       title: filter.clean(title),
       description: filter.clean(description),
       thumbnailUrl,
+      rbxlFile: rbxlFileUrl,
+      assetId,
       creator: req.user.userId,
       genre,
       maxPlayers: parseInt(maxPlayers, 10),
@@ -90,11 +108,16 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       })
       .catch(error => {
         console.error('Error saving game:', error);
-        if (req.file.path) {
-          fs.unlink(req.file.path, (unlinkError) => {
-            if (unlinkError) console.error('Error deleting file:', unlinkError);
+        if (req.files['thumbnail'] && req.files['thumbnail'][0].path) {
+          fs.unlink(req.files['thumbnail'][0].path, (unlinkError) => {
+              if (unlinkError) console.error('Error deleting thumbnail:', unlinkError);
           });
-        }
+      }
+      if (req.files['rbxlFile'] && req.files['rbxlFile'][0].path) {
+          fs.unlink(req.files['rbxlFile'][0].path, (unlinkError) => {
+              if (unlinkError) console.error('Error deleting .rbxl file:', unlinkError);
+          });
+      }
         res.status(500).json({ error: 'Error saving game', details: error.message });
       });
   });
@@ -196,5 +219,12 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  // Function to generate a unique asset ID
+function generateAssetId() {
+  const timestamp = Date.now().toString(36);
+  const randomStr = crypto.randomBytes(5).toString('hex');
+  return `${timestamp}-${randomStr}`;
+}
 
 module.exports = router;

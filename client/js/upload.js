@@ -72,8 +72,16 @@ $(document).ready(function () {
 
             // Validate file size
             const thumbnailFile = $('#thumbnail')[0].files[0];
+            const rbxlFile = $('#rbxlFile')[0].files[0];
+
             if (thumbnailFile && thumbnailFile.size > 20 * 1024 * 1024) {
                 showAlert('danger', 'Thumbnail file size must be less than 20MB');
+                return;
+            }
+
+            // we can always change this size later
+            if (rbxlFile && rbxlFile.size > 20 * 1024 * 1024) {
+                showAlert('danger', '.rbxl file size must be less than 20MB');
                 return;
             }
 
@@ -88,7 +96,7 @@ $(document).ready(function () {
                     'X-Access-Token': accessKey
                 },
                 success: function (response) {
-                    showAlert('success', 'Game uploaded successfully!');
+                    showAlert('success', `Game uploaded successfully! Asset ID: ${response.assetId}`);
                     setTimeout(() => {
                         window.location.href = `/game?id=${response.gameId}`;
                     }, 2000);
