@@ -69,7 +69,7 @@ async function getNextAssetId() {
 }
 
 router.post('/upload', authenticateToken, (req, res, next) => {
-  const accessToken = req.headers['x-access-token'];
+    const accessToken = req.headers['x-access-token'];
   if (!accessToken) {
     return res.status(403).json({ error: 'Access denied. No access token provided.' });
   }

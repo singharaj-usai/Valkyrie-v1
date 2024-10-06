@@ -16,7 +16,7 @@ function initializeUploadForm() {
         }
 
         $.ajax({
-            url: '/api/shirt/upload',
+            url: '/api/shirts/upload',
             method: 'POST',
             data: formData,
             contentType: false,
@@ -40,7 +40,7 @@ function initializeUploadForm() {
                     }
                 }
                 console.error('Upload error:', errorMessage);
-                showAlert('danger', 'Error uploading game: ' + errorMessage);
+                showAlert('danger', 'Error uploading shirt: ' + errorMessage);
             }
         });
     });
