@@ -101,6 +101,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       const thumbnailUrl = `/uploads/${Date.now()}-${req.files['thumbnail'][0].originalname}`;
       fs.writeFileSync(path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)), req.files['thumbnail'][0].buffer);
 
+      // upload image first
       const s3Key = `shirts/${assetHash}`;
       const assetLocation = `https://c2.rblx18.com/${s3Key}`;
       await s3.upload({
@@ -111,15 +112,60 @@ router.post('/upload', authenticateToken, (req, res, next) => {
           ACL: 'public-read'
       }).promise();
 
+      // make a new asset for the image
       const asset = new Asset({
-          assetId: assetId,
-          FileLocation: assetLocation,
-          creator: req.user.userId
-      });
-
+            assetId: assetId,
+            FileLocation: assetLocation,
+            creator: req.user.userId,
+            AssetType: "Image",
+            Name: filter.clean(title),
+            Description: filter.clean(description),
+            ThumbnailLocation: thumbnailUrl,
+            IsForSale: 0,
+            Price: 0,
+            Sales: 0,
+            IsPublicDomain: 0
+        });
+    
       await asset.save();
 
-      const shirt = new Shirt({
+      // get the next asset id for the shirt
+      const shirtassetId = await getNextAssetId();
+      const shirtassetHash = generateAssetId();
+
+      // generate xml for shirttemplate
+      const shirtAssetUrl = `http://www.rblx18.com/asset/?id=${getNextAssetId}`;
+      const shirtAssetXml = generateXml(shirtAssetUrl);
+
+      // upload the xml
+      const shirts3Key = `${shirtassetHash}`;
+      const shirtassetLocation = `https://c2.rblx18.com/${shirtassetHash}`;
+    
+      await s3.upload({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: shirts3Key,
+          Body: shirtAssetXml,
+          ContentType: 'application/octet-stream',
+          ACL: 'public-read'
+      }).promise();
+
+      const shirt = new Asset({
+            assetId: shirtassetId,
+            FileLocation: shirtassetLocation,
+            creator: req.user.userId,
+            AssetType: "Shirt",
+            Name: filter.clean(title),
+            Description: filter.clean(description),
+            ThumbnailLocation: thumbnailUrl,
+            IsForSale: 0,
+            Price: 0,
+            Sales: 0,
+            IsPublicDomain: 0
+        });
+    
+      await shirt.save();
+    
+      /*const shirt = new Shirt({
           title: filter.clean(title),
           description: filter.clean(description),
           thumbnailUrl,
@@ -127,7 +173,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
           assetId: assetId
       });
 
-      await shirt.save();
+      await shirt.save();*/
       await User.findByIdAndUpdate(req.user.userId, { $push: { shirts: shirt._id } });
 
       res.status(201).json({ shirtId: shirt._id, assetId: shirt.assetId });
@@ -140,7 +186,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   // DELETE /api/shirt/:id
   router.delete('/:id', authenticateToken, async (req, res) => {
     try {
-        const shirt = await Shirt.findById(req.params.id);
+        const shirt = await Asset.findById(req.params.id);
         if (!shirt) {
             return res.status(404).json({ error: 'Shirt not found' });
         }
@@ -156,7 +202,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   
   router.get('/user', authenticateToken, async (req, res) => {
     try {
-      const shirts = await Shirt.find({ creator: req.user.userId }).sort({ updatedAt: -1 });
+      const shirts = await Asset.find({ creator: req.user.userId, AssetType: 'Shirt' }).sort({ updatedAt: -1 });
       res.json(shirts);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -170,7 +216,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       const { title, description } = req.body;
   
       // Check if the shirt exists and belongs to the current user
-      const shirt = await Shirt.findOne({ _id: id, creator: req.user.userId });
+      const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt', creator: req.user.userId });
       if (!shirt) {
         return res.status(404).json({ error: 'Shirt not found or you do not have permission to edit it' });
       }
@@ -193,7 +239,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   router.get('/:id', authenticateToken, async (req, res) => {
     try {
       const { id } = req.params;
-      const shirt = await Shirt.findOne({ _id: id, creator: req.user.userId });
+      const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt', creator: req.user.userId });
       if (!shirt) {
         return res.status(404).json({ error: 'Shirt not found or you do not have permission to view it' });
       }
@@ -211,7 +257,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-      const shirts = await Shirt.find({ creator: user._id }).sort({ createdAt: -1 });
+      const shirts = await Asset.find({ creator: user._id, AssetType: 'Shirt' }).sort({ createdAt: -1 });
       res.json(shirts);
     } catch (error) {
       console.error('Error fetching user shirts:', error);
@@ -224,6 +270,24 @@ function generateAssetId() {
   const timestamp = Date.now().toString(36);
   const randomStr = crypto.randomBytes(5).toString('hex');
   return `${timestamp}-${randomStr}`;
+}
+
+// create a universal func for this later
+function generateXml(assetUrl) {
+  return `
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+  <External>null</External>
+  <External>nil</External>
+  <Item class="Shirt" referent="RBX0">
+    <Properties>
+      <Content name="ShirtTemplate">
+        <url>${assetUrl}</url>
+      </Content>
+      <string name="Name">Shirt</string>
+      <bool name="archivable">true</bool>
+    </Properties>
+  </Item>
+</roblox>`;
 }
 
 module.exports = router;
