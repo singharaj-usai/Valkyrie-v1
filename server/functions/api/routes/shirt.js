@@ -134,7 +134,7 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       const shirtassetHash = generateAssetId();
 
       // generate xml for shirttemplate
-      const shirtAssetUrl = `http://www.rblx18.com/asset/?id=${getNextAssetId}`;
+      const shirtAssetUrl = `http://www.rblx18.com/asset/?id=${assetId}`;
       const shirtAssetXml = generateXml(shirtAssetUrl);
 
       // upload the xml
