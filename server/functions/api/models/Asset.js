@@ -10,6 +10,38 @@ const assetSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    AssetType: {
+        type: String,
+        required: true
+    },
+    Name: {
+        type: String,
+        required: true
+    },
+    Description: {
+        type: String,
+        required: true
+    },
+    ThumbnailLocation: {
+        type: String,
+        required: true
+    },
+    IsForSale: {
+        type: Number,
+        required: true
+    },
+    Price: {
+        type: Number,
+        required: true
+    },
+    Sales: {
+        type: Number,
+        required: true
+    },
+    IsPublicDomain: {
+        type: Number,
+        required: true
+    },
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
