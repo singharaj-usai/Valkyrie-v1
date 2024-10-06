@@ -164,12 +164,12 @@ router.post('/upload', authenticateToken, (req, res, next) => {
   });
   
   // New route to update a game
-  router.put('/:id', authenticateToken, upload.single('thumbnail'), async (req, res) => {
+  router.put('/:id', authenticateToken, async (req, res) => {
     try {
       const { id } = req.params;
       const { title, description } = req.body;
   
-      // Check if the game exists and belongs to the current user
+      // Check if the shirt exists and belongs to the current user
       const shirt = await Shirt.findOne({ _id: id, creator: req.user.userId });
       if (!shirt) {
         return res.status(404).json({ error: 'Shirt not found or you do not have permission to edit it' });
@@ -178,44 +178,31 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       // Update shirt details
       shirt.title = filter.clean(title);
       shirt.description = filter.clean(description);
-      shirt.updatedAt = new Date(); // Explicitly set the updatedAt field
+      shirt.updatedAt = new Date();
   
-      // If a new thumbnail is uploaded, update it
-      if (req.file) {
-        // Delete the old thumbnail file
-        if (shirt.thumbnailUrl) {
-          const oldThumbnailPath = path.join(__dirname, '../../../../uploads', path.basename(shirt.thumbnailUrl));
-          fs.unlink(oldThumbnailPath, (err) => {
-            if (err) console.error('Error deleting old thumbnail:', err);
-          });
-        }
-  
-        // Set the new thumbnail URL
-        shirt.thumbnailUrl = `/uploads/${req.file.filename}`;
-      }
-  
-      // Save the updated game
-      await game.save();
+      // Save the updated shirt
+      await shirt.save();
   
       res.json(shirt);
     } catch (error) {
       console.error('Error updating shirt:', error);
-      res.status(500).json({ error: 'Error updating shirt', details: error.message, stack: error.stack });
+      res.status(500).json({ error: 'Error updating shirt', details: error.message });
     }
   });
 
-router.get('/:id', authenticateToken, async (req, res) => {
+  router.get('/:id', authenticateToken, async (req, res) => {
     try {
-        const shirt = await Shirt.findById(req.params.id).populate('creator', 'username');
-        if (!shirt) {
-            return res.status(404).json({ error: 'Shirt not found' });
-        }
-        res.json(shirt);
+      const { id } = req.params;
+      const shirt = await Shirt.findOne({ _id: id, creator: req.user.userId });
+      if (!shirt) {
+        return res.status(404).json({ error: 'Shirt not found or you do not have permission to view it' });
+      }
+      res.json(shirt);
     } catch (error) {
-        console.error('Error fetching shirt:', error);
-        res.status(500).json({ error: 'Error fetching shirt', details: error.message });
+      console.error('Error fetching shirt:', error);
+      res.status(500).json({ error: 'Error fetching shirt', details: error.message });
     }
-});
+  });
 
 router.get('/user/:username', authenticateToken, async (req, res) => {
     try {

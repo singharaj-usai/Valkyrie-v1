@@ -62,23 +62,34 @@
                         </div>
                     </div>
                 </div>
-                <div class="list-group">
-                    <a href="#" class="list-group-item active">My Games</a>
-                    <a href="#" class="list-group-item">My Shirts</a>
-                    <a href="#" class="list-group-item">My T-Shirts</a>
-                    <a href="#" class="list-group-item">My Pants</a>
-                    <a href="#" class="list-group-item">My Models</a>
-                    <a href="#" class="list-group-item">Building Games</a>
+                <div class="list-group" id="list-tab" role="tablist">
+                    <a class="list-group-item list-group-item-action active" id="list-games-list" data-toggle="list" href="#my-games" role="tab" aria-controls="games">My Games</a>
+                    <a class="list-group-item list-group-item-action" id="list-shirts-list" data-toggle="list" href="#my-shirts" role="tab" aria-controls="shirts">My Shirts</a>
                 </div>
             </div>
             <div class="col-md-10">
-                <!-- Games List -->
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">MY GAMES</h3>
+                <div class="tab-content">
+                    <div id="my-games" class="tab-pane active">
+                        <!-- Games List -->
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">MY GAMES</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="places-container" class="list-group"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <div id="places-container" class="list-group"></div>
+                    <div id="my-shirts" class="tab-pane">
+                        <!-- Shirts List -->
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">MY SHIRTS</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="shirts-container" class="list-group"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -247,11 +258,46 @@
     
 </div>
 
+<!-- Edit Shirt Modal -->
+<div class="modal fade" id="editShirtModal" tabindex="-1" role="dialog" aria-labelledby="editShirtModalLabel">
+    <div class="modal-dialog" role="document">
+        <div id="shirt-error-message" class="alert alert-danger hidden"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editShirtModalLabel">Edit Shirt</h4>
+            </div>
+            <div class="modal-body">
+                <form id="edit-shirt-form">
+                    <input type="hidden" id="edit-shirt-id">
+                    <div class="form-group">
+                        <label for="edit-shirt-title">Title:</label>
+                        <input type="text" class="form-control" id="edit-shirt-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-shirt-description">Description:</label>
+                        <textarea class="form-control" id="edit-shirt-description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Shirt Image:</label>
+                        <img id="current-shirt-thumbnail" src="" alt="Shirt Image" style="max-width: 100%; max-height: 200px;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-shirt-changes">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/js/theme-loader.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script src="/js/places.js"></script>
+    <script src="/js/shirts.js"></script>
 </body>
 </html>
