@@ -36,8 +36,10 @@ router.get("/my/friends", (req, res) => sendHtmlFile(res, "pages/my/friends.html
 router.get("/my/messages", (req, res) => sendHtmlFile(res, "pages/my/messages.html"));
 router.get("/messages/compose", (req, res) => sendHtmlFile(res, "pages/my/compose/compose.html"));
 
-// Upload page
-router.get("/upload/place", (req, res) => sendHtmlFile(res, "pages/upload/place.html"));
+// Upload pages
+router.get("/upload/place", (req, res) => sendHtmlFile(res, "pages/upload/place/place.html"));
+router.get("/upload/shirt", (req, res) => sendHtmlFile(res, "pages/upload/shirt/shirt.html"));
+
 
 router.get("/upload", (req, res) => sendHtmlFile(res, "pages/upload/index.html"));
 
