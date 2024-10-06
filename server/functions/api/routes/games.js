@@ -119,7 +119,15 @@ router.post('/upload', authenticateToken, (req, res, next) => {
       const asset = new Asset({
             assetId: assetId,
             FileLocation: AssetLocation,
-            creator: req.user.userId
+            creator: req.user.userId,
+            AssetType: "Place",
+            Name: filter.clean(title),
+            Description: filter.clean(description),
+            ThumbnailLocation: thumbnailUrl,
+            IsForSale: 0,
+            Price: 0,
+            Sales: 0,
+            IsPublicDomain: 0
         });
 
         await asset.save();
