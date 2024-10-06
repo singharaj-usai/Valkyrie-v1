@@ -30,18 +30,40 @@ function displayShirts(shirts) {
         return;
     }
 
+    const table = $(`
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Thumbnail</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Asset ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    `);
+
+    const tableBody = table.find('tbody');
+
     shirts.forEach(shirt => {
-        const shirtElement = $(`
-            <div class="list-group-item">
-                <h4 class="list-group-item-heading">${shirt.title}</h4>
-                <p class="list-group-item-text">${shirt.description}</p>
-                <img src="${shirt.thumbnailUrl}" alt="${shirt.title}" style="max-width: 100px; max-height: 100px;">
-                <p>Asset ID: ${shirt.assetId}</p>
-                <button class="btn btn-primary edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
-            </div>
+        const row = $(`
+            <tr>
+                <td><img src="${shirt.thumbnailUrl}" alt="${shirt.title}" style="max-width: 50px; max-height: 50px;"></td>
+                <td>${shirt.title}</td>
+                <td>${shirt.description.substring(0, 50)}${shirt.description.length > 50 ? '...' : ''}</td>
+                <td>${shirt.assetId}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
+                </td>
+            </tr>
         `);
-        shirtsContainer.append(shirtElement);
+        tableBody.append(row);
     });
+
+    shirtsContainer.append(table);
 }
 
 function setupShirtToggler() {
