@@ -51,7 +51,7 @@ function displayShirts(shirts) {
     shirts.forEach(shirt => {
         const row = $(`
             <tr>
-                <td><img src="${shirt.thumbnailUrl}" alt="${shirt.Name}" style="max-width: 50px; max-height: 50px;"></td>
+                <td><img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" style="max-width: 50px; max-height: 50px;"></td>
                 <td>${shirt.Name}</td>
                 <td>${shirt.Description.substring(0, 50)}${shirt.Description.length > 50 ? '...' : ''}</td>
                 <td>${shirt.assetId}</td>
@@ -100,7 +100,7 @@ function openShirtEditModal(shirtId) {
             $('#edit-shirt-id').val(shirt._id);
             $('#edit-shirt-title').val(shirt.Name);
             $('#edit-shirt-description').val(shirt.Description);
-            $('#current-shirt-thumbnail').attr('src', shirt.thumbnailUrl);
+            $('#current-shirt-thumbnail').attr('src', shirt.ThumbnailLocation);
             $('#editShirtModal').modal('show');
         },
         error: function(xhr, status, error) {
