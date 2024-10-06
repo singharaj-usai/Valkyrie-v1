@@ -112,7 +112,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: rbxlKey,
             Body: req.files['rbxlFile'][0].buffer,
-            ContentType: 'application/octet-stream'
+            ContentType: 'application/octet-stream',
+            ACL: 'public-read'
         }).promise();
 
       const asset = new Asset({
