@@ -69,74 +69,72 @@ async function getNextAssetId() {
 }
 
 router.post('/upload', authenticateToken, (req, res, next) => {
-    const accessToken = req.headers['x-access-token'];
-    if (!accessToken) {
-      return res.status(403).json({ error: 'Access denied. No access token provided.' });
-    }
-    if (accessToken !== process.env.UPLOAD_ACCESS_KEY) {
-        return res.status(403).json({ error: 'Access denied. Invalid access token.' });
-    }
-    next();
-  }, upload.fields([
-    {name: 'thumbnail', maxCount: 1},
-
-  ]), async (req, res) => {
-    if (!req.files['thumbnail']) {
-      return res.status(400).json({ error: 'thumbnail file are required' });
+  const accessToken = req.headers['x-access-token'];
+  if (!accessToken) {
+    return res.status(403).json({ error: 'Access denied. No access token provided.' });
   }
-  
-    const { title, description } = req.body;
-  
-    if (!title || !description) {
-      return res.status(400).json({ error: 'Title, description are required' });
-    }
-  
-    // censor bad words
-    if (filter.isProfane(title) || filter.isProfane(description)) {
-        return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
-    }
-  
-       const assetHash = generateAssetId(); // rename this to generateAssetHash
-       const assetId = await getNextAssetId();
+  if (accessToken !== process.env.UPLOAD_ACCESS_KEY) {
+      return res.status(403).json({ error: 'Access denied. Invalid access token.' });
+  }
+  next();
+}, upload.fields([
+  {name: 'thumbnail', maxCount: 1},
+]), async (req, res) => {
+  if (!req.files['thumbnail']) {
+    return res.status(400).json({ error: 'Thumbnail file is required' });
+  }
 
-    try {
-        // Upload thumbnail to local storage
-        const thumbnailUrl = `/uploads/${Date.now()}-${req.files['thumbnail'][0].originalname}`;
-        fs.writeFileSync(path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)), req.files['thumbnail'][0].buffer);
+  const { title, description } = req.body;
 
-        // Upload .rbxl file to S3
-        const rbxlKey = `${assetHash}`; // more hidden
-        const AssetLocation = `https://c2.rblx18.com/${assetHash}`;
-        await s3.upload({
-            Bucket: process.env.AWS_S3_BUCKET_NAME,
-            Key: rbxlKey,
-            Body: req.files['thumbnail'][0].buffer,
-            ContentType: 'image/png',
-            ACL: 'public-read'
-        }).promise();
+  if (!title || !description) {
+    return res.status(400).json({ error: 'Title and description are required' });
+  }
+
+  if (filter.isProfane(title) || filter.isProfane(description)) {
+      return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
+  }
+
+  const assetHash = generateAssetId();
+  const assetId = await getNextAssetId();
+
+  try {
+      const thumbnailUrl = `/uploads/${Date.now()}-${req.files['thumbnail'][0].originalname}`;
+      fs.writeFileSync(path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)), req.files['thumbnail'][0].buffer);
+
+      const s3Key = `shirts/${assetHash}`;
+      const assetLocation = `https://c2.rblx18.com/${s3Key}`;
+      await s3.upload({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: s3Key,
+          Body: req.files['thumbnail'][0].buffer,
+          ContentType: 'image/png',
+          ACL: 'public-read'
+      }).promise();
 
       const asset = new Asset({
-            assetId: assetId,
-            FileLocation: AssetLocation,
-            creator: req.user.userId
-        });
+          assetId: assetId,
+          FileLocation: assetLocation,
+          creator: req.user.userId
+      });
 
-        await asset.save();
+      await asset.save();
 
-        const game = new Game({
-            title: filter.clean(title),
-            description: filter.clean(description),
-            thumbnailUrl,
-        });
+      const shirt = new Shirt({
+          title: filter.clean(title),
+          description: filter.clean(description),
+          thumbnailUrl,
+          creator: req.user.userId,
+          assetId: assetId
+      });
 
-        await game.save();
-        await User.findByIdAndUpdate(req.user.userId, { $push: { games: game._id } });
+      await shirt.save();
+      await User.findByIdAndUpdate(req.user.userId, { $push: { shirts: shirt._id } });
 
-        res.status(201).json({ gameId: game._id, assetId: game.assetId });
-    } catch (error) {
-        console.error('Error saving game:', error);
-        res.status(500).json({ error: 'Error saving game', details: error.message });
-    }
+      res.status(201).json({ shirtId: shirt._id, assetId: shirt.assetId });
+  } catch (error) {
+      console.error('Error saving shirt:', error);
+      res.status(500).json({ error: 'Error saving shirt', details: error.message });
+  }
 });
 
   // DELETE /api/shirt/:id
