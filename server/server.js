@@ -66,7 +66,7 @@ function decryptSecretKey(encryptedKey) {
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
 
-  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path === '/images/Valkyrie404.png') {
+  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path.startsWith('/js/') || req.path === '/images/Valkyrie404.png') {
     return next();  // Skip maintenance check for these routes
   }
   
