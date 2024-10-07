@@ -131,7 +131,7 @@ const validateUser = [
 
 
 // REgister account
-router.post("/register-create", async (req, res) => {
+router.post("/register-create", validateUser, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     console.log("Registration attempt for:", email);
@@ -165,7 +165,7 @@ router.post("/register-create", async (req, res) => {
   await user.save();
 
   // send email verification link
-  const verificationLink = `http://localhost:3000/auth/verify/${verificationToken}`;
+  const verificationLink = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
 
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
