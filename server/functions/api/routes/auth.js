@@ -163,9 +163,8 @@ router.post("/register-create", async (req, res) => {
   await user.save();
 
   // send email verification link
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.BASE_URL;
-    
-    const verificationLink = `${baseUrl}/api/auth/verify-email/${verificationToken}`;
+  const verificationLink = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
+
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
