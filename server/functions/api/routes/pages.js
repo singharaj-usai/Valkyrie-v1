@@ -15,6 +15,10 @@ const sendHtmlFile = (res, relativePath) => {
 // Authentication pages
 router.get("/login", (req, res) => sendHtmlFile(res, "pages/authentication/login.html"));
 router.get("/register", (req, res) => sendHtmlFile(res, "pages/authentication/register.html"));
+router.get("/auth/verify-email/:token", (req, res) => sendHtmlFile(res, "pages/authentication/email-verified.html"));
+
+
+
 
 // User-related pages
 router.get("/users", (req, res) => sendHtmlFile(res, "pages/users/users.html"));
