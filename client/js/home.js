@@ -1,5 +1,6 @@
 $(document).ready(function () {
   const username = localStorage.getItem("username");
+  const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
   if (username && token) {
@@ -105,6 +106,7 @@ $(document).ready(function () {
   }
 
   function fetchFriendsList() {
+    const username = localStorage.getItem("username");
     Friends.fetchFriendsList(username, "friends-list", 10)
       .then((friends) => {
         if (friends.length > 10) {

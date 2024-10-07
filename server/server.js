@@ -21,7 +21,7 @@ const chatRoutes = require('./functions/api/routes/chat');
 const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
 const User = require('./functions/api/models/User');
 const shirtRoutes = require('./functions/api/routes/shirt');
-
+const friendsRoutes = require('./functions/api/routes/friends');
 
 // Init Expressjs
 const app = express();
@@ -139,6 +139,7 @@ app.use('/', pageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/games', gamesRouter);
 app.use('/api/chat', chatRoutes);
+app.use('/api/friends', friendsRoutes);
 app.use('/api/shirts', shirtRoutes);
 app.use('/video', express.static(path.join(__dirname, '../client/video')));
 // Serve static files from the client directory
