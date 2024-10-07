@@ -22,8 +22,8 @@ router.get("/auth/verify-email/:token", (req, res) => sendHtmlFile(res, "pages/a
 
 // User-related pages
 router.get("/users", (req, res) => sendHtmlFile(res, "pages/users/users.html"));
-//router.get("/user-profile", (req, res) => sendHtmlFile(res, "pages/profile/user-profile.html"));
-router.get("/users/:userId/profile", (req, res) => sendHtmlFile(res, "pages/profile/user-profile.html"));
+router.get("/user-profile", (req, res) => sendHtmlFile(res, "pages/profile/user-profile.html"));
+//router.get("/users/:userId/profile", (req, res) => sendHtmlFile(res, "pages/profile/user-profile.html"));
 
 
 // Forum pages
