@@ -190,7 +190,7 @@ router.post("/register-create", validateUser, async (req, res) => {
 }
 });
 
-router.get("/verify-email/:token", async (req, res) => {
+router.get("/auth/verify-email/:token", async (req, res) => {
   try {
     const { token } = req.params;
 
@@ -202,10 +202,10 @@ router.get("/verify-email/:token", async (req, res) => {
     user.verificationToken = undefined;
     await user.save();
 
-    res.redirect('/html/pages/authentication/login.html?verified=true');
+    res.redirect('/html/pages/authentication/email-verified.html');
   } catch (error) {
     console.error("Email verification error:", error);
-    res.status(500).send({message: "Error verifying email", error: error.message });
+    res.status(500).send("Error verifying email. Please try again later.");
   }
 });
 
