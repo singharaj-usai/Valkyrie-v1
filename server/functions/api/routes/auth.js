@@ -134,6 +134,8 @@ const validateUser = [
 router.post("/register-create", async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log("Registration attempt for:", email);
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const clientIp = getClientIp(req);
     const verificationToken = crypto.randomBytes(64).toString('hex');
@@ -163,7 +165,7 @@ router.post("/register-create", async (req, res) => {
   await user.save();
 
   // send email verification link
-  const verificationLink = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
+  const verificationLink = `http://localhost:3000/auth/verify/${verificationToken}`;
 
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
