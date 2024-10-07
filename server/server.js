@@ -66,7 +66,7 @@ function decryptSecretKey(encryptedKey) {
 app.use((req, res, next) => {
   console.log('Checking maintenance mode...'); 
 
-  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path.startsWith('/js/') || req.path === '/images/Valkyrie404.png') {
+  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path.startsWith('/js/') || req.path === '/images/Valkyrie404.png' || req.path.startsWith('/video/')) {
     return next();  // Skip maintenance check for these routes
   }
   
@@ -140,7 +140,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/games', gamesRouter);
 app.use('/api/chat', chatRoutes);
 app.use('/api/shirts', shirtRoutes);
-
+app.use('/video', express.static(path.join(__dirname, '../client/video')));
 // Serve static files from the client directory
 app.use('/', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

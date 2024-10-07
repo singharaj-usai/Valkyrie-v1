@@ -26,12 +26,12 @@ function loadPost(postId) {
                 success: function(postCount) {
                     post.author.postCount = postCount;
                     displayPost(post);
-                    loadComments(postId);
+                    loadReplies(postId);
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching author post count:', error);
                     displayPost(post);
-                    loadComments(postId);
+                    loadReplies(postId);
                 }
             });
         },
@@ -102,8 +102,8 @@ function displayPost(post) {
         $(`#user-status-${post.author._id}`).html(onlineStatus);
     });
 
-    // Load comments
-    loadComments(post._id);
+    // Load replies
+    loadReplies(post._id);
 }
 
 function loadPostForReply(postId) {

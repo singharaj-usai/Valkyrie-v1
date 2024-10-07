@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Game = require('../models/Game');
 const ForumPost = require('../models/ForumPost');
-const Comment = require('../models/Comment');
+const Reply = require('../models/Reply');
 const isAdmin = require('../middleware/adminAuth');
 const { isAuthenticated } = require('../middleware/auth');
 
@@ -71,7 +71,7 @@ router.get('/forum-posts', async (req, res) => {
       .populate('author', 'username')
       .populate('section', 'name')
       .populate({
-        path: 'comments',
+        path: 'replies',
         populate: { path: 'author', select: 'username' }
       })
       .sort({ createdAt: -1 });
@@ -89,9 +89,9 @@ router.delete('/forum-posts/:id', async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
     
-    // Delete all comments associated with the post, if any
-    if (post.comments && post.comments.length > 0) {
-      await Comment.deleteMany({ _id: { $in: post.comments } });
+    // Delete all replies associated with the post, if any
+    if (post.replies && post.replies.length > 0) {
+      await Reply.deleteMany({ _id: { $in: post.reply } });
     }
     
     // Delete the post
@@ -106,19 +106,19 @@ router.delete('/forum-posts/:id', async (req, res) => {
 // Delete a forum reply
 router.delete('/forum-replies/:id', async (req, res) => {
   try {
-    const reply = await Comment.findById(req.params.id);
+    const reply = await Replies.findById(req.params.id);
     if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
     }
     
-    // Update the post to remove the comment reference and decrease reply count
+    // Update the post to remove the reply reference and decrease reply count
     await ForumPost.findByIdAndUpdate(reply.post, {
-      $pull: { comments: reply._id },
+      $pull: { replies: reply._id },
       $inc: { replyCount: -1 }
     });
     
     // Delete the reply
-    await Comment.findByIdAndDelete(req.params.id);
+    await Reply.findByIdAndDelete(req.params.id);
     
     res.json({ message: 'Reply deleted successfully' });
   } catch (error) {

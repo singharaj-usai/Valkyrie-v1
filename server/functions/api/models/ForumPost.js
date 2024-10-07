@@ -51,9 +51,9 @@ const forumPostSchema = new mongoose.Schema({
         default: []
     },
     
-    comments: [{
+    replies: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment'
+        ref: 'Reply'
     }],
     createdAt: {
         type: Date,

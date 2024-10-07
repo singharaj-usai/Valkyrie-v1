@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ForumPost = require('../models/ForumPost');
-const Comment = require('../models/Comment');
+const Reply = require('../models/Reply');
 const { isAuthenticated } = require('../middleware/auth');
 
 router.get('/sections', (req, res) => {
@@ -107,7 +107,7 @@ router.get('/posts/:id', async (req, res) => {
         const post = await ForumPost.findById(req.params.id)
             .populate('author', 'username')
             .populate({
-                path: 'comments',
+                path: 'replies',
                 populate: { path: 'author', select: 'username' },
                 options: { sort: { createdAt: -1 } }
             });
@@ -225,12 +225,12 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
     }
 });
 
-// Get comments for a post
-router.get('/posts/:id/comments', async (req, res) => {
+// Get replies for a post
+router.get('/posts/:id/replies', async (req, res) => {
     try {
         const { id } = req.params;
         const post = await ForumPost.findById(id).populate({
-            path: 'comments',
+            path: 'replies',
             populate: { path: 'author', select: 'username' },
             options: { sort: { createdAt: 1 } }
         });
@@ -239,18 +239,18 @@ router.get('/posts/:id/comments', async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        res.json(post.comments);
+        res.json(post.replies);
     } catch (error) {
-        console.error('Error fetching comments:', error);
-        res.status(500).json({ message: 'Error fetching comments' });
+        console.error('Error fetching replies:', error);
+        res.status(500).json({ message: 'Error fetching replies' });
     }
 });
 
-// Add a comment to a post
-router.post('/posts/:postId/comments', isAuthenticated, async (req, res) => {
+// Add a reply to a post
+router.post('/posts/:postId/replies', isAuthenticated, async (req, res) => {
     try {
         const { postId } = req.params;
-        const { content, parentCommentId } = req.body;
+        const { content, parentReplyId } = req.body;
         const userId = req.user._id;
 
         const post = await ForumPost.findById(postId);
@@ -258,43 +258,43 @@ router.post('/posts/:postId/comments', isAuthenticated, async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        const newComment = new Comment({
+        const newReply = new Reply({
             content,
             author: userId,
             post: postId,
-            parentComment: parentCommentId || null
+            parentReply: parentReplyId || null
         });
 
-        await newComment.save();
+        await newReply.save();
         await ForumPost.findByIdAndUpdate(postId, { 
-            $push: { comments: newComment._id },
+            $push: { replies: newReply._id },
             $inc: { replyCount: 1 },
             updatedAt: new Date() // Update the updatedAt field
         });
 
-        res.status(201).json(newComment);
+        res.status(201).json(newReply);
     } catch (error) {
-        console.error('Error creating comment:', error);
+        console.error('Error creating reply:', error);
         res.status(500).json({ message: 'Error creating comment' });
     }
 });
 
-router.get('/posts/:postId/comments', async (req, res) => {
+router.get('/posts/:postId/replies', async (req, res) => {
     try {
         const { postId } = req.params;
-        const comments = await Comment.find({ post: postId })
+        const replies = await Reply.find({ post: postId })
             .populate('author', 'username')
             .populate({
-                path: 'parentComment',
+                path: 'parentReply',
                 populate: { path: 'author', select: 'username' }
             })
             .sort({ createdAt: 1 });
 
-        res.json(comments);
+        res.json(replies);
     } catch (error) {
-        console.error('Error creating comment:', error);
+        console.error('Error creating reply:', error);
         console.error('Error stack:', error.stack);
-        res.status(500).json({ message: 'Error creating comment', error: error.message });
+        res.status(500).json({ message: 'Error creating reply', error: error.message });
     }
 });
 

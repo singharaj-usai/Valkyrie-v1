@@ -51,12 +51,37 @@
             align-items: center;
             z-index: 9999;
         }
+        #background-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000;
+            object-fit: cover;
+        }
+        @media (max-aspect-ratio: 16/9) {
+            #background-video {
+                width: 100%;
+                height: auto;
+            }
+        }
+        @media (max-width: 767px) {
+            #content {
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading...</div>
-    <div id="particles-js"></div>
-    
+    <video autoplay muted loop id="background-video">
+        <source src="/video/valkyrie-background-trailer.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
     <div id="content" style="display: none;">
         <div class="container" style="margin-top: 50px;">
             <div id="navbar-container"></div>
@@ -109,11 +134,23 @@
     <script src="/js/particles-config.js"></script>
     <script src="/js/theme-loader.js"></script>
     <script src="/js/auth/auth.js"></script>
-    <script>
-        $(document).ready(function() {
-            App.init();
-            App.initForms();
+<script>
+    $(document).ready(function() {
+        const video = document.getElementById('background-video');
+        video.addEventListener('loadeddata', function() {
+            $('#loading').hide();
+            $('#content').show();
         });
-    </script>
+
+        video.addEventListener('error', function(e) {
+            console.error('Error loading video:', e);
+            $('#loading').hide();
+            $('#content').show();
+        });
+
+        App.init();
+        App.initForms();
+    });
+</script>
 </body>
 </html>

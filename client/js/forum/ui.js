@@ -46,9 +46,9 @@ function displayPosts(posts, containerId = '#recent-posts') {
 
             sectionPosts.forEach(post => {
                 const replyCount = post.replyCount || 0;
-                const lastComment = post.lastComment || post; 
-                const lastPostDate = new Date(lastComment.createdAt).toLocaleString();
-                const lastPostAuthor = lastComment.author ? lastComment.author.username : post.author.username;
+                const lastReply = post.lastReply || post; 
+                const lastPostDate = new Date(lastReply.createdAt).toLocaleString();
+                const lastPostAuthor = lastReply.author ? lastReply.author.username : post.author.username;
 
                 const row = $(`
                     <tr>
@@ -215,6 +215,6 @@ function setupReplyForm(postId) {
     $('#reply-form').on('submit', function(e) {
         e.preventDefault();
         const content = $('#reply-content').val();
-        submitComment(postId, content);
+        submitReply(postId, content);
     });
 }

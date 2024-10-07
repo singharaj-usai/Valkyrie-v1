@@ -53,7 +53,7 @@ function displayForumPosts(posts) {
         `);
 
         const repliesList = postElement.find('.replies-list');
-        post.comments.forEach(reply => {
+        post.replies.forEach(reply => {
             repliesList.append(`
                 <div class="panel panel-info mb-2">
                     <div class="panel-body">
