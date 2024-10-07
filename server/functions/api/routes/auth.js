@@ -8,6 +8,8 @@ const requestIp = require('request-ip');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
+const nodemailer = require('nodemailer');
+
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -34,11 +36,6 @@ function authenticateToken(req, res, next) {
 
 const router = express.Router();
 
-// Setup CSRF protection
-//const csrfProtection = csrf({ cookie: true });
-
-
-
 // Helper function to get IP address
 function getClientIp(req) {
   // For testing purposes, check for a custom header first
@@ -49,6 +46,15 @@ function getClientIp(req) {
   return requestIp.getClientIp(req);
 }
 
+const transporter = nodemailer.createTransport({
+  host: `smtp.gmail.com`,
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+})
 
 // Validation middleware
 const validateUser = [
@@ -123,57 +129,14 @@ const validateUser = [
   }),
 ];
 
-router.post("/register", validateUser, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
 
-  try {
-    const { username, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const clientIp = requestIp.getClientIp(req);
-    const verificationToken = crypto.randomBytes(20).toString('hex');
-
-
-    const user = new User({
-      username,
-      email,
-      password: hashedPassword,
-      signupDate: moment().tz("America/New_York").toDate(),
-      signupIp: clientIp,
-      verificationToken
-    });
-
-    await user.save();
-    await sendVerificationEmail(email, verificationToken, req);
-    res.status(201).json({ message: "User created successfully. Please check your email to verify your account." });
-  } catch (error) {
-    console.error("Registration error:", error);
-    if (error.code === 11000) {
-      res.status(409).json({ error: "Username or email already exists" });
-    } else {
-      res.status(500).json({ error: "Error creating user", details: error.message || "Unknown error" });
-    }
-  }
-});
-
-// Step 1: Validate user input
-router.post("/register-validate", validateUser, (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  res.status(200).json({ message: "Validation successful" });
-});
-
-// Step 2: Create user
+// REgister account
 router.post("/register-create", async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const clientIp = getClientIp(req);
-   // const verificationToken = crypto.randomBytes(20).toString('hex');
+    const verificationToken = crypto.randomBytes(64).toString('hex');
 
    const existingUsername = await User.findOne({ username });
    if (existingUsername) {
@@ -192,26 +155,30 @@ router.post("/register-create", async (req, res) => {
       password: hashedPassword,
       signupDate: moment().tz("America/New_York").toDate(),
       signupIp: clientIp,
-      isVerified: true // Set the user as verified by default
-    //  verificationToken
+      verificationToken,
+
     });
 
-    //const baseUrl = `${req.protocol}://${req.get('host')}`;
-    //try {
-     // await sendVerificationEmail(email, verificationToken, baseUrl);
-      //res.status(201).json({ 
-       // message: "User created successfully. Please check your email to verify your account."
-     // });
-  //  } catch (emailError) {
-  //    console.error("Error sending verification email:", emailError);
-  //    // Instead of sending a 201 status, send a 500 status with more detailed error information
-  //    res.status(500).json({ 
-  //      message: "User created successfully, but there was an issue sending the verification email.",
-  //      error: emailError.message
-  //    });
-  //  }
+
   await user.save();
-  res.status(201).json({ message: "User registered successfully" });
+
+  // send email verification link
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.BASE_URL;
+    
+    const verificationLink = `${baseUrl}/api/auth/verify-email/${verificationToken}`;
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Email Verification",
+        html: `
+            <p>Hello ${username},</p>
+            <p>Thank you for registering an account on our website. Please click the link below to verify your email address:</p>
+            <p><a href="${verificationLink}">${verificationLink}</a></p>
+            <p>If you did not register an account, please ignore this email.</p>
+        `,
+    });
+
+  res.status(201).json({ message: "User registered. Please check your email to verify your account" });
 } catch (error) {
   console.error("Registration error:", error);
   if (error.name === 'ValidationError') {
@@ -224,17 +191,20 @@ router.post("/register-create", async (req, res) => {
 
 router.get("/verify-email/:token", async (req, res) => {
   try {
-    const user = await User.findOne({ verificationToken: req.params.token });
+    const { token } = req.params;
+
+    const user = await User.findOne({ verificationToken: token });
     if (!user) {
       return res.status(400).send("Invalid or expired verification token");
     }
     user.isVerified = true;
     user.verificationToken = undefined;
     await user.save();
+
     res.redirect('/html/pages/authentication/login.html?verified=true');
   } catch (error) {
     console.error("Email verification error:", error);
-    res.status(500).send("Error verifying email");
+    res.status(500).send({message: "Error verifying email", error: error.message });
   }
 });
 
@@ -268,23 +238,20 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid username" });
     }
 
-    
-    //if (!user.isVerified) {
-    //  return res.status(403).send("Please verify your email before logging in");
-   // }
+    if (!user.isVerified) {
+      return res.status(403).json({ message: "Please verify your email before logging in" });
+    }
 
-    const isValidPassword = await bcrypt.compare(password, user.password); //password === user.password; //await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(400).json({ message: "Invalid password" });
     }
-
 
     const clientIp = requestIp.getClientIp(req);
     user.lastLoggedIn = moment().tz("America/New_York").toDate();
     user.lastLoginIp = clientIp;
     await user.save();
 
-   
     const token = jwt.sign(
       { userId: user._id, username: user.username },
       process.env.JWT_SECRET || 'fallback_secret_key_for_development',
@@ -299,7 +266,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).send("Error logging in");
+    res.status(500).json({ message: "An unexpected error occurred during login. Please try again." });
   }
 });
 

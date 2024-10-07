@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  verificationToken: {
+    type: String,
+  },
   signupDate: {
     type: Date,
     default: () => moment().tz("America/New_York").toDate(),
@@ -47,7 +50,7 @@ const userSchema = new mongoose.Schema({
   },
   isVerified: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   verificationToken: String,
   currency: {
