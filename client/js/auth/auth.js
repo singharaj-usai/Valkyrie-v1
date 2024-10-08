@@ -23,7 +23,7 @@ const App = {
       this.initLogout();
       this.loadFooter();
       this.updateAuthUI();
-      this.loadTurnstileScript();
+//      this.loadTurnstileScript();
 
    //   this.checkForAnnouncements();
    //   this.initParticles();
@@ -425,18 +425,18 @@ const App = {
         const password = $("#password").val();
 
         // cloudflare captcha
-        const turnstileResponse = turnstile.getResponse();
+ /*        const turnstileResponse = turnstile.getResponse();
         console.log("Turnstile response:", turnstileResponse);
         if (!turnstileResponse) {
           this.showAlert("danger", "Please complete the captcha.");
           return;
-        }
+        } */
   
 
         $.ajax({
           url: "/api/login",
           method: "POST",
-          data: { username, password, captchaResponse: turnstileResponse },
+          data: { username, password }, //captchaResponse: turnstileResponse },
           success: (response) => {
             localStorage.setItem("token", response.token);
             localStorage.setItem("username", response.username);

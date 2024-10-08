@@ -235,9 +235,9 @@ router.get("/validate-session", async (req, res) => {
 // Login endpoint
 router.post("/login", async (req, res) => {
   try {
-    const { username, password, captchaResponse } = req.body;
-    console.log("Login attempt for:", username);
-    console.log("Captcha response received:", captchaResponse);
+    const { username, password } = req.body;
+//    console.log("Login attempt for:", username);
+ //   console.log("Captcha response received:", captchaResponse);
 
     const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
     if (!user) {
@@ -253,7 +253,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    try {
+/*     try {
 
     // verify cloudflare captcha
     console.log("Verifying captcha with secret key:", process.env.CLOUDFLARE_SECRET_KEY);
@@ -271,7 +271,7 @@ router.post("/login", async (req, res) => {
     );
 
     console.log("Captcha verification response:", response.data);
-    
+
     if (!response.data.success) {
       console.error("Captcha verification failed:", response.data);
       return res.status(400).json({ message: "Invalid captcha" });
@@ -279,7 +279,7 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error verifying captcha:", error);
     return res.status(500).json({ message: "Error verifying captcha" });
-  }
+  } */
 
     
     const clientIp = requestIp.getClientIp(req);
