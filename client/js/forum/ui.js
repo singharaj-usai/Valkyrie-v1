@@ -13,7 +13,7 @@ function displayPosts(posts, containerId = '#recent-posts') {
     });
 
     //  order of sections
-    const sectionOrder = ['announcements', 'general', 'game-dev', 'support', 'off-topic'];
+    const sectionOrder = ['announcements', 'change-log', 'suggestions-and-ideas', 'media', 'asset-sharing', 'tutorials', 'general', 'game-dev', 'support', 'off-topic', 'rate-my-character', 'memes'];
 
     sectionOrder.forEach(sectionId => {
         if (sections[sectionId] && sections[sectionId].length > 0) {

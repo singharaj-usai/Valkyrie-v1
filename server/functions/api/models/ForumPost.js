@@ -21,7 +21,7 @@ const forumPostSchema = new mongoose.Schema({
     section: {
         type: String,
         required: true,
-        enum: ['announcements', 'general', 'game-dev', 'support', 'off-topic']
+        enum: ['announcements', 'change-log', 'suggestions-and-ideas', 'media', 'asset-sharing', 'tutorials', 'general', 'game-dev', 'support', 'off-topic', 'rate-my-character', 'memes']
     },
     subSection: {
         type: String,

@@ -8,10 +8,17 @@ router.get('/sections', (req, res) => {
     const sections = [
         { id: 'all', name: 'All Posts' },
         { id: 'announcements', name: 'Announcements' },
+        { id: 'change-log', name: 'Change Log' },
+        { id: 'suggestions-and-ideas', name: 'Suggestions and Ideas' },
+        { id: 'media', name: 'Media' },
+        { id: 'asset-sharing', name: 'Asset Sharing' },
+        { id: 'tutorials', name: 'Tutorials' },
         { id: 'general', name: 'General Discussion' },
         { id: 'game-dev', name: 'Game Development' },
         { id: 'support', name: 'Support' },
-        { id: 'off-topic', name: 'Off-Topic' }
+        { id: 'off-topic', name: 'Off-Topic' },
+        { id: 'rate-my-character', name: 'Rate My Character' },
+        { id: 'memes', name: 'Memes' }
     ];
     res.json(sections);
 });
