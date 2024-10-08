@@ -73,18 +73,18 @@ $(document).ready(function () {
 
     if (!isOwnProfile) {
       if (user.isFriend) {
-        actionButton = `<button id="unfriend" class="btn btn-warning btn-sm">Unfriend</button>`;
+        actionButton = `<button id="unfriend" class="btn btn-warning btn-sm"><i class="fa fa-user-times"></i> Unfriend</button>`;
       } else if (user.friendRequestReceived) {
         actionButton = `
-          <button id="accept-friend-request" class="btn btn-success btn-sm">Accept Friend Request</button>
-          <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;">Decline Friend Request</button>
+          <button id="accept-friend-request" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Accept Friend Request</button>
+          <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;"><i class="fa fa-times"></i> Decline Friend Request</button>
         `;
       } else if (user.friendRequestSent) {
-        actionButton = `<button class="btn btn-secondary btn-sm" disabled>Friend Request Sent</button>`;
+        actionButton = `<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-clock-o"></i> Friend Request Sent</button>`;
       } else {
-        actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm">Send Friend Request</button>`;
+        actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm"><i class="fa fa-user-plus"></i> Send Friend Request</button>`;
       }
-      actionButton += `<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">Message</button>`;
+      actionButton += `<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message</button>`;
     }
 
     const userInfoHtml = `
@@ -117,7 +117,7 @@ $(document).ready(function () {
                         </div>
                          ${
                            isOwnProfile
-                             ? '<button id="edit-blurb" class="btn btn-default btn-sm">Edit Blurb</button>'
+                             ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
                              : ""
                          }
                     </div>

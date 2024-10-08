@@ -74,10 +74,10 @@ function displayPost(post) {
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-2 col-sm-3 text-center">
+                        <p id="user-status-${post.author._id}" class="small">Loading status...</p>
                         <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                         <h5><a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a></h5>
-                        <p id="user-status-${post.author._id}" class="small">Loading status...</p>
-                        <p class="small">Posts: ${post.author.postCount || 0}</p>
+                        <p class="small"><b>Posts:</b> ${post.author.postCount || 0}</p>
                     </div>
                     <div class="col-md-10 col-sm-9">
                         <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
