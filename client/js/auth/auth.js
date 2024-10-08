@@ -230,14 +230,22 @@ const App = {
         headers: { "Authorization": `Bearer ${token}` },
         success: (response) => {
           authContainer.html(`
-            <span class="navbar-text">
-              Welcome, ${this.escapeHtml(username)} 
-              <span id="currency-container" data-toggle="tooltip" data-placement="bottom" title="">
+            <div class="navbar-text d-flex align-items-center">
+              <span id="currency-container" data-toggle="tooltip" data-placement="bottom" title="" style="margin-right: 10px;">
                 <i class="bi bi-coin" id="currency-icon"></i> 
                 <span id="currency-amount">${response.currency}</span>
               </span>
-            </span>
-            <button id="logout" class="btn btn-sm btn-danger ml-2 navbar-btn">Logout</button>
+              <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Profile Picture" class="img-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+              <div class="dropdown" style="display: inline-block;">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="text-decoration: none; color: inherit; background: none !important;">
+                  ${this.escapeHtml(username)} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" style="min-width: 100%;">
+                  <li><a href="/settings" style="padding: 3px 20px;"><i class="fa fa-cog"></i> Settings</a></li>
+                  <li><a href="#" id="logout" style="padding: 3px 20px;"><i class="fa fa-sign-out"></i> Logout</a></li>
+                </ul>
+              </div>
+            </div>
           `);
           this.updateCurrencyTooltip(response.lastCurrencyClaimDate);
           this.initLogout();
