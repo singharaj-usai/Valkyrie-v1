@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
 let cachedDb = null;
 
@@ -16,9 +18,15 @@ const connectDB = async (uri) => {
         });
         cachedDb = client;
         console.log('MongoDB connected');
-        require('../models/Counter');
-        require('../models/User');
-       require('../models/Message')
+
+        // require all models
+        const modelsPath = path.join(__dirname, '../models');
+        fs.readdirSync(modelsPath).forEach(file => {
+            if (file.endsWith('.js')) {
+                require(path.join(modelsPath, file));
+            }
+        });
+        
         return client;
     } catch (error) {
         console.error('MongoDB connection error:', error);
