@@ -251,12 +251,21 @@ router.post("/login", async (req, res) => {
     }
 
     // verify cloudflare captcha
-    const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      secret: process.env.CLOUDFLARE_SECRET_KEY,
-      response: captchaResponse
-    });
+    const response = await axios.post(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      new URLSearchParams({
+        secret: process.env.CLOUDFLARE_SECRET_KEY,
+        response: captchaResponse,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
     if (!response.data.success) {
+      console.error("Captcha verification failed:", verificationResponse.data);
       return res.status(400).json({ message: "Invalid captcha" });
     }
 
