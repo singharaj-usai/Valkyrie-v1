@@ -33,7 +33,7 @@ const port = process.env.PORT || 3000;
 
 // Environment vars
 const MONGODB_URI = process.env.MONGODB_URI;
-const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'false';
 const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
 
 
