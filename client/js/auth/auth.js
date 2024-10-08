@@ -426,6 +426,7 @@ const App = {
 
         // cloudflare captcha
         const turnstileResponse = turnstile.getResponse();
+        console.log("Turnstile response:", turnstileResponse);
         if (!turnstileResponse) {
           this.showAlert("danger", "Please complete the captcha.");
           return;
