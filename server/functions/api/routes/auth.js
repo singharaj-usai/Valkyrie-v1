@@ -326,73 +326,10 @@ router.post("/logout", async (req, res) => {
 //});
 
 
-// Search users endpoint
-router.get("/search", async (req, res) => {
-  try {
-    const { username, page = 1, limit = 10 } = req.query;
-    const skip = (page - 1) * limit;
-    
-    const query = { username: new RegExp(username, 'i') };
-    const total = await User.countDocuments(query);
-    const users = await User.find(query)
-      .select('username userId signupDate lastLoggedIn blurb isOnline lastActiveAt')
-      .sort({ isOnline: -1, username: 1 }) // Sort by isOnline (descending) and then by username ascending
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    //res.status(500).send("Error searching users");
-    res.json({
-      users: users.map(user => ({
-        username: user.username,
-        userId: user.userId,
-        signupDate: user.signupDate,
-        lastLoggedIn: user.lastLoggedIn,
-        blurb: user.blurb,
-        isOnline: user.isOnline,
-        lastActiveAt: user.lastActiveAt,
-      })),
-      total,
-      page: parseInt(page),
-      pages: Math.ceil(total / limit)
-    });
-  } catch (error) {
-    console.error("Error searching users:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 
-// User profile endpoint
-router.get('/user/:username', authenticateToken, async (req, res) => {
-  try {
-    const { username } = req.params;
-    const currentUser = await User.findById(req.user.userId);
-    const user = await User.findOne({ username }).select('username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests');
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
 
-    const isFriend = currentUser.friends.includes(user._id);
-    const friendRequestSent = user.friendRequests.includes(currentUser._id);
-    const friendRequestReceived = currentUser.friendRequests.includes(user._id);
 
-    const userObject = user.toObject();
-    delete userObject.friendRequests;
-    delete userObject.friends;
-    delete userObject.sentFriendRequests;
-
-    res.json({
-      ...userObject,
-      isFriend,
-      friendRequestSent,
-      friendRequestReceived
-    });
-  } catch (error) {
-    console.error('User profile error:', error);
-    res.status(500).json({ error: 'Error fetching user profile' });
-  }
-});
 
 
 /* router.get('/user/:username', async (req, res) => {
@@ -410,16 +347,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
 }); */
 
 
-// Get number of registered users
-router.get("/user-count", async (req, res) => {
-  try {
-    const count = await User.countDocuments();
-    res.json({ count });
-  } catch (error) {
-    console.error("Error fetching user count:", error);
-    res.status(500).send("Error fetching user count");
-  }
-});
+
 
 
 router.get("/user-info", async (req, res) => {

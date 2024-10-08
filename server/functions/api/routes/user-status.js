@@ -4,7 +4,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 const User = require('../models/User');
 
 // Update user status
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/update-status", authenticateToken, async (req, res) => {
     try {
       const user = await User.findByIdAndUpdate(req.user.userId, 
         { isOnline: true, lastActiveAt: new Date() },
@@ -18,7 +18,7 @@ router.post("/", authenticateToken, async (req, res) => {
   });
   
   // Get user status
-  router.get("/:username", async (req, res) => {
+  router.get("/user-status/:username", async (req, res) => {
     try {
       const user = await User.findOne({ username: req.params.username });
       if (!user) {
