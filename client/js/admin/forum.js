@@ -108,7 +108,7 @@ function togglePinPost(postId) {
       },
       success: function(response) {
         showAlert('success', response.message);
-        loadForumPosts();
+        loadForumPosts(); 
       },
       error: function() {
         showAlert('danger', 'Error toggling post pin status. Please try again.');

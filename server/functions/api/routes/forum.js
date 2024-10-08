@@ -61,29 +61,33 @@ router.get('/sections/:section?', async (req, res) => {
 });
 
 router.get('/posts', async (req, res) => {
-      try {
-          const page = parseInt(req.query.page) || 1;
-              const limit = parseInt(req.query.limit) || 10;
-                  const skip = (page - 1) * limit;
-
-                      const totalPosts = await ForumPost.countDocuments();
-                          const posts = await ForumPost.find()
-                                .sort({ isPinned: -1, createdAt: -1 }) // Sort pinned posts first, then by creation date
-                                      .skip(skip)
-                                            .limit(limit)
-                                                  .populate('author', 'username')
-                                                        .populate('section', 'name');
-
-                                                            res.json({
-                                                                  posts,
-                                                                        total: totalPosts,
-                                                                              page,
-                                                                                    totalPages: Math.ceil(totalPosts / limit)
-                                                                                        });
-                                                                                          } catch (error) {
-                                                                                              res.status(500).json({ error: 'Error fetching forum posts' });
-                                                                                                }
-                                                                                                });
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+  
+      const totalPosts = await ForumPost.countDocuments();
+      const posts = await ForumPost.find()
+        .sort({ isPinned: -1, updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('author', 'username')
+        .populate({
+          path: 'replies',
+          options: { sort: { createdAt: -1 }, limit: 1 },
+          populate: { path: 'author', select: 'username' }
+        });
+  
+      res.json({
+        posts,
+        total: totalPosts,
+        page,
+        totalPages: Math.ceil(totalPosts / limit)
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching forum posts' });
+    }
+  });
 
 
 // Create a new post

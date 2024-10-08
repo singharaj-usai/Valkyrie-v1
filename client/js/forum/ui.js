@@ -29,10 +29,11 @@ function displayPosts(posts, containerId = '#recent-posts') {
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th style="width: 40%">Topic</th>
+                                    <th style="width: 30%">Topic</th>
                                     <th style="width: 20%">Author</th>
                                     <th style="width: 10%">Replies</th>
-                                    <th style="width: 30%">Posted On</th>
+                                    <th style="width: 20%">Posted On</th>
+                                    <th style="width: 20%">Last Reply</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -44,11 +45,14 @@ function displayPosts(posts, containerId = '#recent-posts') {
 
             const tableBody = sectionTable.find('tbody');
 
-            sectionPosts.forEach(post => {
-                const replyCount = post.replyCount || 0;
-                const lastReply = post.lastReply || post; 
-                const lastPostDate = new Date(lastReply.createdAt).toLocaleString();
-                const lastPostAuthor = lastReply.author ? lastReply.author.username : post.author.username;
+                 sectionPosts.forEach(post => {
+                const replyCount = post.replies ? post.replies.length : 0;
+                const lastReply = post.replies && post.replies.length > 0 ? post.replies[post.replies.length - 1] : null;
+
+                const postedOn = new Date(post.createdAt).toLocaleString();
+                const lastReplyDate = lastReply ? new Date(lastReply.createdAt).toLocaleString() : 'N/A';
+                const lastReplyAuthor = lastReply ? escapeHtml(lastReply.author.username) : 'N/A';
+
 
                 const row = $(`
                     <tr>
@@ -60,10 +64,9 @@ function displayPosts(posts, containerId = '#recent-posts') {
                             <a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a>
                         </td>
                         <td>${replyCount}</td>
+                        <td>${postedOn}</td>
                         <td>
-                            ${lastPostDate}
-                            <br>
-                            by <a href="/user-profile?username=${lastPostAuthor}">${escapeHtml(lastPostAuthor)}</a>
+                            ${lastReplyDate !== 'N/A' ? `${lastReplyDate}<br>by <a href="/user-profile?username=${lastReplyAuthor}">${lastReplyAuthor}</a>` : 'N/A'}
                         </td>
                     </tr>
                 `);
