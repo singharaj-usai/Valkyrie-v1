@@ -22,7 +22,7 @@ const updateUserStatus = require('./functions/api/middleware/updateUserStatus');
 const User = require('./functions/api/models/User');
 const shirtRoutes = require('./functions/api/routes/shirt');
 const friendsRoutes = require('./functions/api/routes/friends');
-
+const userStatusRoutes = require('./functions/api/routes/user-status');
 // Init Expressjs
 const app = express();
 const port = process.env.PORT || 3000;
@@ -141,6 +141,7 @@ app.use('/api/games', gamesRouter);
 app.use('/api/chat', chatRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/shirts', shirtRoutes);
+app.use('/api/user-status', userStatusRoutes);
 app.use('/video', express.static(path.join(__dirname, '../video')));
 // Serve static files from the client directory
 app.use('/', (req, res, next) => {
