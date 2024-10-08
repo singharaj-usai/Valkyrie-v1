@@ -1,25 +1,3 @@
-<footer class="footer mt-auto py-3 mt-4 custom-bg-white custom-shadow">
-  <div class="container">
-    <div class="row text-center">
-      <div class="col-12">
-        <h4 class="text-muted">Valkyrie</h4>
-      </div>
-      <div class="col-12 mb-2">
-        <span class="text-muted">All rights belong to their respective owners</span>
-      </div>
-      <div class="col-12 mb-2">
-        <a href="/legal/about" class="text-primary ">About</a>
-        <span class="mx-2">|</span>
-        <a href="/legal/terms-of-service" class="text-primary ">Terms of Service</a>
-        <span class="mx-2">|</span>
-        <span class="text-muted">&copy; 2024 Valkyrie. All rights reserved.</span>
-      </div>
-      <div class="col-12">
-        <span class="text-muted">Registered Users: <span id="user-count">Loading...</span></span>
-      </div>
-    </div>
-  </div>
-</footer>
 
 <style>
   html {
@@ -27,17 +5,78 @@
     min-height: 100%;
   }
   body {
-    margin-bottom: 160px; /* Adjust this value based on your footer's height */
+    margin-bottom: 200px;
   }
   .footer {
     position: absolute;
     bottom: 0;
     width: 100%;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 2rem 0;
+    font-family: 'Arial', sans-serif;
   }
-  .custom-shadow {
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
   }
-  .custom-bg-white {
-    background-color: #f9f9f9; /* A custom off-white color */
+  .footer-logo h2 {
+    font-size: 2rem;
+    margin: 0;
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .footer-links a {
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .footer-links a:hover {
+    color: #3498db;
+  }
+  .footer-info {
+    text-align: right;
+    font-size: 0.9rem;
+  }
+  .footer-info p {
+    margin: 0.5rem 0;
+  }
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    .footer-links, .footer-info {
+      margin-top: 1rem;
+    }
+    .footer-info {
+      text-align: center;
+    }
   }
 </style>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <h2>Valkyrie</h2>
+    </div>
+    <div class="footer-links">
+      <a href="/legal/about">About</a>
+      <a href="/legal/terms-of-service">Terms of Service</a>
+    </div>
+    <div class="footer-info">
+      <p>All rights belong to their respective owners</p>
+      <p>&copy; 2024 Valkyrie. All rights reserved.</p>
+      <p>Registered Users: <span id="user-count">Loading...</span></p>
+    </div>
+  </div>
+</footer>

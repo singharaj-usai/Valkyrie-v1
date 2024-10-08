@@ -9,6 +9,8 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+
 
 
 function authenticateToken(req, res, next) {
@@ -233,7 +235,7 @@ router.get("/validate-session", async (req, res) => {
 // Login endpoint
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, captchaResponse } = req.body;
     const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
     if (!user) {
       return res.status(400).json({ message: "Invalid username" });
@@ -248,6 +250,17 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
+    // verify cloudflare captcha
+    const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      secret: process.env.CLOUDFLARE_SECRET_KEY,
+      response: captchaResponse
+    });
+
+    if (!response.data.success) {
+      return res.status(400).json({ message: "Invalid captcha" });
+    }
+
+    
     const clientIp = requestIp.getClientIp(req);
     user.lastLoggedIn = moment().tz("America/New_York").toDate();
     user.lastLoginIp = clientIp;

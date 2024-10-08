@@ -23,6 +23,8 @@ const App = {
       this.initLogout();
       this.loadFooter();
       this.updateAuthUI();
+      this.loadTurnstileScript();
+
    //   this.checkForAnnouncements();
    //   this.initParticles();
     });
@@ -422,10 +424,18 @@ const App = {
         const username = $("#username").val();
         const password = $("#password").val();
 
+        // cloudflare captcha
+        const turnstileResponse = turnstile.getResponse();
+        if (!turnstileResponse) {
+          this.showAlert("danger", "Please complete the captcha.");
+          return;
+        }
+  
+
         $.ajax({
           url: "/api/login",
           method: "POST",
-          data: { username, password },
+          data: { username, password, captchaResponse: turnstileResponse },
           success: (response) => {
             localStorage.setItem("token", response.token);
             localStorage.setItem("username", response.username);
@@ -438,11 +448,22 @@ const App = {
           error: (xhr) => {
             const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
             this.showAlert("danger", `Error logging in: ${errorMessage}`);
+            turnstile.reset();
           },
         });
       }
     });
   },
+
+
+// load cloudflare captcha
+   loadTurnstileScript: function() {
+     const script = document.createElement('script');
+     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback';
+     script.async = true;
+     script.defer = true;
+     document.head.appendChild(script);
+   },
 
   validateForm: function (isSignup) {
     const username = $("#username").val();
@@ -685,6 +706,14 @@ const App = {
   },
 
 };
+
+// Add this function outside of the App object
+function onloadTurnstileCallback() {
+  turnstile.render('#cf-turnstile', {
+    sitekey: '0x4AAAAAAAw6-tS7TX3o7eld',
+    theme: 'light',
+  });
+}
 
 // Initialize the application
 $(document).ready(function() {

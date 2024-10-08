@@ -141,7 +141,7 @@ app.use('/api/games', gamesRouter);
 app.use('/api/chat', chatRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/shirts', shirtRoutes);
-app.use('/video', express.static(path.join(__dirname, '../client/video')));
+app.use('/video', express.static(path.join(__dirname, '../video')));
 // Serve static files from the client directory
 app.use('/', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
