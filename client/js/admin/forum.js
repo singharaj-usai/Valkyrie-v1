@@ -39,6 +39,9 @@ function displayForumPosts(posts) {
                                 <li class="list-group-item"><strong>Section:</strong> ${sectionName}</li>
                                 <li class="list-group-item"><strong>Created:</strong> ${new Date(post.createdAt).toLocaleString()}</li>
                             </ul>
+                            <button class="btn btn-sm btn-warning toggle-pin" data-post-id="${post._id}">
+                                <i class="fa ${post.isPinned ? 'fa-unlink' : 'fa-thumbtack'}"></i> ${post.isPinned ? 'Unpin' : 'Pin'}
+                            </button>
                             <button class="btn btn-danger btn-block mt-3 delete-post" data-post-id="${post._id}">
                                 <i class="glyphicon glyphicon-trash"></i> Delete Post
                             </button>
@@ -78,6 +81,11 @@ function displayForumPosts(posts) {
 
         postsList.append(postElement);
 
+        $('.toggle-pin').on('click', function() {
+            const postId = $(this).data('post-id');
+            togglePinPost(postId);
+          });
+
         // Add event listeners for delete buttons
         postElement.find('.delete-post').on('click', function() {
             const postId = $(this).data('post-id');
@@ -90,6 +98,23 @@ function displayForumPosts(posts) {
         });
     });
 }
+
+function togglePinPost(postId) {
+    $.ajax({
+      url: `/api/admin/forum-posts/${postId}/toggle-pin`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      success: function(response) {
+        showAlert('success', response.message);
+        loadForumPosts();
+      },
+      error: function() {
+        showAlert('danger', 'Error toggling post pin status. Please try again.');
+      }
+    });
+  }
 
 function deleteForumPost(postId) {
     if (confirm('Are you sure you want to delete this post and all its replies?')) {

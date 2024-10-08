@@ -53,6 +53,7 @@ function displayPosts(posts, containerId = '#recent-posts') {
                 const row = $(`
                     <tr>
                         <td>
+                            ${post.isPinned ? '<i class="fa fa-thumbtack text-warning" title="Pinned Post"></i> ' : ''}
                             <a href="/forum/post?id=${post._id}">${escapeHtml(post.title)}</a>
                         </td>
                         <td>

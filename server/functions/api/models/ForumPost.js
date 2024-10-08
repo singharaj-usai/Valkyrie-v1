@@ -27,6 +27,11 @@ const forumPostSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    
+    isPinned: {
+      type: Boolean,
+        default: false
+        },
     upvotes: {
         type: Number,
         default: 0

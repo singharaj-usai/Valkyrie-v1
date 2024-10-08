@@ -81,6 +81,24 @@ router.get('/forum-posts', async (req, res) => {
   }
 });
 
+// Add this new route after the existing forum post routes
+router.post('/forum-posts/:id/toggle-pin', async (req, res) => {
+  try {
+      const post = await ForumPost.findById(req.params.id);
+          if (!post) {
+                return res.status(404).json({ error: 'Post not found' });
+                    }
+                        
+                            post.isPinned = !post.isPinned;
+                                await post.save();
+                                    
+                                        res.json({ message: `Post ${post.isPinned ? 'pinned' : 'unpinned'} successfully`, isPinned: post.isPinned });
+                                          } catch (error) {
+                                              console.error('Error toggling post pin status:', error);
+                                                  res.status(500).json({ error: 'Error toggling post pin status' });
+                                                    }
+                                                    });
+
 // Delete a forum post
 router.delete('/forum-posts/:id', async (req, res) => {
   try {

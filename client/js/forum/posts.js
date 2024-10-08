@@ -53,11 +53,21 @@ function displayPost(post) {
 
     const userVote = post.userVote || 'none';
 
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const pinUnpinButton = isAdmin ? `
+      <button class="btn btn-sm btn-warning toggle-pin" data-post-id="${post._id}">
+        <i class="fa ${post.isPinned ? 'fa-unlink' : 'fa-thumbtack'}"></i> ${post.isPinned ? 'Unpin' : 'Pin'}
+    </button>
+    ` : '';
+
     postContainer.html(`
         <div id="post-${post._id}" class="panel panel-primary">
             <div class="panel-heading">
                 <span>
-                    <h3 class="panel-title" style="display: inline-block; margin-right: 10px;">Original Post:</h3>
+                    <h3 class="panel-title" style="display: inline-block; margin-right: 10px;">
+                    ${post.isPinned ? '<i class="fa fa-thumbtack text-warning" title="Pinned Post"></i> ' : ''}
+                    Original Post:
+                    </h3>
                     <small>Posted on ${new Date(post.createdAt).toLocaleString()}</small>
                 </span>
             </div>
@@ -75,6 +85,7 @@ function displayPost(post) {
                 </div>
             </div>
             <div class="panel-footer">
+                    ${pinUnpinButton}
                 <button class="btn btn-sm btn-success vote-button ${userVote === 'up' ? 'active' : ''}" data-vote="up">
                     <i class="bi bi-hand-thumbs-up"></i> Upvote
                     <span class="upvote-count">${post.upvotes || 0}</span>
@@ -94,6 +105,13 @@ function displayPost(post) {
         votePost(post._id, voteType);
     });
 
+    if (isAdmin) {
+        $('.toggle-pin').on('click', function() {
+          const postId = $(this).data('post-id');
+          togglePinPost(postId);
+        });
+    }
+
     // Load user status
     fetchUserStatus(post.author.username).then(isOnline => {
         const onlineStatus = isOnline 
@@ -105,6 +123,23 @@ function displayPost(post) {
     // Load replies
     loadReplies(post._id);
 }
+
+function togglePinPost(postId) {
+    $.ajax({
+      url: `/api/admin/forum-posts/${postId}/toggle-pin`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      success: function(response) {
+        alert(response.message);
+        loadPost(postId);
+      },
+      error: function() {
+        alert('Error toggling post pin status. Please try again.');
+      }
+    });
+  }
 
 function loadPostForReply(postId) {
     $.ajax({
