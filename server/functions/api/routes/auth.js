@@ -319,7 +319,7 @@ router.post("/logout", async (req, res) => {
   });
 });
 
-
+/* 
 
 router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
   try {
@@ -349,7 +349,7 @@ router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
     console.error("Error claiming daily currency:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-});
+}); */
 
 router.post('/verify-upload-access', (req, res) => {
   const { accessKey } = req.body;
