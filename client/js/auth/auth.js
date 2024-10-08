@@ -446,6 +446,7 @@ const App = {
             }, 3000);
           },
           error: (xhr) => {
+            console.error("Login error:", xhr.responseText);
             const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
             this.showAlert("danger", `Error logging in: ${errorMessage}`);
             turnstile.reset();

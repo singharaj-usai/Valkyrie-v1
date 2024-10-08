@@ -250,6 +250,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
+    try {
+
     // verify cloudflare captcha
     const response = await axios.post(
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
@@ -265,9 +267,13 @@ router.post("/login", async (req, res) => {
     );
 
     if (!response.data.success) {
-      console.error("Captcha verification failed:", verificationResponse.data);
+      console.error("Captcha verification failed:", response.data);
       return res.status(400).json({ message: "Invalid captcha" });
     }
+  } catch (error) {
+    console.error("Error verifying captcha:", error);
+    return res.status(500).json({ message: "Error verifying captcha" });
+  }
 
     
     const clientIp = requestIp.getClientIp(req);
