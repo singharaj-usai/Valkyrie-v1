@@ -6,6 +6,7 @@ const ForumPost = require('../models/ForumPost');
 const Reply = require('../models/Reply');
 const isAdmin = require('../middleware/adminAuth');
 const { isAuthenticated } = require('../middleware/auth');
+const authenticateToken = require('../middleware/authenticateToken');
 
 // Apply isAuthenticated middleware to all admin routes
 router.use(isAuthenticated);
@@ -17,7 +18,7 @@ router.get('/check-auth', (req, res) => {
 });
 
 // Promote user to admin
-router.post('/promote-admin/:id', async (req, res) => {
+router.post('/promote-admin/:id', authenticateToken, async (req, res) => {
   try {
     const userToPromote = await User.findById(req.params.id);
     if (!userToPromote) {
@@ -38,7 +39,7 @@ router.post('/promote-admin/:id', async (req, res) => {
   }
 });
 
-router.post('/demote-admin/:id', async (req, res) => {
+router.post('/demote-admin/:id', authenticateToken, async (req, res) => {
   try {
       const userToDemote = await User.findById(req.params.id);
       if (!userToDemote) {
@@ -65,7 +66,7 @@ router.post('/demote-admin/:id', async (req, res) => {
 
 // Get all forum posts
 // Get all forum posts
-router.get('/forum-posts', async (req, res) => {
+router.get('/forum-posts', authenticateToken, async (req, res) => {
   try {
     const posts = await ForumPost.find()
       .populate('author', 'username')
@@ -81,7 +82,7 @@ router.get('/forum-posts', async (req, res) => {
   }
 });
 
-router.post('/forum-posts/:id/toggle-pin', async (req, res) => {
+router.post('/forum-posts/:id/toggle-pin', authenticateToken, async (req, res) => {
   try {
     const post = await ForumPost.findById(req.params.id);
     if (!post) {
@@ -100,7 +101,7 @@ router.post('/forum-posts/:id/toggle-pin', async (req, res) => {
 });
 
 // Delete a forum post
-router.delete('/forum-posts/:id', async (req, res) => {
+router.delete('/forum-posts/:id', authenticateToken, async (req, res) => {
   try {
     const post = await ForumPost.findById(req.params.id);
     if (!post) {
@@ -122,7 +123,7 @@ router.delete('/forum-posts/:id', async (req, res) => {
   }
 });
 // Delete a forum reply
-router.delete('/forum-replies/:id', async (req, res) => {
+router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
   try {
     const reply = await Replies.findById(req.params.id);
     if (!reply) {
@@ -145,37 +146,40 @@ router.delete('/forum-replies/:id', async (req, res) => {
   }
 });
 
-// Get all users
-router.get('/users', async (req, res) => {
+// Get all users 
+router.get('/users', authenticateToken, async (req, res) => {
   try {
-    const users = await User.find({}, '-password');
-    res.json(users);
+      const users = await User.find({}, '-password');
+      res.json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching users' });
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post('/users/:userId/ban', async (req, res) => {
+router.post('/users/:userId/ban', authenticateToken, async (req, res) => {
   try {
-      const user = await User.findById(req.params.userId);
+      const { userId } = req.params;
+      const { ban, banReason } = req.body;
+
+      const user = await User.findById(userId);
       if (!user) {
           return res.status(404).json({ error: 'User not found' });
       }
 
-      user.isBanned = req.body.ban;
-      if (req.body.ban) {
-          user.banReason = req.body.banReason;
-      } else {
-          user.banReason = null;
-      }
-
+      user.isBanned = ban;
+      user.banReason = ban ? banReason : null;
       await user.save();
 
-      res.json({ message: req.body.ban ? 'User banned successfully' : 'User unbanned successfully' });
+      res.json({ message: ban ? 'User banned successfully' : 'User unbanned successfully' });
   } catch (error) {
-      res.status(500).json({ error: 'Error updating user ban status' });
+      console.error('Error banning/unbanning user:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
 
 // Get all games
 router.get('/games', async (req, res) => {

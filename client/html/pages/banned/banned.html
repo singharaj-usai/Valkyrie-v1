@@ -54,7 +54,7 @@
     <script>
         $(document).ready(function() {
             $.ajax({
-                url: '/api/users/check-ban',
+                url: '/api/auth/check-ban',
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`

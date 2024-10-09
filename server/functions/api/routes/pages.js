@@ -18,6 +18,7 @@ router.get("/register", (req, res) => sendHtmlFile(res, "pages/authentication/re
 router.get("/auth/verify-email/:token", (req, res) => sendHtmlFile(res, "pages/authentication/email-verified.html"));
 
 
+router.get("/banned", (req, res) => sendHtmlFile(res, "pages/banned/banned.html"));
 
 
 // User-related pages

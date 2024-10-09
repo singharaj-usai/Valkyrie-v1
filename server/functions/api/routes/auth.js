@@ -232,6 +232,21 @@ router.get("/validate-session", async (req, res) => {
   }
 });
 
+
+// Check if user is banned
+router.get("/check-ban", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ isBanned: user.isBanned, banReason: user.banReason });
+  } catch (error) {
+    console.error("Error checking ban status:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Login endpoint
 router.post("/login", async (req, res) => {
   try {
@@ -298,7 +313,9 @@ router.post("/login", async (req, res) => {
       username: user.username,
       userId: user.userId,
       signupDate: user.signupDate,
-      lastLoggedIn: user.lastLoggedIn
+      lastLoggedIn: user.lastLoggedIn,
+      isBanned: user.isBanned,
+      banReason: user.banReason
     });
   } catch (error) {
     console.error("Login error:", error);
