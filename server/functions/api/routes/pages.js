@@ -60,7 +60,7 @@ router.get('/admin/dashboard', (req, res) => sendHtmlFile(res, 'pages/admin/dash
 // Legal pages
 router.get("/legal/about", (req, res) => sendHtmlFile(res, "pages/legal/about.html"));
 router.get("/legal/terms-of-service", (req, res) => sendHtmlFile(res, "pages/legal/terms-of-service.html"));
-router.get("/privacy", (req, res) => sendHtmlFile(res, "pages/legal/privacy/privacy.html"));
+router.get("/legal/privacy-policy", (req, res) => sendHtmlFile(res, "pages/legal/privacy-policy.html"));
 
 // Components
 router.get("/navbar", (req, res) => sendHtmlFile(res, "components/navbar.html"));

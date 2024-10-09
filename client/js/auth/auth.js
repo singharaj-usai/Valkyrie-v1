@@ -109,13 +109,13 @@ const App = {
             console.error("Error validating session:", xhr.responseText);
           }
           this.logout();
-          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about") {
+          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about" && currentPath !== "/legal/privacy-policy") {
             window.location.href = "/login";
           }
         },
       });
     } else {
-      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about") {
+      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about" && currentPath !== "/legal/privacy-policy") {
         window.location.href = "/login";
       } else {
         $("#loading").hide();
