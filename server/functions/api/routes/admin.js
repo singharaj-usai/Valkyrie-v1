@@ -125,7 +125,7 @@ router.delete('/forum-posts/:id', authenticateToken, async (req, res) => {
 // Delete a forum reply
 router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
   try {
-    const reply = await Replies.findById(req.params.id);
+    const reply = await Reply.findById(req.params.id);
     if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
     }
