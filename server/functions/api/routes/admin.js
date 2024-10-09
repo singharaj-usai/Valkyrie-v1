@@ -103,15 +103,24 @@ router.post('/forum-posts/:id/toggle-pin', authenticateToken, async (req, res) =
 // Delete a forum post
 router.delete('/forum-posts/:id', authenticateToken, async (req, res) => {
   try {
-    const post = await ForumPost.findById(req.params.id);
+    const post = await ForumPost.findById(req.params.id).populate('author');
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
     
     // Delete all replies associated with the post, if any
     if (post.replies && post.replies.length > 0) {
-      await Reply.deleteMany({ _id: { $in: post.reply } });
+      await Reply.deleteMany({ _id: { $in: post.replies } });
+      // Decrease the post count for each reply author
+      const replyAuthors = await Reply.find({ _id: { $in: post.replies } }).distinct('author');
+      await User.updateMany(
+        { _id: { $in: replyAuthors } },
+        { $inc: { forumPostCount: -1 } }
+      );
     }
+    
+    // Decrease the post count for the post author
+    await User.findByIdAndUpdate(post.author._id, { $inc: { forumPostCount: -1 } });
     
     // Delete the post
     await ForumPost.findByIdAndDelete(req.params.id);
@@ -125,7 +134,7 @@ router.delete('/forum-posts/:id', authenticateToken, async (req, res) => {
 // Delete a forum reply
 router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
   try {
-    const reply = await Reply.findById(req.params.id);
+    const reply = await Reply.findById(req.params.id).populate('author');
     if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
     }
@@ -136,6 +145,9 @@ router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
       $inc: { replyCount: -1 }
     });
     
+    // Decrease the post count for the reply author
+    await User.findByIdAndUpdate(reply.author._id, { $inc: { forumPostCount: -1 } });
+    
     // Delete the reply
     await Reply.findByIdAndDelete(req.params.id);
     
@@ -143,6 +155,24 @@ router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error deleting forum reply:', error);
     res.status(500).json({ error: 'Error deleting forum reply' });
+  }
+});
+
+// Reset forum post count
+router.post('/reset-forum-post-count', authenticateToken, async (req, res) => {
+  try {
+    const users = await User.find();
+    for (const user of users) {
+      const postCount = await ForumPost.countDocuments({ author: user._id });
+      const replyCount = await Reply.countDocuments({ author: user._id });
+      const totalCount = postCount + replyCount;
+      user.forumPostCount = totalCount;
+      await user.save();
+    }
+    res.json({ message: 'Forum post counts reset successfully' });
+  } catch (error) {
+    console.error('Error resetting forum post counts:', error);
+    res.status(500).json({ error: 'Error resetting forum post counts' });
   }
 });
 

@@ -162,6 +162,25 @@ function deleteForumReply(replyId) {
     }
 }
 
+function resetForumPostCount() {
+    if (confirm('Are you sure you want to reset the forum post count for all users? This may take a while.')) {
+      $.ajax({
+        url: '/api/admin/reset-forum-post-count',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        success: function(response) {
+          showAlert('success', 'Forum post counts reset successfully.');
+        },
+        error: function(xhr, status, error) {
+          console.error('Error resetting forum post counts:', error);
+          showAlert('danger', 'Error resetting forum post counts. Please try again.');
+        }
+      });
+    }
+  }
+
 function getSectionName(sectionId) {
     const sectionMap = {
         'announcements': 'Announcements',

@@ -29,6 +29,22 @@ function loadPost(postId) {
     });
 }
 
+function fetchForumPostCount(userId) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: `/api/forum/user-post-count/${userId}`,
+            method: 'GET',
+            success: function(response) {
+                resolve(response.count);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching forum post count:', error);
+                resolve(0); // Default to 0 if there's an error
+            }
+        });
+    });
+}
+
 function displayPost(post) {
     const postContainer = $('#post-container');
     const breadcrumb = $('#post-breadcrumb');
@@ -64,7 +80,7 @@ function displayPost(post) {
                         <p id="user-status-${post.author._id}" class="small">Loading status...</p>
                         <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                         <h5><a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a></h5>
-                        <p class="small"><b>Posts:</b> ${post.author.postCount || 0}</p>
+                        <p class="small"><b>Posts:</b> <span id="author-post-count-${post.author._id}">Loading...</span></p>
                     </div>
                     <div class="col-md-10 col-sm-9">
                         <p style="white-space: pre-wrap;">${formatContent(post.content)}</p>
@@ -105,6 +121,11 @@ function displayPost(post) {
             ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
             : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
         $(`#user-status-${post.author._id}`).html(onlineStatus);
+    });
+
+    // Load author's post count
+    fetchForumPostCount(post.author._id).then(postCount => {
+        $(`#author-post-count-${post.author._id}`).text(postCount);
     });
 
     // Load replies

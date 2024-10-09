@@ -321,11 +321,14 @@ router.get('/posts/:postId/replies', async (req, res) => {
 
 router.get('/user-post-count/:userId', async (req, res) => {
     try {
-    const postCount = await ForumPost.countUserPosts(req.params.userId);
-    res.json({ count: postCount });
+        const { userId } = req.params;
+        const postCount = await ForumPost.countDocuments({ author: userId });
+        const replyCount = await Reply.countDocuments({ author: userId });
+        const totalCount = postCount + replyCount;
+        res.json({ count: totalCount });
     } catch (error) {
-    console.error('Error fetching user post count:', error);
-    res.status(500).json({ message: 'Error fetching user post count' });
+        console.error('Error fetching user post count:', error);
+        res.status(500).json({ message: 'Error fetching user post count', error: error.message });
     }
 });
 
