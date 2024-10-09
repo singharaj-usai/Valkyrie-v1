@@ -122,11 +122,28 @@ $(document).ready(function () {
                          }
                     </div>
                     <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
+                   
                 </div>
             </div>
         `;
 
     $("#user-info").html(userInfoHtml);
+
+
+    const statisticsHtml = `
+    <div class="panel panel-primary" style="margin-top: 20px;">
+      <div class="panel-heading">
+        <h3 class="panel-title">User Statistics</h3>
+      </div>
+      <div class="panel-body">
+        <p><strong>Last Seen:</strong> ${formatDate(user.lastLoggedIn)}</p>
+        <p><strong>Join Date:</strong> ${formatDate(user.signupDate)}</p>
+        <p><strong>Place Visits:</strong>0</p>
+      </div>
+    </div>
+  `;
+
+  $("#user-info").append(statisticsHtml);
 
 
     // Fetch and display friends list
@@ -450,3 +467,15 @@ $(document).ready(function () {
       .replace(/'/g, "&#039;");
   }
 });
+
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+}
