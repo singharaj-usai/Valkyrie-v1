@@ -81,6 +81,21 @@ const App = {
     const username = localStorage.getItem("username");
     const currentPath = window.location.pathname;
 
+    // this whole public pages stuff need to be improved, requires whole site refactoring so unauthorized users can view other pages but certain div elements are hidden from them
+    const publicPages = [
+      "/login",
+      "/register",
+      "/legal/terms-of-service",
+      "/legal/about",
+      "/legal/privacy-policy",
+      "/forum/home",
+      "/games",
+    ];
+
+    // all forum pages
+    const isForumPage = currentPath.startsWith("/forum/");
+
+
     if (token && username) {
       $.ajax({
         url: "/api/validate-session",
@@ -109,13 +124,13 @@ const App = {
             console.error("Error validating session:", xhr.responseText);
           }
           this.logout();
-          if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about" && currentPath !== "/legal/privacy-policy") {
+          if (!publicPages.includes(currentPath) && !isForumPage) {
             window.location.href = "/login";
           }
         },
       });
     } else {
-      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/legal/terms-of-service" && currentPath !== "/legal/about" && currentPath !== "/legal/privacy-policy") {
+      if (!publicPages.includes(currentPath) && !isForumPage) {
         window.location.href = "/login";
       } else {
         $("#loading").hide();
