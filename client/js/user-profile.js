@@ -31,7 +31,13 @@ $(document).ready(function () {
         currentUser = user;
         fetchUserStatus(username).then((isOnline) => {
           user.isOnline = isOnline;
+
+          fetchForumPostCount(user._id).then((postCount) => {
+            user.forumPostCount = postCount;
+
           displayUserProfile(user);
+        });
+
         });
         document.getElementById(
           "profile-title"
@@ -59,6 +65,22 @@ $(document).ready(function () {
         error: function (xhr, status, error) {
           console.error("Error fetching user status:", error);
           resolve(false);
+        },
+      });
+    });
+  }
+
+  function fetchForumPostCount(userId) {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: `/api/forum/user-post-count/${userId}`,
+        method: "GET",
+        success: function (response) {
+          resolve(response.count);
+        },
+        error: function (xhr, status, error) {
+          console.error("Error fetching forum post count:", error);
+          resolve(0); // Default to 0 if there's an error
         },
       });
     });
@@ -139,6 +161,7 @@ $(document).ready(function () {
         <p><strong>Last Seen:</strong> ${formatDate(user.lastLoggedIn)}</p>
         <p><strong>Join Date:</strong> ${formatDate(user.signupDate)}</p>
         <p><strong>Place Visits:</strong>0</p>
+        <p><strong>Forum Post Count:</strong> ${user.forumPostCount || 0}</p>
       </div>
     </div>
   `;

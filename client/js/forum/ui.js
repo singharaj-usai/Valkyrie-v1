@@ -46,7 +46,7 @@ function displayPosts(posts, containerId = '#recent-posts') {
             const tableBody = sectionTable.find('tbody');
 
                  sectionPosts.forEach(post => {
-                const replyCount = post.replies ? post.replies.length : 0;
+                const replyCount = post.replyCount || 0;
                 const lastReply = post.replies && post.replies.length > 0 ? post.replies[post.replies.length - 1] : null;
 
                 const postedOn = new Date(post.createdAt).toLocaleString();

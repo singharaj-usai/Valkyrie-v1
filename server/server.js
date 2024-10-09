@@ -26,7 +26,7 @@ const userStatusRoutes = require('./functions/api/routes/user-status');
 const currencyRoutes = require('./functions/api/routes/currency');
 const searchUsersRoutes = require('./functions/api/routes/searchUsers');
 const userRoutes = require('./functions/api/routes/user');
-
+const forumRoutes = require('./functions/api/routes/forum');
 // Init Expressjs
 const app = express();
 const port = process.env.PORT || 3000;
@@ -141,6 +141,7 @@ app.use((err, req, res, next) => {
 app.use('/api', authRoutes);
 app.use('/', pageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/forum', forumRoutes);
 app.use('/api/games', gamesRouter);
 app.use('/api/chat', chatRoutes);
 app.use('/api/friends', friendsRoutes);

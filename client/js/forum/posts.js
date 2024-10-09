@@ -16,24 +16,11 @@ function loadRecentPosts(page = 1) {
 
 function loadPost(postId) {
     $.ajax({
-        url: `/api/forum/posts/id/${postId}`,
+        url: `/api/forum/posts/${postId}`,
         method: 'GET',
         success: function(post) {
-            // Fetch post count for the post author
-            $.ajax({
-                url: `/api/forum/user-post-count/${post.author._id}`,
-                method: 'GET',
-                success: function(postCount) {
-                    post.author.postCount = postCount;
-                    displayPost(post);
-                    loadReplies(postId);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching author post count:', error);
-                    displayPost(post);
-                    loadReplies(postId);
-                }
-            });
+            displayPost(post);
+            loadReplies(postId);
         },
         error: function(xhr, status, error) {
             console.error('Error loading post:', error);

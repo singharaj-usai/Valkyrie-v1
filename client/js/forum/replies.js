@@ -4,35 +4,31 @@ function loadReplies(postId) {
         method: 'GET',
         success: function(replies) {
             const repliesContainer = $('#replies-container');
+            repliesContainer.html(displayReplies(replies, postId));
             
-            // Fetch post counts for all replies authors
-            const authorIds = [...new Set(replies.map(reply => reply.author._id))];
-            const postCountPromises = authorIds.map(authorId => 
-                $.ajax({
-                    url: `/api/forum/user-post-count/${authorId}`,
-                    method: 'GET'
-                })
-            );
+            // Add event listeners for reply buttons
+            $('.reply-button').on('click', function() {
+                const replyId = $(this).data('reply-id');
+                $(`#reply-form-${replyId}`).toggle();
+            });
 
-            Promise.all(postCountPromises).then(postCounts => {
-                const postCountMap = Object.fromEntries(postCounts.map((count, index) => [authorIds[index], count]));
-                
-                replies.forEach(reply => {
-                    reply.author.postCount = postCountMap[reply.author._id];
+            $('.submit-reply').on('click', function() {
+                const replyId = $(this).data('reply-id');
+                const content = $(this).siblings('textarea').val();
+                submitReply(postId, content, replyId);
+            });
+
+            // Load user statuses and post counts
+            replies.forEach(reply => {
+                fetchUserStatus(reply.author.username).then(isOnline => {
+                    const onlineStatus = isOnline 
+                        ? '<span class="text-success"><i class="bi bi-circle-fill"></i> Online</span>' 
+                        : '<span class="text-danger"><i class="bi bi-circle-fill"></i> Offline</span>';
+                    $(`#reply-user-status-${reply._id}`).html(onlineStatus);
                 });
 
-                repliesContainer.html(displayReplies(replies, postId));
-                
-                // Add event listeners for reply buttons
-                $('.reply-button').on('click', function() {
-                    const replyId = $(this).data('reply-id');
-                    $(`#reply-form-${replyId}`).toggle();
-                });
-
-                $('.submit-reply').on('click', function() {
-                    const replyId = $(this).data('reply-id');
-                    const content = $(this).siblings('textarea').val();
-                    submitReply(postId, content, replyId);
+                fetchForumPostCount(reply.author._id).then(postCount => {
+                    $(`#reply-post-count-${reply._id}`).text(postCount);
                 });
             });
         },
@@ -73,16 +69,16 @@ function displayReplies(replies, postId, parentId = null, level = 0) {
                     <div class="panel-heading">
                         <span>
                             <h3 class="panel-title" style="display: inline-block; margin-right: 10px;">Reply:</h3>
-                            <small">Posted on ${new Date(reply.createdAt).toLocaleString()}</small>
+                            <small>Posted on ${new Date(reply.createdAt).toLocaleString()}</small>
                         </span>
                     </div>
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-2 col-sm-3 text-center">
-                                <p id="reply-user-status-${reply.author._id}" class="small">Loading status...</p>
+                                <p id="reply-user-status-${reply._id}" class="small">Loading status...</p>
                                 <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                                 <h5><a href="/user-profile?username=${reply.author.username}">${escapeHtml(reply.author.username)}</a></h5>
-                                <p class="small"><b>Posts:</b> ${reply.author.postCount || 0}</p>
+                                <p class="small"><b>Posts:</b> <span id="reply-post-count-${reply._id}">${reply.author.postCount || 0}</span></p>
                             </div>
                             <div class="col-md-10 col-sm-9">
                                 <p style="white-space: pre-wrap;">${formatContent(reply.content)}</p>
@@ -102,4 +98,21 @@ function displayReplies(replies, postId, parentId = null, level = 0) {
         }
     });
     return html;
+}
+
+// Add this function to fetch the forum post count
+function fetchForumPostCount(userId) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: `/api/forum/user-post-count/${userId}`,
+            method: 'GET',
+            success: function(response) {
+                resolve(response.count);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching forum post count:', error);
+                resolve(0); // Default to 0 if there's an error
+            }
+        });
+    });
 }

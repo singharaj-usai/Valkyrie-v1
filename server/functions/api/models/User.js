@@ -104,9 +104,15 @@ sentFriendRequests: [{
 games: [{
   type: mongoose.Schema.Types.ObjectId,
   ref: 'Game'
-}]
+}],
+
+postCount: {
+  type: Number,
+  default: 0
+},
 
 });
+
 
 userSchema.pre('save', async function(next) {
   if (this.isNew) {

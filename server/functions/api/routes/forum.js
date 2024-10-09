@@ -298,18 +298,31 @@ router.get('/posts/:postId/replies', async (req, res) => {
             })
             .sort({ createdAt: 1 });
 
-        res.json(replies);
+        // Fetch post counts for all authors
+        const authorIds = [...new Set(replies.map(reply => reply.author._id))];
+        const postCounts = await Promise.all(authorIds.map(authorId => 
+            ForumPost.countDocuments({ author: authorId })
+        ));
+        const postCountMap = Object.fromEntries(authorIds.map((id, index) => [id.toString(), postCounts[index]]));
+
+        // Add post count to each reply
+        const repliesWithPostCount = replies.map(reply => {
+            const replyObj = reply.toObject();
+            replyObj.author.postCount = postCountMap[reply.author._id.toString()];
+            return replyObj;
+        });
+
+        res.json(repliesWithPostCount);
     } catch (error) {
-        console.error('Error creating reply:', error);
-        console.error('Error stack:', error.stack);
-        res.status(500).json({ message: 'Error creating reply', error: error.message });
+        console.error('Error fetching replies:', error);
+        res.status(500).json({ message: 'Error fetching replies', error: error.message });
     }
 });
 
 router.get('/user-post-count/:userId', async (req, res) => {
     try {
     const postCount = await ForumPost.countUserPosts(req.params.userId);
-    res.json(postCount);
+    res.json({ count: postCount });
     } catch (error) {
     console.error('Error fetching user post count:', error);
     res.status(500).json({ message: 'Error fetching user post count' });
