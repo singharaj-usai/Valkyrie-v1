@@ -82,6 +82,8 @@ function displayPost(post) {
     fetchTop15Posters().then(top15 => {
         const isTop15 = top15.includes(post.author._id);
         const top15Badge = isTop15 ? '<p class="small text-success"><i class="fa fa-trophy"></i> Top 15 Poster</p>' : '';
+        const joinDate = formatJoinDate(post.author.signupDate);
+
     postContainer.html(`
         <div id="post-${post._id}" class="panel panel-primary">
             <div class="panel-heading">
@@ -100,6 +102,7 @@ function displayPost(post) {
                         <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                         <h5><a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a></h5>
                         ${top15Badge}
+                        <p><b>Join Date:</b> ${joinDate}</p>
                         <p class="small"><b>Posts:</b> <span id="author-post-count-${post.author._id}">Loading...</span></p>
                     </div>
                     <div class="col-md-10 col-sm-9">
@@ -215,5 +218,16 @@ function votePost(postId, voteType) {
             console.error('Error voting:', error);
             alert('Error voting. Please try again later.');
         }
+    });
+}
+
+function formatJoinDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
     });
 }

@@ -100,6 +100,7 @@ function displayReplies(replies, postId) {
                                 <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                                 <h5><a href="/user-profile?username=${reply.author.username}">${escapeHtml(reply.author.username)}</a></h5>
                                 ${top15Badge}
+                                <p><b>Join Date:</b> ${formatDate(reply.author.signupDate)}</p>
                                 <p class="small"><b>Posts:</b> <span id="reply-post-count-${reply._id}">${reply.author.postCount || 0}</span></p>
                             </div>
                             <div class="col-md-10 col-sm-9">
@@ -150,5 +151,16 @@ function fetchForumPostCount(userId) {
                 resolve(0); // Default to 0 if there's an error
             }
         });
+    });
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
     });
 }
