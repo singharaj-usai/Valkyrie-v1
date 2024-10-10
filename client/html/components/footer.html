@@ -7,15 +7,29 @@
   body {
     margin-bottom: 200px;
   }
+html, body {
+    height: 100%; /* Make sure body takes full height */
+}
+#content {
+    min-height: 100%; /* Ensure content takes full height */
+    margin-bottom: -50px; /* Footer height (adjust if necessary) */
+    padding-bottom: 50px; /* Footer height again */
+}
+
+  .footer-dark {
+    background-color: #202020; /* Dark background */
+    color: #ffffff; /* White text */
+    padding: 20px 0;
+}
   .footer {
-    position: absolute;
+    height: 50px; /* Set footer height */
+    background-color: #343a40; /* Dark background color */
+    color: #ffffff; /* Text color */
+    padding: 10px 0;
+    position: relative;
     bottom: 0;
     width: 100%;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 2rem 0;
-    font-family: 'Arial', sans-serif;
-  }
+}
   .footer-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -64,20 +78,19 @@
   }
 </style>
 
-<footer class="footer">
-  <div class="footer-content">
-    <div class="footer-logo">
-      <h2>Valkyrie</h2>
+<footer class="footer-dark" style="margin-top: 30px;">
+    <div class="container">
+        <ul class="list-inline text-center">
+            <li><a href="https://www.valk.fun/terms-of-service">Terms of Service</a></li>
+            <li><a href="https://www.valk.fun/privacy-policy" class="text-light h5 text-decoration-none">Privacy Policy</a></li>
+            <li><a href="https://www.valk.fun/about" class="text-light h5 text-decoration-none">About</a></li>
+            <li><a href="https://www.valk.fun/stats" class="text-light h5 text-decoration-none">Stats</a></li>
+            <li><a href="https://discord.gg/XKksQEjXht" class="text-light h5 text-decoration-none">Discord</a></li>
+        </ul>
+        <hr class="text-light">
+        <div class="row">
+            <div class="col-xs-12 text-left text-muted">
+                &copy; 2024 Valkyrie. Valkyrie is a not-for-profit private community. Valkyrie is not associated with, does not deal with, or otherwise part of Roblox Corporation. Magic number: <span id="user-count">Loading...</span></div>
+        </div>
     </div>
-    <div class="footer-links">
-      <a href="/legal/about">About</a>
-      <a href="/legal/terms-of-service">Terms of Service</a>
-      <a href="/legal/privacy-policy">Privacy Policy</a>
-    </div>
-    <div class="footer-info">
-      <p>All rights belong to their respective owners</p>
-      <p>&copy; 2024 Valkyrie. All rights reserved.</p>
-      <p>Registered Users: <span id="user-count">Loading...</span></p>
-    </div>
-  </div>
 </footer>
