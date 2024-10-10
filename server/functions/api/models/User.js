@@ -111,6 +111,11 @@ postCount: {
   default: 0
 },
 
+forumPostCount: { 
+  type: Number, 
+  default: 0 
+},
+
 });
 
 

@@ -1,3 +1,19 @@
+function fetchTop15Posters() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/api/forum/top-15-posters',
+            method: 'GET',
+            success: function(response) {
+                resolve(response.map(user => user._id));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching top 15 posters:', error);
+                reject(error);
+            }
+        });
+    });
+}
+
 function loadRecentPosts(page = 1) {
     $.ajax({
         url: '/api/forum/posts',
@@ -63,6 +79,9 @@ function displayPost(post) {
     </button>
     ` : '';
 
+    fetchTop15Posters().then(top15 => {
+        const isTop15 = top15.includes(post.author._id);
+        const top15Badge = isTop15 ? '<p class="small text-success"><i class="fa fa-trophy"></i> Top 15 Poster</p>' : '';
     postContainer.html(`
         <div id="post-${post._id}" class="panel panel-primary">
             <div class="panel-heading">
@@ -80,6 +99,7 @@ function displayPost(post) {
                         <p id="user-status-${post.author._id}" class="small">Loading status...</p>
                         <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="64" height="64">
                         <h5><a href="/user-profile?username=${post.author.username}">${escapeHtml(post.author.username)}</a></h5>
+                        ${top15Badge}
                         <p class="small"><b>Posts:</b> <span id="author-post-count-${post.author._id}">Loading...</span></p>
                     </div>
                     <div class="col-md-10 col-sm-9">
@@ -130,6 +150,7 @@ function displayPost(post) {
 
     // Load replies
     loadReplies(post._id);
+    });
 }
 
 function togglePinPost(postId) {

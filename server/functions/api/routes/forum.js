@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ForumPost = require('../models/ForumPost');
 const Reply = require('../models/Reply');
+const User = require('../models/User');
 const { isAuthenticated } = require('../middleware/auth');
 
 router.get('/sections', (req, res) => {
@@ -102,6 +103,7 @@ router.post('/posts', isAuthenticated, async (req, res) => {
         });
 
         await newPost.save();
+        await User.findByIdAndUpdate(req.user._id, { $inc: { forumPostCount: 1 } });
         res.status(201).json({ message: 'Post created successfully', post: newPost });
     } catch (error) {
         console.error('Error creating forum post:', error);
@@ -329,6 +331,40 @@ router.get('/user-post-count/:userId', async (req, res) => {
     } catch (error) {
         console.error('Error fetching user post count:', error);
         res.status(500).json({ message: 'Error fetching user post count', error: error.message });
+    }
+});
+
+router.get('/top-15-posters', async (req, res) => {
+    try {
+        const topPosters = await ForumPost.aggregate([
+            {
+                $group: {
+                    _id: '$author',
+                    totalPosts: { $sum: 1 }
+                }
+            },
+            { $sort: { totalPosts: -1 } },
+            { $limit: 15 },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    username: { $arrayElemAt: ['$userDetails.username', 0] },
+                    totalPosts: 1
+                }
+            }
+        ]);
+        res.json(topPosters);
+    } catch (error) {
+        console.error('Error fetching top 15 posters:', error);
+        res.status(500).json({ message: 'Error fetching top 15 posters', error: error.message });
     }
 });
 
