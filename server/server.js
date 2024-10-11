@@ -26,7 +26,9 @@ const userStatusRoutes = require('./functions/api/routes/user-status');
 const currencyRoutes = require('./functions/api/routes/currency');
 const searchUsersRoutes = require('./functions/api/routes/searchUsers');
 const userRoutes = require('./functions/api/routes/user');
+const catalogRoutes = require('./functions/api/routes/catalog');
 const forumRoutes = require('./functions/api/routes/forum');
+
 // Init Expressjs
 const app = express();
 const port = process.env.PORT || 3000;
@@ -149,6 +151,7 @@ app.use('/api/shirts', shirtRoutes);
 app.use('/api', userStatusRoutes);
 app.use('/api', currencyRoutes);
 app.use('/api', searchUsersRoutes);
+app.use('/api/catalog', catalogRoutes);
 
 app.use('/api', userRoutes);
 

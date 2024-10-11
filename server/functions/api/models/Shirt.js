@@ -33,6 +33,11 @@ const shirtSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    price: {
+        type: Number,
+        required: true,
+        default: 0
+    },
 });
 
 

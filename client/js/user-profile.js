@@ -429,11 +429,8 @@ $(document).ready(function () {
                     ${generateItemHtml("T-shirt 2", "placeholder-tshirt.jpg", "Roblox", "75")}
                   </div>
                 </div>
-                  <div role="tabpanel" class="tab-pane" id="shirts">
-                  <div class="row">
-                    ${generateItemHtml("Shirt 1", "placeholder-shirt.jpg", "Roblox", "80")}
-                    ${generateItemHtml("Shirt 2", "placeholder-shirt.jpg", "Roblox", "90")}
-                  </div>
+                <div role="tabpanel" class="tab-pane" id="shirts">
+                  <div class="row" id="user-shirts"></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="pants">
                   <div class="row">
@@ -456,12 +453,41 @@ $(document).ready(function () {
   
     $("#user-items-panel").html(itemsHtml);
   
+    // Load user's shirts
+    loadUserShirts(user._id);
+
     // Initialize Bootstrap tabs
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       // You can add logic here to load items dynamically if needed
    //   console.log('Tab switched to: ' + $(e.target).attr('href'));
     });
   }
+
+  function loadUserShirts(userId) {
+    $.ajax({
+        url: `/api/shirts/user/${userId}`,
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        success: function(shirts) {
+            displayUserShirts(shirts);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching user shirts:', error);
+        }
+    });
+}
+
+function displayUserShirts(shirts) {
+    const shirtsContainer = $('#user-shirts');
+    shirtsContainer.empty();
+
+    shirts.forEach(shirt => {
+        const shirtHtml = generateItemHtml(shirt.Name, shirt.ThumbnailLocation, "You", "Owned");
+        shirtsContainer.append(shirtHtml);
+    });
+}
   
   function generateItemHtml(name, imageSrc, creator, price) {
     const priceDisplay = price === "Free" ? "Free" : `$${price}`;

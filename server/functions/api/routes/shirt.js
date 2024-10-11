@@ -84,10 +84,10 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     return res.status(400).json({ error: 'Thumbnail file is required' });
   }
 
-  const { title, description } = req.body;
+  const { title, description, price } = req.body;
 
-  if (!title || !description) {
-    return res.status(400).json({ error: 'Title and description are required' });
+  if (!title || !description || !price) {
+    return res.status(400).json({ error: 'Title, description, and price are required' });
   }
 
   if (filter.isProfane(title) || filter.isProfane(description)) {
@@ -158,7 +158,8 @@ router.post('/upload', authenticateToken, (req, res, next) => {
             Description: filter.clean(description),
             ThumbnailLocation: thumbnailUrl,
             IsForSale: 0,
-            Price: 0,
+            Price: parseInt(price),
+            IsForSale: 1,
             Sales: 0,
             IsPublicDomain: 0
         });
@@ -199,6 +200,42 @@ router.post('/upload', authenticateToken, (req, res, next) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+router.get('/catalog', async (req, res) => {
+  try {
+      const shirts = await Asset.find({ AssetType: 'Shirt', IsForSale: 1 }).sort({ createdAt: -1 });
+      res.json(shirts);
+  } catch (error) {
+      console.error('Error fetching catalog shirts:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/purchase/:id', authenticateToken, async (req, res) => {
+  try {
+      const shirt = await Asset.findOne({ _id: req.params.id, AssetType: 'Shirt', IsForSale: 1 });
+      if (!shirt) {
+          return res.status(404).json({ error: 'Shirt not found or not for sale' });
+      }
+
+      const user = await User.findById(req.user.userId);
+      if (user.currency < shirt.Price) {
+          return res.status(400).json({ error: 'Insufficient funds' });
+      }
+
+      user.currency -= shirt.Price;
+      user.inventory.push(shirt._id);
+      await user.save();
+
+      shirt.Sales += 1;
+      await shirt.save();
+
+      res.json({ success: true, newBalance: user.currency });
+  } catch (error) {
+      console.error('Error purchasing shirt:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
   
   router.get('/user', authenticateToken, async (req, res) => {
     try {
@@ -236,12 +273,12 @@ router.post('/upload', authenticateToken, (req, res, next) => {
     }
   });
 
-  router.get('/:id', authenticateToken, async (req, res) => {
+  router.get('/:id', async (req, res) => {
     try {
-      const { id } = req.params;
-      const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt', creator: req.user.userId });
+      const id = req.params.id;
+      const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' }).populate('creator', 'username');
       if (!shirt) {
-        return res.status(404).json({ error: 'Shirt not found or you do not have permission to view it' });
+        return res.status(404).json({ error: 'Shirt not found' });
       }
       res.json(shirt);
     } catch (error) {

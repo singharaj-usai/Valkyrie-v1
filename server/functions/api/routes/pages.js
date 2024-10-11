@@ -37,6 +37,9 @@ router.get("/forum/sections/:section", (req, res) => sendHtmlFile(res, "pages/fo
 // Catalog  page
 router.get("/catalog", (req, res) => sendHtmlFile(res, "pages/catalog/catalog.html"));
 
+
+router.get("/catalog/:id/:name", (req, res) => sendHtmlFile(res, "pages/catalog/shirt-details.html"));
+
 // User's personal pages
 router.get("/my/create", (req, res) => sendHtmlFile(res, "pages/my/create/create.html"));
 router.get("/my/friends", (req, res) => sendHtmlFile(res, "pages/my/friends.html"));
