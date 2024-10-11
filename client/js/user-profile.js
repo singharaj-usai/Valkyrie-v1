@@ -465,21 +465,22 @@ $(document).ready(function () {
 
   function loadUserShirts(userId) {
     $.ajax({
-        url: `/api/shirts/user/${userId}`,
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        success: function(shirts) {
-            displayUserShirts(shirts);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching user shirts:', error);
-        }
+      url: `/api/shirts/user/id/${userId}`, // Updated URL
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      success: function(shirts) {
+        displayUserShirts(shirts);
+      },
+      error: function(xhr, status, error) {
+        console.error('Error fetching user shirts:', error);
+        $('#user-shirts').html('<p>Error loading your shirts. Please try again later.</p>');
+      }
     });
-}
+  }
 
-function displayUserShirts(shirts) {
+  function displayUserShirts(shirts) {
     const shirtsContainer = $('#user-shirts');
     shirtsContainer.empty();
 

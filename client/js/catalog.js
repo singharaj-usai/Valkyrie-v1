@@ -20,25 +20,37 @@ function displayShirts(shirts) {
     shirtsContainer.empty();
 
     if (shirts.length === 0) {
-        shirtsContainer.append('<p>No shirts available in the catalog.</p>');
+        shirtsContainer.append('<div class="col-xs-12"><div class="alert alert-info">No shirts available in the catalog.</div></div>');
         return;
     }
 
-    shirts.forEach(shirt => {
-        const shirtCard = `
-            <div class="col-md-3 mb-4">
-                <div class="card">
-                    <img src="${shirt.ThumbnailLocation}" class="card-img-top" alt="${shirt.Name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${shirt.Name}</h5>
-                        <p class="card-text">Creator: ${shirt.creator ? shirt.creator.username : 'Unknown'}</p>
-                        <p class="card-text">Price: ${shirt.Price} currency</p>
-                        <p class="card-text">For Sale: ${shirt.IsForSale ? 'Yes' : 'No'}</p>
-                        <a href="/catalog/${shirt._id}/${encodeURIComponent(shirt.Name)}" class="btn btn-primary">View Details</a>
+    shirts.forEach((shirt, index) => {
+        const shirtPanel = `
+            <div class="col-md-3 col-sm-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">${shirt.Name}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <img src="${shirt.ThumbnailLocation}" class="img-responsive center-block" alt="${shirt.Name}" style="max-height: 150px;">
+                        <hr>
+                        <p><strong>Creator:</strong> ${shirt.creator ? shirt.creator.username : 'Unknown'}</p>
+                        <p><strong>Price:</strong> ${shirt.Price} currency</p>
+                        <p><strong>For Sale:</strong> ${shirt.IsForSale ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div class="panel-footer">
+                        <a href="/catalog/${shirt._id}/${encodeURIComponent(shirt.Name)}" class="btn btn-primary btn-block">View Details</a>
                     </div>
                 </div>
             </div>
         `;
-        shirtsContainer.append(shirtCard);
+        shirtsContainer.append(shirtPanel);
+
+        if ((index + 1) % 4 === 0) {
+            shirtsContainer.append('<div class="clearfix visible-md visible-lg"></div>');
+        }
+        if ((index + 1) % 2 === 0) {
+            shirtsContainer.append('<div class="clearfix visible-sm"></div>');
+        }
     });
 }

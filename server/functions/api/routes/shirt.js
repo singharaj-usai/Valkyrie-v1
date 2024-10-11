@@ -213,34 +213,90 @@ router.get('/catalog', async (req, res) => {
 
 router.post('/purchase/:id', authenticateToken, async (req, res) => {
   try {
-      const shirt = await Asset.findOne({ _id: req.params.id, AssetType: 'Shirt', IsForSale: 1 });
-      if (!shirt) {
-          return res.status(404).json({ error: 'Shirt not found or not for sale' });
-      }
+    const shirt = await Asset.findOne({ _id: req.params.id, AssetType: 'Shirt', IsForSale: 1 });
+    if (!shirt) {
+      return res.status(404).json({ error: 'Shirt not found or not for sale' });
+    }
 
-      const user = await User.findById(req.user.userId);
-      if (user.currency < shirt.Price) {
-          return res.status(400).json({ error: 'Insufficient funds' });
-      }
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-      if (shirt.creator.toString() === user._id.toString()) {
-          return res.status(400).json({ error: 'You already own this shirt' });
-      }
+    if (user.inventory && user.inventory.includes(shirt._id)) {
+      return res.status(400).json({ error: 'You already own this shirt' });
+    }
 
-      user.currency -= shirt.Price;
-      user.inventory.push(shirt._id);
-      await user.save();
+    if (user.currency < shirt.Price) {
+      return res.status(400).json({ error: 'Insufficient funds' });
+    }
 
-      shirt.Sales += 1;
-      await shirt.save();
+    if (shirt.creator.toString() === user._id.toString()) {
+      return res.status(400).json({ error: 'You already own this shirt' });
+    }
 
-      res.json({ success: true, newBalance: user.currency });
+    user.currency -= shirt.Price;
+
+    if (!user.inventory) {
+      user.inventory = [];
+    }
+
+    user.inventory.push(shirt._id);
+    await user.save();
+
+    shirt.Sales += 1;
+    await shirt.save();
+
+    res.json({ success: true, newBalance: user.currency });
   } catch (error) {
-      console.error('Error purchasing shirt:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error purchasing shirt:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
-  
+router.get('/check-ownership/:id', authenticateToken, async (req, res) => {
+  try {
+    const shirt = await Asset.findOne({ _id: req.params.id, AssetType: 'Shirt' });
+    if (!shirt) {
+      return res.status(404).json({ error: 'Shirt not found' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const owned = user.inventory && user.inventory.includes(shirt._id);
+    const isCreator = shirt.creator.toString() === user._id.toString();
+
+    // Include the shirt's price in the response
+    res.json({ owned, isCreator, price: shirt.Price });
+  } catch (error) {
+    console.error('Error checking shirt ownership:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+router.get('/user/id/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const createdShirts = await Asset.find({ creator: userId, AssetType: 'Shirt' }).sort({ createdAt: -1 });
+    const ownedShirts = await Asset.find({ _id: { $in: user.inventory }, AssetType: 'Shirt' }).sort({ createdAt: -1 });
+    const allShirts = [...createdShirts, ...ownedShirts];
+    const uniqueShirts = Array.from(new Set(allShirts.map(s => s._id.toString())))
+      .map(_id => allShirts.find(s => s._id.toString() === _id));
+
+    res.json(uniqueShirts);
+  } catch (error) {
+    console.error('Error fetching user shirts by ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
   router.get('/user', authenticateToken, async (req, res) => {
     try {
       const shirts = await Asset.find({ creator: req.user.userId, AssetType: 'Shirt' }).sort({ updatedAt: -1 });

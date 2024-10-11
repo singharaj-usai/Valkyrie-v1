@@ -116,6 +116,11 @@ forumPostCount: {
   default: 0 
 },
 
+inventory: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Asset'
+}],
+
 });
 
 
