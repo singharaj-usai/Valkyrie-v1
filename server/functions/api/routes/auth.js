@@ -67,6 +67,16 @@ const authLimiter = rateLimit({
   message: "Too many requests from this IP, please try again in 10 minute",
 });
 
+// for accounts signed up without csrf protection
+const flexibleCsrfProtection = (req, res, next) => {
+  const csrfToken = req.headers['x-csrf-token'] || req.body._csrf;
+  if (csrfToken) {
+    csrfProtection(req, res, next);
+  } else {
+    console.warn('Request without CSRF token received');
+    next();
+  }
+};
 
 // Validation middleware
 const validateUser = [
@@ -143,7 +153,7 @@ const validateUser = [
 
 
 // REgister account
-router.post("/register-create", csrfProtection, authLimiter, validateUser, async (req, res) => {
+router.post("/register-create", flexibleCsrfProtection, authLimiter, validateUser, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     console.log("Registration attempt for:", email);
@@ -244,7 +254,7 @@ router.get("/validate-session", async (req, res) => {
 
 
 // Check if user is banned
-router.get("/check-ban", csrfProtection, authenticateToken, async (req, res) => {
+router.get("/check-ban", flexibleCsrfProtection, authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) {
@@ -261,7 +271,7 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 2 * 60 * 1000; // 2 minutes
 
 // Login endpoint
-router.post("/login", csrfProtection, authLimiter, async (req, res) => {
+router.post("/login", flexibleCsrfProtection, authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 //    console.log("Login attempt for:", username);
@@ -342,14 +352,14 @@ router.post("/login", csrfProtection, authLimiter, async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      sameSite: 'Lax',
       maxAge: 24 * 60 * 60 * 1000, // 1  day
     });
 
     res.json({
-      
+      token,
       username: user.username,
-      userId: user.userId,
+      userId: user._id,
       signupDate: user.signupDate,
       lastLoggedIn: user.lastLoggedIn,
       isBanned: user.isBanned,

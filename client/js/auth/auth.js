@@ -411,7 +411,8 @@ const App = {
           username: $("#username").val(),
           email: $("#email").val(),
           password: $("#password").val(),
-          confirmPassword: $("#confirm-password").val()
+          confirmPassword: $("#confirm-password").val(),
+          _csrf: csrfToken
         };
   
         this.showLoadingIndicator();
@@ -421,6 +422,7 @@ const App = {
           type: "POST",
           data: JSON.stringify(formData),
           contentType: "application/json",
+          headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
           success: (response) => {
             this.hideLoadingIndicator();
             this.showAlert("success", response.message);
@@ -431,7 +433,6 @@ const App = {
           error: (xhr, status, error) => {
             this.hideLoadingIndicator();
             if (status === "timeout") {
-              // Assume the account was created successfully
               this.showAlert("success", "Your account has been created successfully. You can now log in.");
               setTimeout(() => {
                 window.location.href = "/login";
@@ -453,6 +454,9 @@ const App = {
         const username = $("#username").val();
         const password = $("#password").val();
 
+        const data = { username, password };
+        const headers = {};
+
         // cloudflare captcha
  /*        const turnstileResponse = turnstile.getResponse();
         console.log("Turnstile response:", turnstileResponse);
@@ -461,12 +465,20 @@ const App = {
           return;
         } */
   
+      // Add CSRF token if available
+      if (csrfToken) {
+        data._csrf = csrfToken;
+          headers['X-CSRF-Token'] = csrfToken;
+        }
 
         $.ajax({
           url: "/api/login",
           method: "POST",
-          data: { username, password }, //captchaResponse: turnstileResponse },
-          headers: { 'CSRF-Token': csrfToken }, //  CSRF token
+          data: data, //captchaResponse: turnstileResponse },
+          headers: headers,
+          xhrFields: {
+            withCredentials: true //  cookies are sent with the request
+          },
           success: (response) => {
             localStorage.setItem("token", response.token);
             localStorage.setItem("username", response.username);
