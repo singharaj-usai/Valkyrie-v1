@@ -429,7 +429,7 @@ $(document).ready(function () {
                     ${generateItemHtml("T-shirt 2", "placeholder-tshirt.jpg", "Roblox", "75")}
                   </div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="shirts">
+                <div role="tabpanel" class="tab-pane active" id="shirts">
                   <div class="row" id="user-shirts"></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="pants">
@@ -483,8 +483,13 @@ function displayUserShirts(shirts) {
     const shirtsContainer = $('#user-shirts');
     shirtsContainer.empty();
 
+    if (shirts.length === 0) {
+        shirtsContainer.append('<p>No shirts available.</p>');
+        return;
+    }
+
     shirts.forEach(shirt => {
-        const shirtHtml = generateItemHtml(shirt.Name, shirt.ThumbnailLocation, "You", "Owned");
+        const shirtHtml = generateItemHtml(shirt.Name, shirt.ThumbnailLocation, shirt.creator.username, shirt.Price);
         shirtsContainer.append(shirtHtml);
     });
 }

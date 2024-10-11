@@ -260,6 +260,7 @@ crossorigin="anonymous"></script>
 </div>
 
 <!-- Edit Shirt Modal -->
+<!-- Edit Shirt Modal -->
 <div class="modal fade" id="editShirtModal" tabindex="-1" role="dialog" aria-labelledby="editShirtModalLabel">
     <div class="modal-dialog" role="document">
         <div id="shirt-error-message" class="alert alert-danger hidden"></div>
@@ -278,6 +279,10 @@ crossorigin="anonymous"></script>
                     <div class="form-group">
                         <label for="edit-shirt-description">Description:</label>
                         <textarea class="form-control" id="edit-shirt-description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-shirt-price">Price:</label>
+                        <input type="number" class="form-control" id="edit-shirt-price" required min="0" step="1">
                     </div>
                     <div class="form-group">
                         <label>Shirt Image:</label>

@@ -15,6 +15,14 @@ function initializeUploadForm() {
             return;
         }
 
+        const price = $('#price').val();
+        if (!price || isNaN(price) || price < 0) {
+            showAlert('danger', 'Please enter a valid price (0 or greater)');
+            return;
+        }
+
+        formData.append('price', price);
+
         $.ajax({
             url: '/api/shirts/upload',
             method: 'POST',
@@ -28,7 +36,7 @@ function initializeUploadForm() {
             success: function (response) {
                 showAlert('success', `Shirt uploaded successfully! Asset ID: ${response.assetId}`);
                 setTimeout(() => {
-                    window.location.href = `/shirt?id=${response.shirtId}`;
+                    window.location.href = `/catalog/${response.shirtId}`;
                 }, 2000);
             },
             error: function (xhr, status, error) {

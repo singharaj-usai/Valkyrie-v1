@@ -38,6 +38,7 @@ function displayShirts(shirts) {
                     <th>Title</th>
                     <th>Description</th>
                     <th>Asset ID</th>
+                    <th>Price</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -55,6 +56,7 @@ function displayShirts(shirts) {
                 <td>${shirt.Name}</td>
                 <td>${shirt.Description.substring(0, 50)}${shirt.Description.length > 50 ? '...' : ''}</td>
                 <td>${shirt.assetId}</td>
+                <td>${shirt.Price}</td>
                 <td>
                     <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
                 </td>
@@ -100,6 +102,7 @@ function openShirtEditModal(shirtId) {
             $('#edit-shirt-id').val(shirt._id);
             $('#edit-shirt-title').val(shirt.Name);
             $('#edit-shirt-description').val(shirt.Description);
+            $('#edit-shirt-price').val(shirt.Price);
             $('#current-shirt-thumbnail').attr('src', shirt.ThumbnailLocation);
             $('#editShirtModal').modal('show');
         },
@@ -114,17 +117,19 @@ function saveShirtChanges() {
     const shirtId = $('#edit-shirt-id').val();
     const title = $('#edit-shirt-title').val();
     const description = $('#edit-shirt-description').val();
+    const price = $('#edit-shirt-price').val();
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
+    const shirtData = {
+        title: title,
+        description: description,
+        price: price
+    };
 
     $.ajax({
         url: `/api/shirts/${shirtId}`,
         method: 'PUT',
-        data: formData,
-        processData: false,
-        contentType: false,
+        data: JSON.stringify(shirtData),
+        contentType: 'application/json',
         headers: {
             'Authorization': `Bearer ${token}`
         },
@@ -134,7 +139,7 @@ function saveShirtChanges() {
         },
         error: function(xhr, status, error) {
             console.error('Error updating shirt:', error);
-            $('#shirt-error-message').text('Error updating shirt: ' + error).removeClass('hidden');
+            $('#shirt-error-message').text('Error updating shirt: ' + xhr.responseJSON.error).removeClass('hidden');
         }
     });
 }

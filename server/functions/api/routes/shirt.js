@@ -223,6 +223,10 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
           return res.status(400).json({ error: 'Insufficient funds' });
       }
 
+      if (shirt.creator.toString() === user._id.toString()) {
+          return res.status(400).json({ error: 'You already own this shirt' });
+      }
+
       user.currency -= shirt.Price;
       user.inventory.push(shirt._id);
       await user.save();
@@ -243,6 +247,41 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       res.json(shirts);
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  router.put('/:shirtId', authenticateToken, async (req, res) => {
+    try {
+      const { shirtId } = req.params;
+      const { title, description, price } = req.body;
+  
+      if (!title || !description || price === undefined) {
+        return res.status(400).json({ error: 'Title, description, and price are required' });
+      }
+  
+      if (filter.isProfane(title) || filter.isProfane(description)) {
+        return res.status(400).json({ error: 'Your submission contains inappropriate content. Please revise and try again.' });
+      }
+  
+      const updatedShirt = await Asset.findOneAndUpdate(
+        { _id: shirtId, creator: req.user.userId, AssetType: "Shirt" },
+        {
+          Name: filter.clean(title),
+          Description: filter.clean(description),
+          Price: parseInt(price),
+          IsForSale: parseInt(price) > 0 ? 1 : 0
+        },
+        { new: true }
+      );
+  
+      if (!updatedShirt) {
+        return res.status(404).json({ error: 'Shirt not found or you do not have permission to edit it' });
+      }
+  
+      res.json(updatedShirt);
+    } catch (error) {
+      console.error('Error updating shirt:', error);
+      res.status(500).json({ error: 'An error occurred while updating the shirt' });
     }
   });
   
@@ -287,21 +326,24 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
     }
   });
 
-router.get('/user/:username', authenticateToken, async (req, res) => {
+  router.get('/user/:username', authenticateToken, async (req, res) => {
     try {
-      const username = req.params.username;
-      const user = await User.findOne({ username: username });
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      const shirts = await Asset.find({ creator: user._id, AssetType: 'Shirt' }).sort({ createdAt: -1 });
-      res.json(shirts);
+        const username = req.params.username;
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const createdShirts = await Asset.find({ creator: user._id, AssetType: 'Shirt' }).sort({ createdAt: -1 });
+        const ownedShirts = await Asset.find({ _id: { $in: user.inventory }, AssetType: 'Shirt' }).sort({ createdAt: -1 });
+        const allShirts = [...createdShirts, ...ownedShirts];
+        const uniqueShirts = Array.from(new Set(allShirts.map(s => s._id.toString())))
+            .map(_id => allShirts.find(s => s._id.toString() === _id));
+        res.json(uniqueShirts);
     } catch (error) {
-      console.error('Error fetching user shirts:', error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching user shirts:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  });
-
+});
   // Function to generate a unique asset ID
 function generateAssetId() {
   const timestamp = Date.now().toString(36);
