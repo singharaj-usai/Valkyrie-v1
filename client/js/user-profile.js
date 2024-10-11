@@ -241,7 +241,7 @@ $(document).ready(function () {
   function checkFriendshipStatus(username) {
     const token = localStorage.getItem("token");
     $.ajax({
-      url: `/api/friendship-status/${username}`,
+      url: `/api/friends/friendship-status/${username}`,
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -257,7 +257,7 @@ $(document).ready(function () {
 
   function sendFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/send-friend-request/" + userId,
+      "/api/friends/send-friend-request/" + userId,
       "POST",
       "Friend request sent successfully"
     );
@@ -265,7 +265,7 @@ $(document).ready(function () {
 
   function acceptFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/accept-friend-request/" + userId,
+      "/api/friends/accept-friend-request/" + userId,
       "POST",
       "Friend request accepted"
     );
@@ -273,7 +273,7 @@ $(document).ready(function () {
 
   function declineFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/decline-friend-request/" + userId,
+      "/api/friends/decline-friend-request/" + userId,
       "POST",
       "Friend request declined"
     );
@@ -281,7 +281,7 @@ $(document).ready(function () {
 
   function unfriend(userId) {
     sendAjaxRequest(
-      "/api/unfriend/" + userId,
+      "/api/friends/unfriend/" + userId,
       "POST",
       "Unfriended successfully"
     );

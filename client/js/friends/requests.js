@@ -2,7 +2,7 @@ function fetchFriendRequests() {
    // console.log('Fetching friend requests');
     const token = localStorage.getItem('token');
     $.ajax({
-        url: '/api/friend-requests',
+        url: '/api/friends/friend-requests',
         method: 'GET',
         headers: {
             "Authorization": `Bearer ${token}`

@@ -1,16 +1,16 @@
 $(document).on('click', '.accept-request', function() {
     const userId = $(this).data('id');
-    sendFriendAction('/api/accept-friend-request/' + userId, 'Friend request accepted');
+    sendFriendAction('/api/friends/accept-friend-request/' + userId, 'Friend request accepted');
 });
 
 $(document).on('click', '.decline-request', function() {
     const userId = $(this).data('id');
-    sendFriendAction('/api/decline-friend-request/' + userId, 'Friend request declined');
+    sendFriendAction('/api/friends/decline-friend-request/' + userId, 'Friend request declined');
 });
 
 $(document).on('click', '.unfriend', function() {
     const userId = $(this).data('id');
-    sendFriendAction('/api/unfriend/' + userId, 'Unfriended successfully');
+    sendFriendAction('/api/friends/unfriend/' + userId, 'Unfriended successfully');
 });
 
 function sendFriendAction(url, successMessage) {
