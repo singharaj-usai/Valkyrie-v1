@@ -218,36 +218,40 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Shirt not found or not for sale' });
     }
 
-    const user = await User.findById(req.user.userId);
-    if (!user) {
+    const buyer = await User.findById(req.user.userId);
+    if (!buyer) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (user.inventory && user.inventory.includes(shirt._id)) {
+    if (buyer.inventory && buyer.inventory.includes(shirt._id)) {
       return res.status(400).json({ error: 'You already own this shirt' });
     }
 
-    if (user.currency < shirt.Price) {
+    if (buyer.currency < shirt.Price) {
       return res.status(400).json({ error: 'Insufficient funds' });
     }
 
-    if (shirt.creator.toString() === user._id.toString()) {
-      return res.status(400).json({ error: 'You already own this shirt' });
+    const seller = await User.findById(shirt.creator);
+    if (!seller) {
+      return res.status(404).json({ error: 'Shirt creator not found' });
     }
 
-    user.currency -= shirt.Price;
+    // Transfer currency from buyer to seller
+    buyer.currency -= shirt.Price;
+    seller.currency += shirt.Price;
 
-    if (!user.inventory) {
-      user.inventory = [];
+    if (!buyer.inventory) {
+      buyer.inventory = [];
     }
 
-    user.inventory.push(shirt._id);
-    await user.save();
+    buyer.inventory.push(shirt._id);
+    await buyer.save();
+    await seller.save();
 
     shirt.Sales += 1;
     await shirt.save();
 
-    res.json({ success: true, newBalance: user.currency });
+    res.json({ success: true, newBalance: buyer.currency });
   } catch (error) {
     console.error('Error purchasing shirt:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
