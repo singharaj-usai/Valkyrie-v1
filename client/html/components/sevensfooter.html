@@ -1,0 +1,96 @@
+
+<style>
+  html {
+    position: relative;
+    min-height: 100%;
+  }
+  body {
+    margin-bottom: 200px;
+  }
+html, body {
+    height: 100%; /* Make sure body takes full height */
+}
+#content {
+    min-height: 100%; /* Ensure content takes full height */
+    margin-bottom: -50px; /* Footer height (adjust if necessary) */
+    padding-bottom: 50px; /* Footer height again */
+}
+
+  .footer-dark {
+    background-color: #202020; /* Dark background */
+    color: #ffffff; /* White text */
+    padding: 20px 0;
+}
+  .footer {
+    height: 50px; /* Set footer height */
+    background-color: #343a40; /* Dark background color */
+    color: #ffffff; /* Text color */
+    padding: 10px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-logo h2 {
+    font-size: 2rem;
+    margin: 0;
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .footer-links a {
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .footer-links a:hover {
+    color: #3498db;
+  }
+  .footer-info {
+    text-align: right;
+    font-size: 0.9rem;
+  }
+  .footer-info p {
+    margin: 0.5rem 0;
+  }
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    .footer-links, .footer-info {
+      margin-top: 1rem;
+    }
+    .footer-info {
+      text-align: center;
+    }
+  }
+</style>
+
+<footer class="footer-dark" style="margin-top: 30px;">
+    <div class="container">
+        <ul class="list-inline text-center">
+            <li><a href="https://www.valk.fun/terms-of-service" class="text-light h5 text-decoration-none">Terms of Service</a></li>
+            <li><a href="https://www.valk.fun/privacy-policy" class="text-light h5 text-decoration-none">Privacy Policy</a></li>
+            <li><a href="https://www.valk.fun/about" class="text-light h5 text-decoration-none">About</a></li>
+            <li><a href="https://www.valk.fun/stats" class="text-light h5 text-decoration-none">Stats</a></li>
+            <li><a href="https://discord.gg/XKksQEjXht" class="text-light h5 text-decoration-none">Discord</a></li>
+        </ul>
+        <hr class="text-light">
+        <div class="row">
+            <div class="col-xs-12 text-left text-muted">
+                &copy; 2024 Valkyrie. Valkyrie is a not-for-profit private community. Valkyrie is not associated with, does not deal with, or otherwise part of Roblox Corporation. Magic Number: <span id="user-count">Loading...</span></div>
+        </div>
+    </div>
+</footer>
