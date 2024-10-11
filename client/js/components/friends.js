@@ -30,9 +30,9 @@ const Friends = {
                     html += "<p>No friends yet.</p>";
                   } else {
                     html += '<div class="row" id="friendsContainer">';
-                    friendsWithStatus.slice(0, 8).forEach((friend, index) => {
+                    friendsWithStatus.slice(0, 6).forEach((friend, index) => {
                       html += `
-                        <div class="col-xs-6 col-sm-4 col-md-3 text-center mb-3 friend-item ${index >= 6 ? 'd-none d-md-block' : ''}">
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 text-center mb-3 friend-item ${index >= 6 ? 'hidden-xs hidden-sm' : ''}">
                           <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${this.escapeHtml(friend.username)}">
                             <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png"
                                  alt="${this.escapeHtml(friend.username)}" 
@@ -55,7 +55,7 @@ const Friends = {
                     if (friendsWithStatus.length > 6) {
                       html += `
                         <div class="text-center mt-3">
-                          <button id="showMoreFriends" class="btn btn-primary d-md-none">Show More</button>
+                          <button id="showMoreFriends" class="btn btn-primary hidden-md hidden-lg">Show More</button>
                         </div>
                       `;
                     }
