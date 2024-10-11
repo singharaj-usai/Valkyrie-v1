@@ -4,6 +4,12 @@ $.getScript('/js/version.js', function() {
   VERSION = window.VERSION;
 });
 
+let csrfToken = '';
+
+$.get('/api/auth/csrf-token', function(data) {
+  csrfToken = data.csrfToken;
+});
+
 // Main application object
 const App = {
   // Configuration
@@ -460,6 +466,7 @@ const App = {
           url: "/api/login",
           method: "POST",
           data: { username, password }, //captchaResponse: turnstileResponse },
+          headers: { 'CSRF-Token': csrfToken }, //  CSRF token
           success: (response) => {
             localStorage.setItem("token", response.token);
             localStorage.setItem("username", response.username);

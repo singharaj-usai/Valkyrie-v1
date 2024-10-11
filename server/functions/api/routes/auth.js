@@ -3,7 +3,9 @@ const bcrypt = require("bcrypt");
 const { body, validationResult } = require("express-validator");
 const User = require("../models/User");
 const moment = require("moment-timezone");
-//const csrf = require("csurf");
+const csrf = require("csurf");
+const csrfProtection = csrf({ cookie: true });
+
 const requestIp = require('request-ip');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -141,7 +143,7 @@ const validateUser = [
 
 
 // REgister account
-router.post("/register-create", authLimiter, validateUser, async (req, res) => {
+router.post("/register-create", csrfProtection, authLimiter, validateUser, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     console.log("Registration attempt for:", email);
@@ -242,7 +244,7 @@ router.get("/validate-session", async (req, res) => {
 
 
 // Check if user is banned
-router.get("/check-ban", authenticateToken, async (req, res) => {
+router.get("/check-ban", csrfProtection, authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) {
@@ -259,7 +261,7 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 2 * 60 * 1000; // 2 minutes
 
 // Login endpoint
-router.post("/login", authLimiter, async (req, res) => {
+router.post("/login", csrfProtection, authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 //    console.log("Login attempt for:", username);
@@ -360,7 +362,7 @@ router.post("/login", authLimiter, async (req, res) => {
 });
 
 // Logout endpoint
-router.post("/logout", async (req, res) => {
+router.post("/logout", csrfProtection, async (req, res) => {
   if (req.user) {
     await User.findByIdAndUpdate(req.user._id, { isOnline: false });
   }
@@ -370,6 +372,10 @@ router.post("/logout", async (req, res) => {
     }
     res.json({ message: 'Logged out successfully' });
   });
+});
+
+router.get("/csrf-token", csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
 /* 
