@@ -92,7 +92,9 @@ function purchaseShirt(shirtId) {
         success: function(response) {
             showAlert('success', 'Shirt purchased successfully!');
             updateCurrency(response.newBalance);
-            loadShirtDetails(shirtId); // Reload shirt details to update the UI
+            setTimeout(function() {
+                loadShirtDetails(shirtId);
+            }, 2000); // refresh after 2 second
         },
         error: function(xhr, status, error) {
             console.error('Error purchasing shirt:', xhr.responseJSON);
