@@ -70,6 +70,13 @@ const authLimiter = rateLimit({
 // for accounts signed up without csrf protection
 const flexibleCsrfProtection = (req, res, next) => {
   const csrfToken = req.headers['x-csrf-token'] || req.body._csrf;
+  const isBootswatchRequest = req.path.includes('/bootswatch/');
+
+    if (isBootswatchRequest) {
+    // Allow Bootswatch requests without CSRF protection
+    return next();
+  }
+
   if (csrfToken) {
     csrfProtection(req, res, next);
   } else {
