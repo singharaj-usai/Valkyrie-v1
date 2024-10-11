@@ -372,7 +372,7 @@ router.post("/login", flexibleCsrfProtection, authLimiter, async (req, res) => {
 });
 
 // Logout endpoint
-router.post("/logout", csrfProtection, async (req, res) => {
+router.post("/logout", flexibleCsrfProtection, async (req, res) => {
   if (req.user) {
     await User.findByIdAndUpdate(req.user._id, { isOnline: false });
   }
