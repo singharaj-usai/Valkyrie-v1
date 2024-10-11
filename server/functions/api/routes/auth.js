@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 
 
 
@@ -57,6 +58,13 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 })
+
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 mni
+  max: 100, 
+  message: "Too many requests from this IP, please try again in 10 minute",
+});
+
 
 // Validation middleware
 const validateUser = [
@@ -133,7 +141,7 @@ const validateUser = [
 
 
 // REgister account
-router.post("/register-create", validateUser, async (req, res) => {
+router.post("/register-create", authLimiter, validateUser, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     console.log("Registration attempt for:", email);
@@ -247,8 +255,11 @@ router.get("/check-ban", authenticateToken, async (req, res) => {
   }
 });
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_TIME = 2 * 60 * 1000; // 2 minutes
+
 // Login endpoint
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 //    console.log("Login attempt for:", username);
@@ -263,8 +274,22 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Please verify your email before logging in" });
     }
 
+    if (user.isLocked) {
+      return res.status(423).json({ message: "Account is temporarily locked due to multiple failed login attempts. Please try again later." });
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      user.loginAttempts += 1;
+
+      if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        user.lockUntil = Date.now() + LOCK_TIME;
+        await user.save();
+        return res.status(423).json({ message: "Account locked due to multiple failed login attempts. Please try again later." });
+      }
+
+      await user.save();
+
       return res.status(400).json({ message: "Invalid password" });
     }
 
@@ -298,6 +323,10 @@ router.post("/login", async (req, res) => {
 
     
     const clientIp = requestIp.getClientIp(req);
+
+    // Reset loginAttempts and lockUntil if you log in successuly
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
     user.lastLoggedIn = moment().tz("America/New_York").toDate();
     user.lastLoginIp = clientIp;
     await user.save();

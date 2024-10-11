@@ -52,6 +52,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  loginAttempts: { 
+    type: Number, 
+    required: true, 
+    default: 0 
+  },
+
+  lockUntil: { 
+    type: Date 
+  },
+
+
   verificationToken: String,
   currency: {
     type: Number,
@@ -144,5 +156,9 @@ userSchema.statics.resetCounter = async function() {
     { upsert: true, new: true }
   );
 };
+
+userSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
 
 module.exports = mongoose.model("User", userSchema);
