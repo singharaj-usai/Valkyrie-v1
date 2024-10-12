@@ -19,7 +19,7 @@ async function consumeQueue() {
         console.log(`Received assetId: ${assetId}. Rendering thumbnail...`);
 
         try {
-            const renderedThumbnailUrl = await rccService.renderThumbnail(assetId);
+            const renderedThumbnailUrl = await rccService.renderAssetThumbnail(assetId, assetType);
 
             // Update the asset in the MongoDB collection with the new thumbnail URL
             await Asset.updateOne({ assetId: assetId }, { ThumbnailLocation: renderedThumbnailUrl });
