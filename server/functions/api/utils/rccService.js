@@ -8,7 +8,7 @@ class RCCService {
         this.serviceUrl = serviceUrl;
     }
 
-    function generateJobId() {
+    generateJobId() {
          const randomHex = (length) => {
              return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
          };
