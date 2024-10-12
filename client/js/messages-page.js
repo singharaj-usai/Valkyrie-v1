@@ -9,7 +9,9 @@ $(document).ready(function () {
    */
   function getCurrentUsername() {
     const token = localStorage.getItem('token');
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -439,7 +441,9 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
 
   // Utility function to escape HTML to prevent XSS
   function escapeHtml(text) {
-    if (!text) return '';
+    if (!text) {
+      return '';
+    }
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

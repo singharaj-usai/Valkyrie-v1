@@ -173,8 +173,12 @@ router.post('/posts/:id/vote', isAuthenticated, async (req, res) => {
     }
 
     // Ensure upvotes and downvotes are numbers
-    if (typeof post.upvotes !== 'number') post.upvotes = 0;
-    if (typeof post.downvotes !== 'number') post.downvotes = 0;
+    if (typeof post.upvotes !== 'number') {
+      post.upvotes = 0;
+    }
+    if (typeof post.downvotes !== 'number') {
+      post.downvotes = 0;
+    }
 
     const existingVote = post.userVotes.find(
       (vote) => vote.user.toString() === userId.toString()

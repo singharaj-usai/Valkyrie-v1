@@ -266,9 +266,13 @@ function votePost(postId, voteType) {
 }
 
 function formatJoinDate(dateString) {
-  if (!dateString) return 'N/A';
+  if (!dateString) {
+    return 'N/A';
+  }
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'N/A';
+  if (isNaN(date.getTime())) {
+    return 'N/A';
+  }
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',

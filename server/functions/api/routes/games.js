@@ -32,13 +32,17 @@ const upload = multer({
 });
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) return res.sendStatus(401);
+  if (token == null) {
+    return res.sendStatus(401);
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      return res.sendStatus(403);
+    }
     req.user = user;
     next();
   });
@@ -84,7 +88,7 @@ router.post(
     { name: 'rbxlFile', maxCount: 1 },
   ]),
   async (req, res) => {
-    if (!req.files['thumbnail'] || !req.files['rbxlFile']) {
+    if (!req.files.thumbnail || !req.files.rbxlFile) {
       return res
         .status(400)
         .json({ error: 'Both thumbnail and .rbxl file are required' });
@@ -112,7 +116,7 @@ router.post(
     try {
       // Upload thumbnail to local storage
       const thumbnailUrl = `/uploads/${Date.now()}-${
-        req.files['thumbnail'][0].originalname
+        req.files.thumbnail[0].originalname
       }`;
       fs.writeFileSync(
         path.join(
@@ -120,7 +124,7 @@ router.post(
           '../../../../uploads',
           path.basename(thumbnailUrl)
         ),
-        req.files['thumbnail'][0].buffer
+        req.files.thumbnail[0].buffer
       );
 
       // Upload .rbxl file to S3
@@ -130,7 +134,7 @@ router.post(
         .upload({
           Bucket: process.env.AWS_S3_BUCKET_NAME,
           Key: rbxlKey,
-          Body: req.files['rbxlFile'][0].buffer,
+          Body: req.files.rbxlFile[0].buffer,
           ContentType: 'application/octet-stream',
           ACL: 'public-read',
         })
@@ -245,7 +249,9 @@ router.put(
             path.basename(game.thumbnailUrl)
           );
           fs.unlink(oldThumbnailPath, (err) => {
-            if (err) console.error('Error deleting old thumbnail:', err);
+            if (err) {
+              console.error('Error deleting old thumbnail:', err);
+            }
           });
         }
 

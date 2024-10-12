@@ -32,13 +32,17 @@ const upload = multer({
 });
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) return res.sendStatus(401);
+  if (token == null) {
+    return res.sendStatus(401);
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      return res.sendStatus(403);
+    }
     req.user = user;
     next();
   });
@@ -81,7 +85,7 @@ router.post(
   },
   upload.fields([{ name: 'thumbnail', maxCount: 1 }]),
   async (req, res) => {
-    if (!req.files['thumbnail']) {
+    if (!req.files.thumbnail) {
       return res.status(400).json({ error: 'Thumbnail file is required' });
     }
 
@@ -105,7 +109,7 @@ router.post(
 
     try {
       const thumbnailUrl = `/uploads/${Date.now()}-${
-        req.files['thumbnail'][0].originalname
+        req.files.thumbnail[0].originalname
       }`;
       fs.writeFileSync(
         path.join(
@@ -113,7 +117,7 @@ router.post(
           '../../../../uploads',
           path.basename(thumbnailUrl)
         ),
-        req.files['thumbnail'][0].buffer
+        req.files.thumbnail[0].buffer
       );
 
       // upload image first
@@ -123,7 +127,7 @@ router.post(
         .upload({
           Bucket: process.env.AWS_S3_BUCKET_NAME,
           Key: s3Key,
-          Body: req.files['thumbnail'][0].buffer,
+          Body: req.files.thumbnail[0].buffer,
           ContentType: 'image/png',
           ACL: 'public-read',
         })

@@ -18,7 +18,7 @@ const axios = require('axios');
 const rateLimit = require('express-rate-limit');
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
   console.log('Auth header:', authHeader);
@@ -57,7 +57,7 @@ function getClientIp(req) {
 }
 
 const transporter = nodemailer.createTransport({
-  host: `smtp.gmail.com`,
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {
@@ -602,7 +602,7 @@ router.get('/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-/* 
+/*
 
 router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
   try {
@@ -623,9 +623,9 @@ router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
     } else {
       const nextClaimTime = lastClaim.clone().add(24, 'hours');
       const timeUntilNextClaim = nextClaimTime.diff(now);
-      res.status(400).json({ 
+      res.status(400).json({
         error: "Currency can only be claimed once per day",
-        lastClaimDate: user.lastCurrencyClaimDate 
+        lastClaimDate: user.lastCurrencyClaimDate
       });
     }
   } catch (error) {

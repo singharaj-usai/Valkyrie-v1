@@ -49,8 +49,8 @@ const App = {
         console.error("Error fetching announcements:", xhr.responseText);
       },
     });
-  }, 
-  
+  },
+
   showAnnouncement: function (message, type = 'info') {
     $("#announcement-message").text(message);
     $("#site-wide-announcement")
@@ -58,7 +58,7 @@ const App = {
       .addClass(`alert alert-${type} alert-dismissible`)
       .show();
   },
-  
+
   hideAnnouncement: function () {
     $("#site-wide-announcement").hide();
   },
@@ -143,8 +143,9 @@ const App = {
         $('#content').show();
       }
     }
-    if (typeof updateAnnouncementPosition === 'function')
+    if (typeof updateAnnouncementPosition === 'function') {
       updateAnnouncementPosition();
+    }
   },
 
   // Add this new method to update user status
@@ -241,7 +242,9 @@ const App = {
         } else {
           console.error('Error:', error);
         }
-        if (errorCallback) errorCallback(xhr, status, error);
+        if (errorCallback) {
+          errorCallback(xhr, status, error);
+        }
       },
     });
   },
@@ -304,8 +307,9 @@ const App = {
       `);
       $('#user-submenu').hide();
     }
-    if (typeof updateAnnouncementPosition === 'function')
+    if (typeof updateAnnouncementPosition === 'function') {
       updateAnnouncementPosition();
+    }
   },
 
   // Update the currency tooltip with countdown

@@ -113,7 +113,9 @@ function displayPagination(totalPages, currentPage, section) {
   const pagination = $('#pagination');
   pagination.empty();
 
-  if (totalPages <= 1) return;
+  if (totalPages <= 1) {
+    return;
+  }
 
   const maxVisiblePages = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));

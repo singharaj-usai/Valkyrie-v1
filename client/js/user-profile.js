@@ -94,18 +94,22 @@ $(document).ready(function () {
 
     if (!isOwnProfile) {
       if (user.isFriend) {
-        actionButton = `<button id="unfriend" class="btn btn-warning btn-sm"><i class="fa fa-user-times"></i> Unfriend</button>`;
+        actionButton =
+          '<button id="unfriend" class="btn btn-warning btn-sm"><i class="fa fa-user-times"></i> Unfriend</button>';
       } else if (user.friendRequestReceived) {
         actionButton = `
           <button id="accept-friend-request" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Accept Friend Request</button>
           <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;"><i class="fa fa-times"></i> Decline Friend Request</button>
         `;
       } else if (user.friendRequestSent) {
-        actionButton = `<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-clock-o"></i> Friend Request Sent</button>`;
+        actionButton =
+          '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-clock-o"></i> Friend Request Sent</button>';
       } else {
-        actionButton = `<button id="send-friend-request" class="btn btn-primary btn-sm"><i class="fa fa-user-plus"></i> Send Friend Request</button>`;
+        actionButton =
+          '<button id="send-friend-request" class="btn btn-primary btn-sm"><i class="fa fa-user-plus"></i> Send Friend Request</button>';
       }
-      actionButton += `<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message</button>`;
+      actionButton +=
+        '<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message</button>';
     }
 
     const userInfoHtml = `
@@ -618,7 +622,9 @@ $(document).ready(function () {
 });
 
 function formatDate(dateString) {
-  if (!dateString) return 'N/A';
+  if (!dateString) {
+    return 'N/A';
+  }
   const date = new Date(dateString);
   return date.toLocaleString('en-US', {
     year: 'numeric',
