@@ -7,6 +7,7 @@ const Shirt = require('../models/Shirt');
 const User = require('../models/User');
 const Asset = require('../models/Asset');
 const Counter = require('../models/Counter');
+const thumbnailQueue = require('./queues/thumbnailQueue');
 const jwt = require('jsonwebtoken');
 const Filter = require('bad-words');
 const crypto = require('crypto'); // Add this line to import the crypto module
@@ -188,6 +189,8 @@ router.post(
       });
 
       await shirt.save();
+
+      await thumbnailQueue.addToQueue(assetId, 'Shirt');
 
       /*const shirt = new Shirt({
           title: filter.clean(title),
