@@ -4,7 +4,9 @@
   "description": "",
   "main": "server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "npm run lint",
     "start": "node server/server.js",
     "start:maintenance": "cross-env MAINTENANCE_MODE=true node server/server.js",
     "dev": "nodemon server/server.js",
@@ -56,6 +58,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
+    "eslint": "^7.9.0",
     "nodemon": "^3.1.4",
     "vercel": "^37.3.0"
   }
