@@ -8,7 +8,7 @@ class ThumbnailQueue {
     // Function to initialize connection and channel to RabbitMQ
     async _connect() {
         if (!this.connection) {
-            this.connection = await amqp.connect('amqp://localhost');
+            this.connection = await amqp.connect('amqp://rabbitmq');
         }
         if (!this.channel) {
             this.channel = await this.connection.createChannel();
