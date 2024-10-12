@@ -1,228 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up - Valkyrie</title>
-    
+
     <!-- Meta Tags -->
-    <meta name="description" content="Valkyrie is your ultimate platform for creating and sharing immersive gaming experiences. Join us to unleash your creativity and connect with gamers worldwide.">
-    <meta name="keywords" content="Valkyrie, game creation, social gaming, user-generated content, online multiplayer">
-    <meta name="author" content="Valkyrie">
-   
+    <meta
+      name="description"
+      content="Valkyrie is your ultimate platform for creating and sharing immersive gaming experiences. Join us to unleash your creativity and connect with gamers worldwide."
+    />
+    <meta
+      name="keywords"
+      content="Valkyrie, game creation, social gaming, user-generated content, online multiplayer"
+    />
+    <meta name="author" content="Valkyrie" />
+
     <!-- Open Graph / Facebook Meta Tags -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.valk.fun/">
-    <meta property="og:title" content="Valkyrie - Create, Play, Connect">
-    <meta property="og:description" content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie.">
-    <meta property="og:image" content="https://www.valk.fun/images/ValkLogo.png">
-   
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.valk.fun/" />
+    <meta property="og:title" content="Valkyrie - Create, Play, Connect" />
+    <meta
+      property="og:description"
+      content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie."
+    />
+    <meta
+      property="og:image"
+      content="https://www.valk.fun/images/ValkLogo.png"
+    />
+
     <!-- Twitter Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:domain" content="https://www.valk.fun">
-    <meta property="twitter:url" content="https://www.valk.fun/">
-    <meta name="twitter:title" content="Valkyrie - Create, Play, Connect">
-    <meta name="twitter:description" content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie.">
-    <meta name="twitter:image" content="https://www.valk.fun/images/ValkLogo.png">
-   
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="twitter:domain" content="https://www.valk.fun" />
+    <meta property="twitter:url" content="https://www.valk.fun/" />
+    <meta name="twitter:title" content="Valkyrie - Create, Play, Connect" />
+    <meta
+      name="twitter:description"
+      content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.valk.fun/images/ValkLogo.png"
+    />
+
     <!-- Discord Meta Tags -->
-    <meta name="theme-color" content="#5865F2">
-    <meta property="og:site_name" content="Valkyrie">
-    <meta property="og:image:alt" content="Valkyrie - The Ultimate Gaming Creation Platform">
+    <meta name="theme-color" content="#5865F2" />
+    <meta property="og:site_name" content="Valkyrie" />
+    <meta
+      property="og:image:alt"
+      content="Valkyrie - The Ultimate Gaming Creation Platform"
+    />
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" id="theme-stylesheet">
-    <link rel="stylesheet" href="./css/particles.css">
-    <link rel="icon" href="/images/Valkyrie.ico" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css"
+      id="theme-stylesheet"
+    />
+    <link rel="stylesheet" href="./css/particles.css" />
+    <link rel="icon" href="/images/Valkyrie.ico" type="image/x-icon" />
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6563673001934226"
-    crossorigin="anonymous"></script>
-    
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6563673001934226"
+      crossorigin="anonymous"
+    ></script>
+
     <style>
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      #background-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: -1000;
+        object-fit: cover;
+      }
+      @media (max-aspect-ratio: 16/9) {
         #background-video {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -1000;
-            object-fit: cover;
+          width: 100%;
+          height: auto;
         }
-        @media (max-aspect-ratio: 16/9) {
-            #background-video {
-                width: 100%;
-                height: auto;
-            }
+      }
+      @media (max-width: 767px) {
+        #content {
+          margin-top: 20px;
         }
-        @media (max-width: 767px) {
-            #content {
-                margin-top: 20px;
-            }
-        }
+      }
     </style>
-</head>
-<body class="bg-default">
+  </head>
+  <body class="bg-default">
     <div id="loading">Loading...</div>
     <video autoplay muted loop id="background-video">
-        <source src="/video/less.mp4" type="video/mp4">
-        Your browser does not support the video tag.
+      <source src="/video/less.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
     </video>
-    
-    <div id="content" style="display: none;">
-        <div class="container" style="margin-top: 50px;">
-            <div id="navbar-container"></div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="alert alert-info" role="alert">
-                        <h4 class="alert-heading">Important Security Info</h4>
-                        <p>We are working on a new authentication system that will be more secure and easier to use. For now, continue using the old system as we will be migrating users over time.</p>
-                    </div>
-                </div>
-            </div>
+    <div id="content" style="display: none">
+      <div class="container" style="margin-top: 50px">
+        <div id="navbar-container"></div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h2 class="panel-title">Welcome to Valkyrie</h2>
-                        </div>
-                        <div class="panel-body">
-                            <p>Create an account and socialize with each other using the forums and message system</p>
-                            <ul>
-                                <li>Join discussions on various topics</li>
-                                <li>Share your creations and ideas</li>
-                                <li>Connect with like-minded individuals</li>
-                            </ul>
-                            <p>Customize your character with the items found in the Catalog</p>
-                            <ul>
-                                <li>Choose from a wide range of clothing and accessories</li>
-                                <li>Create unique looks to express yourself</li>
-                                <li>Collect rare and limited items</li>
-                            </ul>
-                            <p>Make friends through our friend system</p>
-                            <ul>
-                                <li>Add friends and build your network</li>
-                                <li>See what your friends are playing</li>
-                                <li>Collaborate on projects together</li>
-                            </ul>
-                            <p>Play games with each other, privately and publicly</p>
-                            <ul>
-                                <li>Explore user-created worlds and experiences</li>
-                                <li>Host private game sessions with friends</li>
-                                <li>Compete in public servers and climb leaderboards</li>
-                            </ul>
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/zEu7XzKdm70" title="YouTube video" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="col-md-6">
-                    <div class="panel panel-warning">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Sign Up Information</h3>
-                        </div>
-                        <div class="panel-body">
-                            <ul>
-                                <li>We will never ask for your password via email, phone, or social media</li>
-                                <li>Always make sure you are on the official Valkyrie website before entering your credentials</li>
-                                <li>Report any suspicious activity to our support team immediately</li>
-                                <li>Keep your account information confidential and never share it with others</li>
-                            </ul>
-                            <p>Your security is our top priority. Please use common sense when using our website</p>
-                        </div>
-                    </div>
-
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h2 class="panel-title">Sign Up</h2>
-                        </div>
-                        <div class="panel-body">
-                            <div id="alert-container"></div>
-                            <form id="signup-form">
-                                <div class="form-group">
-                                    <label for="username">Username</label>
-                                    <input type="text" class="form-control" id="username" required placeholder="Username" minlength="3" maxlength="18">
-                                    <p class="help-block">Username must be between 3 and 18 characters.</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required placeholder="Email">
-                                    <p class="help-block">Enter valid email address</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" required placeholder="******" minlength="6">
-                                    <p class="help-block">Password must be at least 6 characters long.</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirm-password">Confirm Password</label>
-                                    <input type="password" class="form-control" id="confirm-password" required placeholder="******" minlength="6">
-                                    <p class="help-block">Confirm password.</p>
-                                </div>
-                                <div class="row">
-                                    <div class="col-xs-5">
-                                        <button type="submit" class="btn btn-success btn-block">Sign Up</button>
-                                    </div>
-                                    <div class="col-xs-2 text-center">
-                                        <p style="margin-top: 6px;">or</p>
-                                    </div>
-                                    <div class="col-xs-5">
-                                        <a href="/login" class="btn btn-primary btn-block">Login</a>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <p class="text-muted">This site is protected by reCAPTCHA and the Google
-                                        <a href="https://policies.google.com/privacy">Privacy Policy</a> and
-                                        <a href="https://policies.google.com/terms">Terms of Service</a> apply.
-                                    </p>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    
-                </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+              <h4 class="alert-heading">Important Security Info</h4>
+              <p>
+                We are working on a new authentication system that will be more
+                secure and easier to use. For now, continue using the old system
+                as we will be migrating users over time.
+              </p>
             </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            <h2 class="panel-title">Why Join Valkyrie?</h2>
-                        </div>
-                        <div class="panel-body">
-                            <p>Valkyrie is more than just a game platform - it's a nostalgic journey back to the golden days of online creativity and community. Here's why you should join us:</p>
-                            <ul>
-                                <li><strong>Relive the Magic:</strong> Experience the charm and simplicity of our classic brick building community that we miss so much.</li>
-                                <li><strong>Create Without Limits:</strong> Unleash your imagination with our intuitive building tools, reminiscent of the ones you loved in the past.</li>
-                                <li><strong>Community-Driven:</strong> Be part of a passionate community that values creativity, friendship, and the spirit of collaborative play.</li>
-                                <li><strong>Safe and Secure:</strong> Enjoy a family friendly environment with robust moderation, just like the good old days.</li>
-                                <li><strong>Constant Evolution:</strong> While we honor the past, we're always improving. Experience regular updates and new features that respect the classic feel.</li>
-                            </ul>
-                            <p>Join Valkyrie today and rediscover your childhood memories in a familiar and fresh environment. Let's build, play, and grow together!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h2 class="panel-title">Welcome to Valkyrie</h2>
+              </div>
+              <div class="panel-body">
+                <p>
+                  Create an account and socialize with each other using the
+                  forums and message system
+                </p>
+                <ul>
+                  <li>Join discussions on various topics</li>
+                  <li>Share your creations and ideas</li>
+                  <li>Connect with like-minded individuals</li>
+                </ul>
+                <p>
+                  Customize your character with the items found in the Catalog
+                </p>
+                <ul>
+                  <li>Choose from a wide range of clothing and accessories</li>
+                  <li>Create unique looks to express yourself</li>
+                  <li>Collect rare and limited items</li>
+                </ul>
+                <p>Make friends through our friend system</p>
+                <ul>
+                  <li>Add friends and build your network</li>
+                  <li>See what your friends are playing</li>
+                  <li>Collaborate on projects together</li>
+                </ul>
+                <p>Play games with each other, privately and publicly</p>
+                <ul>
+                  <li>Explore user-created worlds and experiences</li>
+                  <li>Host private game sessions with friends</li>
+                  <li>Compete in public servers and climb leaderboards</li>
+                </ul>
+                <div class="embed-responsive embed-responsive-16by9">
+                  <iframe
+                    class="embed-responsive-item"
+                    src="https://www.youtube.com/embed/zEu7XzKdm70"
+                    title="YouTube video"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                <h3 class="panel-title">Sign Up Information</h3>
+              </div>
+              <div class="panel-body">
+                <ul>
+                  <li>
+                    We will never ask for your password via email, phone, or
+                    social media
+                  </li>
+                  <li>
+                    Always make sure you are on the official Valkyrie website
+                    before entering your credentials
+                  </li>
+                  <li>
+                    Report any suspicious activity to our support team
+                    immediately
+                  </li>
+                  <li>
+                    Keep your account information confidential and never share
+                    it with others
+                  </li>
+                </ul>
+                <p>
+                  Your security is our top priority. Please use common sense
+                  when using our website
+                </p>
+              </div>
+            </div>
+
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h2 class="panel-title">Sign Up</h2>
+              </div>
+              <div class="panel-body">
+                <div id="alert-container"></div>
+                <form id="signup-form">
+                  <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="username"
+                      required
+                      placeholder="Username"
+                      minlength="3"
+                      maxlength="18"
+                    />
+                    <p class="help-block">
+                      Username must be between 3 and 18 characters.
+                    </p>
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                      placeholder="Email"
+                    />
+                    <p class="help-block">Enter valid email address</p>
+                  </div>
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      required
+                      placeholder="******"
+                      minlength="6"
+                    />
+                    <p class="help-block">
+                      Password must be at least 6 characters long.
+                    </p>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="confirm-password"
+                      required
+                      placeholder="******"
+                      minlength="6"
+                    />
+                    <p class="help-block">Confirm password.</p>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-5">
+                      <button type="submit" class="btn btn-success btn-block">
+                        Sign Up
+                      </button>
+                    </div>
+                    <div class="col-xs-2 text-center">
+                      <p style="margin-top: 6px">or</p>
+                    </div>
+                    <div class="col-xs-5">
+                      <a href="/login" class="btn btn-primary btn-block"
+                        >Login</a
+                      >
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <p class="text-muted">
+                      This site is protected by reCAPTCHA and the Google
+                      <a href="https://policies.google.com/privacy"
+                        >Privacy Policy</a
+                      >
+                      and
+                      <a href="https://policies.google.com/terms"
+                        >Terms of Service</a
+                      >
+                      apply.
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <h2 class="panel-title">Why Join Valkyrie?</h2>
+              </div>
+              <div class="panel-body">
+                <p>
+                  Valkyrie is more than just a game platform - it's a nostalgic
+                  journey back to the golden days of online creativity and
+                  community. Here's why you should join us:
+                </p>
+                <ul>
+                  <li>
+                    <strong>Relive the Magic:</strong> Experience the charm and
+                    simplicity of our classic brick building community that we
+                    miss so much.
+                  </li>
+                  <li>
+                    <strong>Create Without Limits:</strong> Unleash your
+                    imagination with our intuitive building tools, reminiscent
+                    of the ones you loved in the past.
+                  </li>
+                  <li>
+                    <strong>Community-Driven:</strong> Be part of a passionate
+                    community that values creativity, friendship, and the spirit
+                    of collaborative play.
+                  </li>
+                  <li>
+                    <strong>Safe and Secure:</strong> Enjoy a family friendly
+                    environment with robust moderation, just like the good old
+                    days.
+                  </li>
+                  <li>
+                    <strong>Constant Evolution:</strong> While we honor the
+                    past, we're always improving. Experience regular updates and
+                    new features that respect the classic feel.
+                  </li>
+                </ul>
+                <p>
+                  Join Valkyrie today and rediscover your childhood memories in
+                  a familiar and fresh environment. Let's build, play, and grow
+                  together!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Scripts -->
@@ -233,15 +361,15 @@
     <script src="/js/theme-loader.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script>
-        $(document).ready(function() {
-            if (localStorage.getItem("username")) {
-                window.location.href = '/';
-            } else {
-                $('#loading').hide();
-                $('#content').show();
-                App.initForms();
-            }
-        });
+      $(document).ready(function () {
+        if (localStorage.getItem('username')) {
+          window.location.href = '/';
+        } else {
+          $('#loading').hide();
+          $('#content').show();
+          App.initForms();
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

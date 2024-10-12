@@ -9,14 +9,18 @@ function authenticateToken(req, res, next) {
     return res.sendStatus(401);
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_for_development', (err, user) => {
-    if (err) {
-      console.error('Token verification error:', err);
-      return res.sendStatus(403);
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET || 'fallback_secret_key_for_development',
+    (err, user) => {
+      if (err) {
+        console.error('Token verification error:', err);
+        return res.sendStatus(403);
+      }
+      req.user = user;
+      next();
     }
-    req.user = user;
-    next();
-  });
+  );
 }
 
 module.exports = authenticateToken;

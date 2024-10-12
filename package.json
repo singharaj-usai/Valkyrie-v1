@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
     "test": "npm run lint",
     "start": "node server/server.js",
     "start:maintenance": "cross-env MAINTENANCE_MODE=true node server/server.js",
@@ -59,7 +60,11 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "eslint": "^7.9.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "nodemon": "^3.1.4",
+    "prettier": "^2.1.2",
+    "tidy-html5": "^0.1.1",
     "vercel": "^37.3.0"
   }
 }

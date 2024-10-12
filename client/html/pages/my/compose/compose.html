@@ -1,76 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compose Message - Valkyrie</title>
-    
+
     <!-- Meta Tags -->
-    <meta name="description" content="Valkyrie is your ultimate platform for creating and sharing immersive gaming experiences. Join us to unleash your creativity and connect with gamers worldwide.">
-    <meta name="keywords" content="Valkyrie, game creation, social gaming, user-generated content, online multiplayer">
-    <meta name="author" content="Valkyrie">
-   
+    <meta
+      name="description"
+      content="Valkyrie is your ultimate platform for creating and sharing immersive gaming experiences. Join us to unleash your creativity and connect with gamers worldwide."
+    />
+    <meta
+      name="keywords"
+      content="Valkyrie, game creation, social gaming, user-generated content, online multiplayer"
+    />
+    <meta name="author" content="Valkyrie" />
+
     <!-- Open Graph / Facebook Meta Tags -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.valk.fun/">
-    <meta property="og:title" content="Valkyrie - Create, Play, Connect">
-    <meta property="og:description" content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie.">
-    <meta property="og:image" content="https://www.valk.fun/images/ValkLogo.png">
-    <meta property="og:site_name" content="Valkyrie">
-    <meta property="og:image:alt" content="Valkyrie - The Ultimate Gaming Creation Platform">
-   
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.valk.fun/" />
+    <meta property="og:title" content="Valkyrie - Create, Play, Connect" />
+    <meta
+      property="og:description"
+      content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie."
+    />
+    <meta
+      property="og:image"
+      content="https://www.valk.fun/images/ValkLogo.png"
+    />
+    <meta property="og:site_name" content="Valkyrie" />
+    <meta
+      property="og:image:alt"
+      content="Valkyrie - The Ultimate Gaming Creation Platform"
+    />
+
     <!-- Twitter Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:domain" content="valk.fun">
-    <meta property="twitter:url" content="https://www.valk.fun/">
-    <meta name="twitter:title" content="Valkyrie - Create, Play, Connect">
-    <meta name="twitter:description" content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie.">
-    <meta name="twitter:image" content="https://www.valk.fun/images/ValkLogo.png">
-   
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="twitter:domain" content="valk.fun" />
+    <meta property="twitter:url" content="https://www.valk.fun/" />
+    <meta name="twitter:title" content="Valkyrie - Create, Play, Connect" />
+    <meta
+      name="twitter:description"
+      content="Create and share amazing games, connect with fellow creators, and dive into a world of user-generated content on Valkyrie."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.valk.fun/images/ValkLogo.png"
+    />
+
     <!-- Discord Meta Tags -->
-    <meta name="theme-color" content="#5865F2">
+    <meta name="theme-color" content="#5865F2" />
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" id="theme-stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css"
+      id="theme-stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <!-- Favicon -->
-    <link rel="icon" href="/images/Valkyrie.ico" type="image/x-icon">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6563673001934226"
-     crossorigin="anonymous"></script>
-</head>
-<body>
+    <link rel="icon" href="/images/Valkyrie.ico" type="image/x-icon" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6563673001934226"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
     <!-- Navigation -->
     <div id="navbar-container"></div>
-   
+
     <!-- Main Content -->
-    <div class="container" style="margin-top: 70px;">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Compose Message</h3>
-            </div>
-            <div class="panel-body">
-                <div id="alert-container"></div>
-                <form id="compose-form">
-                    <div class="form-group">
-                        <label for="recipient">To:</label>
-                        <input type="text" class="form-control" id="recipient" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Subject:</label>
-                        <input type="text" class="form-control" id="subject" required maxlength="100">
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message:</label>
-                        <textarea class="form-control" id="message" rows="5" required maxlength="1000"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-success">Send Message</button>
-                        <button type="button" id="discard-button" class="btn btn-default">Discard</button>
-                    </div>
-                </form>
-            </div>
+    <div class="container" style="margin-top: 70px">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Compose Message</h3>
         </div>
+        <div class="panel-body">
+          <div id="alert-container"></div>
+          <form id="compose-form">
+            <div class="form-group">
+              <label for="recipient">To:</label>
+              <input type="text" class="form-control" id="recipient" readonly />
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="subject"
+                required
+                maxlength="100"
+              />
+            </div>
+            <div class="form-group">
+              <label for="message">Message:</label>
+              <textarea
+                class="form-control"
+                id="message"
+                rows="5"
+                required
+                maxlength="1000"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-success">
+                Send Message
+              </button>
+              <button type="button" id="discard-button" class="btn btn-default">
+                Discard
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- Scripts -->
@@ -79,5 +126,5 @@
     <script src="/js/theme-loader.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script src="/js/messages.js"></script>
-</body>
+  </body>
 </html>

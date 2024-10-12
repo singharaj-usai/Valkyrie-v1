@@ -24,7 +24,6 @@ async function clearUsers() {
       { upsert: true }
     );
     console.log('Reset user ID counter');
-
   } catch (error) {
     console.error('Error clearing users:', error);
   } finally {

@@ -1,37 +1,37 @@
 $(document).ready(function () {
-  const username = localStorage.getItem("username");
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
+  const username = localStorage.getItem('username');
+  const userId = localStorage.getItem('userId');
+  const token = localStorage.getItem('token');
 
   if (username && token) {
     $.ajax({
-      url: "/api/validate-session",
-      method: "GET",
+      url: '/api/validate-session',
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       success: function (response) {
-        $("#profile-username").text(`Welcome, ${username}!`);
+        $('#profile-username').text(`Welcome, ${username}!`);
         fetchUserBlurb();
         fetchFriendsList();
         fetchAndDisplayGames();
         displaySocialMediaLinks();
       },
       error: function () {
-        localStorage.removeItem("username");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        localStorage.removeItem('username');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
       },
     });
   } else {
-    window.location.href = "/login";
+    window.location.href = '/login';
   }
 
   function fetchUserBlurb() {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     $.ajax({
       url: `/api/user/${username}`,
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -39,106 +39,106 @@ $(document).ready(function () {
         displayBlurb(user.blurb);
       },
       error: function (xhr, status, error) {
-        console.error("Error fetching user blurb:", error);
+        console.error('Error fetching user blurb:', error);
       },
     });
   }
 
   function displayBlurb(blurb) {
     const blurbHtml = `
-        <p id="blurb-text">${blurb ? escapeHtml(blurb) : "No blurb set."}</p>
+        <p id="blurb-text">${blurb ? escapeHtml(blurb) : 'No blurb set.'}</p>
         <button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>
       `;
-    $("#blurb-container").html(blurbHtml);
+    $('#blurb-container').html(blurbHtml);
     initBlurbEdit(blurb);
   }
 
   function initBlurbEdit(currentBlurb) {
-    $("#edit-blurb").on("click", function () {
-      const blurbContainer = $("#blurb-container");
+    $('#edit-blurb').on('click', function () {
+      const blurbContainer = $('#blurb-container');
       blurbContainer.html(`
             <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(
-              currentBlurb || ""
+              currentBlurb || ''
             )}</textarea>
             <p id="char-count">0/500</p>
             <button id="save-blurb" class="btn btn-success btn-sm mt-2">Save</button>
             <button id="cancel-blurb" class="btn btn-secondary btn-sm mt-2">Cancel</button>
           `);
 
-      const textarea = $("#blurb-textarea");
-      const charCount = $("#char-count");
+      const textarea = $('#blurb-textarea');
+      const charCount = $('#char-count');
 
-      textarea.on("input", function () {
+      textarea.on('input', function () {
         charCount.text(`${this.value.length}/500`);
       });
 
-      textarea.trigger("input");
+      textarea.trigger('input');
 
-      $("#save-blurb").on("click", function () {
+      $('#save-blurb').on('click', function () {
         const newBlurb = textarea.val();
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         $.ajax({
-          url: "/api/user/blurb",
-          method: "PUT",
+          url: '/api/user/blurb',
+          method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           data: JSON.stringify({ blurb: newBlurb }),
           success: function (response) {
             displayBlurb(response.blurb);
           },
           error: function (xhr, status, error) {
-            console.error("Error updating blurb:", error);
-            console.error("Response:", xhr.responseText);
+            console.error('Error updating blurb:', error);
+            console.error('Response:', xhr.responseText);
             alert(
-              "Error updating blurb: " +
-                (xhr.responseJSON ? xhr.responseJSON.error : "Unknown error")
+              'Error updating blurb: ' +
+                (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error')
             );
           },
         });
       });
 
-      $("#cancel-blurb").on("click", function () {
+      $('#cancel-blurb').on('click', function () {
         displayBlurb(currentBlurb);
       });
     });
   }
 
   function fetchFriendsList() {
-    const username = localStorage.getItem("username");
-    Friends.fetchFriendsList(username, "friends-list", 10)
+    const username = localStorage.getItem('username');
+    Friends.fetchFriendsList(username, 'friends-list', 10)
       .then((friends) => {
         if (friends.length > 10) {
-          $("#friends-list").append(
+          $('#friends-list').append(
             '<p class="text-center mt-3">Showing 10 of ' +
               friends.length +
-              " friends</p>"
+              ' friends</p>'
           );
         }
       })
       .catch((error) => {
-        console.error("Error fetching friends list:", error);
-        $("#friends-list").html("<p>Error loading friends list.</p>");
+        console.error('Error fetching friends list:', error);
+        $('#friends-list').html('<p>Error loading friends list.</p>');
       });
   }
 
   function fetchAndDisplayGames() {
     $.ajax({
-      url: "/api/games",
-      method: "GET",
+      url: '/api/games',
+      method: 'GET',
       success: function (games) {
         displayGames(games);
       },
       error: function (xhr, status, error) {
-        console.error("Error fetching games:", error);
-        $("#games-container").html("<p>Error loading games.</p>");
+        console.error('Error fetching games:', error);
+        $('#games-container').html('<p>Error loading games.</p>');
       },
     });
   }
 
   function displayGames(games) {
-    const gamesContainer = $("#games-container");
+    const gamesContainer = $('#games-container');
     gamesContainer.empty();
 
     const gamesHtml = `
@@ -176,7 +176,7 @@ $(document).ready(function () {
                           </div>
                       `
                         )
-                        .join("")}
+                        .join('')}
                   </div>
                   <div class="text-center">
                       <a href="/games" class="btn btn-primary">View All Games</a>
@@ -189,7 +189,7 @@ $(document).ready(function () {
   }
 
   function displaySocialMediaLinks() {
-    const socialMediaContainer = $("#social-media-container");
+    const socialMediaContainer = $('#social-media-container');
     socialMediaContainer.empty();
 
     const socialMediaHtml = `
@@ -234,9 +234,10 @@ $(document).ready(function () {
     socialMediaContainer.html(socialMediaHtml);
 
     // Add custom CSS for hover effect and padding
-    $("<style>")
-        .prop("type", "text/css")
-        .html(`
+    $('<style>')
+      .prop('type', 'text/css')
+      .html(
+        `
             .card {
                 transition: all 0.3s ease;
                 height: 100%;
@@ -249,16 +250,17 @@ $(document).ready(function () {
             .card-body {
                 padding: 20px;
             }
-        `)
-        .appendTo("head");
-}
+        `
+      )
+      .appendTo('head');
+  }
 
   function escapeHtml(unsafe) {
     return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 });

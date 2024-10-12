@@ -1,26 +1,34 @@
 const GameDisplay = {
-    displayGameDetails: function(game) {
-        if (!game) {
-            GameUtils.showError('Game details not available');
-            return;
-        }
-    
-        $('#game-container').html(`
+  displayGameDetails: function (game) {
+    if (!game) {
+      GameUtils.showError('Game details not available');
+      return;
+    }
+
+    $('#game-container').html(`
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h1 class="panel-title">${GameUtils.escapeHtml(game.title || '')}</h1>
+                    <h1 class="panel-title">${GameUtils.escapeHtml(
+                      game.title || ''
+                    )}</h1>
                 </div>
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="embed-responsive embed-responsive-16by9">
-                                <img id="game-thumbnail" src="${game.thumbnailUrl || ''}" alt="Game Thumbnail" class="embed-responsive-item">
+                                <img id="game-thumbnail" src="${
+                                  game.thumbnailUrl || ''
+                                }" alt="Game Thumbnail" class="embed-responsive-item">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <h2>${GameUtils.escapeHtml(game.title || '')}</h2>
-                            <p>by ${GameUtils.escapeHtml(game.creator?.username || '')}</p>
-                            <span class="label label-danger">${game.year || ''}</span>
+                            <p>by ${GameUtils.escapeHtml(
+                              game.creator?.username || ''
+                            )}</p>
+                            <span class="label label-danger">${
+                              game.year || ''
+                            }</span>
 
                             <button id="play-game" class="btn btn-success btn-lg btn-block mt-3">
                                 <i class="bi bi-play-fill"></i> Play
@@ -54,7 +62,9 @@ const GameDisplay = {
                     <div class="tab-content">
                         <div class="tab-pane fade in active" id="description">
                             <h3>Description</h3>
-                            <p>${GameUtils.escapeHtml(game.description || '')}</p>
+                            <p>${GameUtils.escapeHtml(
+                              game.description || ''
+                            )}</p>
 
                             <table class="table table-bordered">
                                 <thead>
@@ -68,9 +78,23 @@ const GameDisplay = {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>${game.createdAt ? new Date(game.createdAt).toLocaleDateString() : 'N/A'}</td>
-                                        <td>${game.updatedAt ? new Date(game.updatedAt).toLocaleDateString() : 'N/A'}</td>
-                                        <td>${GameUtils.escapeHtml(game.genre || 'N/A')}</td>
+                                        <td>${
+                                          game.createdAt
+                                            ? new Date(
+                                                game.createdAt
+                                              ).toLocaleDateString()
+                                            : 'N/A'
+                                        }</td>
+                                        <td>${
+                                          game.updatedAt
+                                            ? new Date(
+                                                game.updatedAt
+                                              ).toLocaleDateString()
+                                            : 'N/A'
+                                        }</td>
+                                        <td>${GameUtils.escapeHtml(
+                                          game.genre || 'N/A'
+                                        )}</td>
                                         <td>0</td>
                                         <td>${game.maxPlayers || 'N/A'}</td>
                                     </tr>
@@ -109,7 +133,7 @@ const GameDisplay = {
                 </div>
             </div>
         `);
-    
-        GameActions.initPlayButton();
-    }
+
+    GameActions.initPlayButton();
+  },
 };

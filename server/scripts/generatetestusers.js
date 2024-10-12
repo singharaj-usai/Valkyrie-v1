@@ -28,7 +28,7 @@ async function generateTestUsers(numUsers = 10) {
         email,
         password: hashedPassword,
         signupIp: '127.0.0.1',
-        isVerified: true
+        isVerified: true,
       });
 
       await user.save();

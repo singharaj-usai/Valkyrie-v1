@@ -5,17 +5,17 @@ const createTransporter = async () => {
   const oauth2Client = new OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    "https://accounts.google.com/o/oauth2/auth"
+    'https://accounts.google.com/o/oauth2/auth'
   );
 
   oauth2Client.setCredentials({
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
   });
 
   const accessToken = await new Promise((resolve, reject) => {
     oauth2Client.getAccessToken((err, token) => {
       if (err) {
-        reject("Failed to create access token :(");
+        reject('Failed to create access token :(');
       }
       resolve(token);
     });
@@ -27,13 +27,13 @@ const createTransporter = async () => {
     port: 465,
     secure: true,
     auth: {
-      type: "OAuth2",
+      type: 'OAuth2',
       user: process.env.EMAIL_USERNAME,
       accessToken,
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      refreshToken: process.env.GOOGLE_REFRESH_TOKEN
-    }
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    },
   });
 
   return transporter;

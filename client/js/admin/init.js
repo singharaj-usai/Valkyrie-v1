@@ -1,50 +1,50 @@
-$(document).ready(function() {
-    checkUserBan();
+$(document).ready(function () {
+  checkUserBan();
 
-    // Check if the user is authenticated and has admin privileges
-    checkAdminAuth();
+  // Check if the user is authenticated and has admin privileges
+  checkAdminAuth();
 
-    // Handle sidebar navigation
-    $('.nav-sidebar a').on('click', function(e) {
-        e.preventDefault();
-        $('.nav-sidebar li').removeClass('active');
-        $(this).parent().addClass('active');
-        loadSection($(this).data('section'));
-    });
+  // Handle sidebar navigation
+  $('.nav-sidebar a').on('click', function (e) {
+    e.preventDefault();
+    $('.nav-sidebar li').removeClass('active');
+    $(this).parent().addClass('active');
+    loadSection($(this).data('section'));
+  });
 
-    // Handle logout
-    $('#logout-btn').on('click', function(e) {
-        e.preventDefault();
-        logout();
-    });
+  // Handle logout
+  $('#logout-btn').on('click', function (e) {
+    e.preventDefault();
+    logout();
+  });
 });
 
 function loadSection(section) {
-    const contentArea = $('#content-area');
-    contentArea.empty();
+  const contentArea = $('#content-area');
+  contentArea.empty();
 
-    switch (section) {
-        case 'overview':
-            loadOverview();
-            break;
-        case 'forum-posts':
-            loadForumPosts();
-            break;
-        case 'users':
-            loadUsers();
-            break;
-        case 'games':
-            loadGames();
-            break;
-        case 'statistics':
-            loadStatistics();
-            break;
-    }
+  switch (section) {
+    case 'overview':
+      loadOverview();
+      break;
+    case 'forum-posts':
+      loadForumPosts();
+      break;
+    case 'users':
+      loadUsers();
+      break;
+    case 'games':
+      loadGames();
+      break;
+    case 'statistics':
+      loadStatistics();
+      break;
+  }
 }
 
 function loadOverview() {
-    const contentArea = $('#content-area');
-    contentArea.html(`
+  const contentArea = $('#content-area');
+  contentArea.html(`
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Welcome to the Admin Dashboard</h3>
@@ -96,26 +96,28 @@ function loadOverview() {
         </div>
     `);
 
-    // Add click event listeners to the panels
-    $('.clickable-panel').on('click', function() {
-        const section = $(this).data('section');
-        $('.nav-sidebar li').removeClass('active');
-        $(`.nav-sidebar a[data-section="${section}"]`).parent().addClass('active');
-        loadSection(section);
-    });
+  // Add click event listeners to the panels
+  $('.clickable-panel').on('click', function () {
+    const section = $(this).data('section');
+    $('.nav-sidebar li').removeClass('active');
+    $(`.nav-sidebar a[data-section="${section}"]`).parent().addClass('active');
+    loadSection(section);
+  });
 
-    // Add custom CSS for underline
-    $('<style>')
-        .prop('type', 'text/css')
-        .html(`
+  // Add custom CSS for underline
+  $('<style>')
+    .prop('type', 'text/css')
+    .html(
+      `
             .underline {
                 text-decoration: underline;
             }
-        `)
-        .appendTo('head');
+        `
+    )
+    .appendTo('head');
 }
 
 function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  localStorage.removeItem('token');
+  window.location.href = '/login';
 }

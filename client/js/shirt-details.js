@@ -1,35 +1,41 @@
-$(document).ready(function() {
-    const pathParts = window.location.pathname.split('/');
-    const shirtId = pathParts[2];
-    loadShirtDetails(shirtId);
+$(document).ready(function () {
+  const pathParts = window.location.pathname.split('/');
+  const shirtId = pathParts[2];
+  loadShirtDetails(shirtId);
 });
 
 function loadShirtDetails(shirtId) {
-    $.ajax({
-        url: `/api/shirts/${shirtId}`,
-        method: 'GET',
-        success: function(shirt) {
-            displayShirtDetails(shirt);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching shirt details:', error);
-            $('#shirt-details').html('<p>Error loading shirt details. Please try again later.</p>');
-        }
-    });
+  $.ajax({
+    url: `/api/shirts/${shirtId}`,
+    method: 'GET',
+    success: function (shirt) {
+      displayShirtDetails(shirt);
+    },
+    error: function (xhr, status, error) {
+      console.error('Error fetching shirt details:', error);
+      $('#shirt-details').html(
+        '<p>Error loading shirt details. Please try again later.</p>'
+      );
+    },
+  });
 }
 
 function displayShirtDetails(shirt) {
-    const shirtDetailsContainer = $('#shirt-details');
-    const isOwner = shirt.creator._id === localStorage.getItem('userId');
-    const detailsHtml = `
+  const shirtDetailsContainer = $('#shirt-details');
+  const isOwner = shirt.creator._id === localStorage.getItem('userId');
+  const detailsHtml = `
         <div class="col-md-6">
             <div class="thumbnail">
-                <img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" class="img-responsive">
+                <img src="${shirt.ThumbnailLocation}" alt="${
+    shirt.Name
+  }" class="img-responsive">
             </div>
         </div>
         <div class="col-md-6">
             <h1>${shirt.Name}</h1>
-            <p class="lead">By <a href="/user-profile?username=${encodeURIComponent(shirt.creator.username)}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></p>
+            <p class="lead">By <a href="/user-profile?username=${encodeURIComponent(
+              shirt.creator.username
+            )}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></p>
             <hr>
             <div class="well">
                 <h3>Description</h3>
@@ -41,82 +47,90 @@ function displayShirtDetails(shirt) {
                 </div>
                 <div class="panel-body">
                     <p><strong>Price:</strong> ${shirt.Price} currency</p>
-                    <p><strong>For Sale:</strong> ${shirt.IsForSale ? 'Yes' : 'No'}</p>
+                    <p><strong>For Sale:</strong> ${
+                      shirt.IsForSale ? 'Yes' : 'No'
+                    }</p>
                 </div>
             </div>
             <div id="purchase-section"></div>
         </div>
     `;
-    shirtDetailsContainer.html(detailsHtml);
+  shirtDetailsContainer.html(detailsHtml);
 
-    checkOwnership(shirt._id);
+  checkOwnership(shirt._id);
 }
 
 function checkOwnership(shirtId) {
-    $.ajax({
-        url: `/api/shirts/check-ownership/${shirtId}`,
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        success: function(response) {
-            if (response.owned) {
-                $('#purchase-section').html('<div class="alert alert-info">You own this shirt</div>');
-            } else if (response.isCreator) {
-                $('#purchase-section').html('<div class="alert alert-info">You are the creator of this shirt</div>');
-            } else {
-                // Use response.price instead of shirt.Price
-                $('#purchase-section').html(`
+  $.ajax({
+    url: `/api/shirts/check-ownership/${shirtId}`,
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    success: function (response) {
+      if (response.owned) {
+        $('#purchase-section').html(
+          '<div class="alert alert-info">You own this shirt</div>'
+        );
+      } else if (response.isCreator) {
+        $('#purchase-section').html(
+          '<div class="alert alert-info">You are the creator of this shirt</div>'
+        );
+      } else {
+        // Use response.price instead of shirt.Price
+        $('#purchase-section').html(`
                     <button id="purchase-btn" class="btn btn-primary btn-lg btn-block">
                         <i class="fa fa-shopping-cart"></i> Purchase for ${response.price} currency
                     </button>
                 `);
-                $('#purchase-btn').on('click', function() {
-                    purchaseShirt(shirtId);
-                });
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error checking shirt ownership:', error);
-            $('#purchase-section').html('<div class="alert alert-danger">Error checking ownership status</div>');
-        }
-    });
+        $('#purchase-btn').on('click', function () {
+          purchaseShirt(shirtId);
+        });
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error('Error checking shirt ownership:', error);
+      $('#purchase-section').html(
+        '<div class="alert alert-danger">Error checking ownership status</div>'
+      );
+    },
+  });
 }
 function purchaseShirt(shirtId) {
-    $.ajax({
-        url: `/api/shirts/purchase/${shirtId}`,
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        success: function(response) {
-            showAlert('success', 'Shirt purchased successfully!');
-            updateCurrency(response.newBalance);
-            setTimeout(function() {
-                loadShirtDetails(shirtId);
-            }, 2000); // refresh after 2 second
-        },
-        error: function(xhr, status, error) {
-            console.error('Error purchasing shirt:', xhr.responseJSON);
-            let errorMessage = 'Error purchasing shirt. Please try again later.';
-            if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            }
-            showAlert('danger', errorMessage);
-        }
-    });
+  $.ajax({
+    url: `/api/shirts/purchase/${shirtId}`,
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    success: function (response) {
+      showAlert('success', 'Shirt purchased successfully!');
+      updateCurrency(response.newBalance);
+      setTimeout(function () {
+        loadShirtDetails(shirtId);
+      }, 2000); // refresh after 2 second
+    },
+    error: function (xhr, status, error) {
+      console.error('Error purchasing shirt:', xhr.responseJSON);
+      let errorMessage = 'Error purchasing shirt. Please try again later.';
+      if (xhr.responseJSON && xhr.responseJSON.error) {
+        errorMessage = xhr.responseJSON.error;
+      }
+      showAlert('danger', errorMessage);
+    },
+  });
 }
 
 function updateCurrency(newBalance) {
-    $('#currency-amount').text(newBalance);
+  $('#currency-amount').text(newBalance);
 }
 
 function showAlert(type, message) {
-    const alertHtml = `
+  const alertHtml = `
         <div class="alert alert-${type} alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             ${message}
         </div>
     `;
-    $('#shirt-details').prepend(alertHtml);
+  $('#shirt-details').prepend(alertHtml);
 }

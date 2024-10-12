@@ -4,7 +4,7 @@ const updateUserStatus = async (req, res, next) => {
   if (req.user) {
     await User.findByIdAndUpdate(req.user._id, {
       isOnline: true,
-      lastActiveAt: new Date()
+      lastActiveAt: new Date(),
     });
   }
   next();

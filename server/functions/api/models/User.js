@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const moment = require("moment-timezone");
+const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 require('./Counter'); // Add this line to ensure Counter model is registered
 
 const userSchema = new mongoose.Schema({
@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
   },
   signupDate: {
     type: Date,
-    default: () => moment().tz("America/New_York").toDate(),
+    default: () => moment().tz('America/New_York').toDate(),
   },
   signupIp: {
     type: String,
@@ -53,102 +53,111 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
-  loginAttempts: { 
-    type: Number, 
-    required: true, 
-    default: 0 
+  loginAttempts: {
+    type: Number,
+    required: true,
+    default: 0,
   },
 
-  lockUntil: { 
-    type: Date 
+  lockUntil: {
+    type: Date,
   },
-
 
   verificationToken: String,
   currency: {
     type: Number,
-    default: 10
+    default: 10,
   },
   lastCurrencyClaimDate: {
     type: Date,
-    default: null
+    default: null,
   },
   blurb: {
-  type: String,
-  default: '',
-  maxlength: 500
-},
-isOnline: {
-  type: Boolean,
-  default: false
-},
+    type: String,
+    default: '',
+    maxlength: 500,
+  },
+  isOnline: {
+    type: Boolean,
+    default: false,
+  },
 
-isBanned: {
-  type: Boolean,
-  default: false
-},
-lastActiveAt: {
-  type: Date,
-  default: Date.now
-},
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  lastActiveAt: {
+    type: Date,
+    default: Date.now,
+  },
 
-resetPasswordToken: {
-  type: String,
-  default: null,
-},
-resetPasswordExpires: {
-  type: Date,
-  default: null,
-},
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null,
+  },
 
-friends: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User'
-}],
-friendRequests: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User'
-}],
-sentFriendRequests: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User'
-}],
-games: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'Game'
-}],
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  friendRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  sentFriendRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  games: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Game',
+    },
+  ],
 
-postCount: {
-  type: Number,
-  default: 0
-},
+  postCount: {
+    type: Number,
+    default: 0,
+  },
 
-forumPostCount: { 
-  type: Number, 
-  default: 0 
-},
+  forumPostCount: {
+    type: Number,
+    default: 0,
+  },
 
-inventory: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'Asset'
-}],
-
+  inventory: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Asset',
+    },
+  ],
 });
 
-
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (this.isNew) {
-    const counter = await mongoose.model('Counter').findOneAndUpdate(
-      { _id: 'userId' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
+    const counter = await mongoose
+      .model('Counter')
+      .findOneAndUpdate(
+        { _id: 'userId' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
     this.userId = counter.seq;
   }
   next();
 });
 
-userSchema.statics.resetCounter = async function() {
+userSchema.statics.resetCounter = async function () {
   const Counter = mongoose.model('Counter');
   await Counter.findOneAndUpdate(
     { _id: 'userId' },
@@ -157,8 +166,8 @@ userSchema.statics.resetCounter = async function() {
   );
 };
 
-userSchema.virtual('isLocked').get(function() {
+userSchema.virtual('isLocked').get(function () {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);

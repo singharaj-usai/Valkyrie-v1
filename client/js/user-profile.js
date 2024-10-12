@@ -1,29 +1,29 @@
 $(document).ready(function () {
   const urlParams = new URLSearchParams(window.location.search);
   const username =
-    urlParams.get("username") || localStorage.getItem("username");
+    urlParams.get('username') || localStorage.getItem('username');
   let currentUser;
 
   if (username) {
     fetchUserProfile(username);
   } else {
-    $("#user-profile").html(
-      "<p>No user specified and you are not logged in.</p>"
+    $('#user-profile').html(
+      '<p>No user specified and you are not logged in.</p>'
     );
   }
 
   function fetchUserProfile(username) {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
-      console.error("No token found in localStorage");
-      $("#user-profile").html(
+      console.error('No token found in localStorage');
+      $('#user-profile').html(
         '<p>You are not logged in. Please <a href="/login">login</a> to view profiles.</p>'
       );
       return;
     }
     $.ajax({
       url: `/api/user/${username}`,
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -35,19 +35,18 @@ $(document).ready(function () {
           fetchForumPostCount(user._id).then((postCount) => {
             user.forumPostCount = postCount;
 
-          displayUserProfile(user);
-        });
-
+            displayUserProfile(user);
+          });
         });
         document.getElementById(
-          "profile-title"
+          'profile-title'
         ).textContent = `${user.username}'s Profile - Valkyrie`;
       },
       error: function (xhr, status, error) {
-        console.error("Error fetching user profile:", xhr.responseText);
-        console.error("Status:", status);
-        console.error("Error:", error);
-        $("#user-profile").html(
+        console.error('Error fetching user profile:', xhr.responseText);
+        console.error('Status:', status);
+        console.error('Error:', error);
+        $('#user-profile').html(
           '<p>Error fetching user profile. Please try again. If the problem persists, please <a href="/login">login</a> again.</p>'
         );
       },
@@ -58,12 +57,12 @@ $(document).ready(function () {
     return new Promise((resolve, reject) => {
       $.ajax({
         url: `/api/user-status/${username}`,
-        method: "GET",
+        method: 'GET',
         success: function (response) {
           resolve(response.isOnline);
         },
         error: function (xhr, status, error) {
-          console.error("Error fetching user status:", error);
+          console.error('Error fetching user status:', error);
           resolve(false);
         },
       });
@@ -74,12 +73,12 @@ $(document).ready(function () {
     return new Promise((resolve, reject) => {
       $.ajax({
         url: `/api/forum/user-post-count/${userId}`,
-        method: "GET",
+        method: 'GET',
         success: function (response) {
           resolve(response.count);
         },
         error: function (xhr, status, error) {
-          console.error("Error fetching forum post count:", error);
+          console.error('Error fetching forum post count:', error);
           resolve(0); // Default to 0 if there's an error
         },
       });
@@ -87,8 +86,8 @@ $(document).ready(function () {
   }
 
   function displayUserProfile(user) {
-    const isOwnProfile = user.username === localStorage.getItem("username");
-    let actionButton = "";
+    const isOwnProfile = user.username === localStorage.getItem('username');
+    let actionButton = '';
     let onlineStatus = user.isOnline
       ? '<span class="text-success">[ Online ]</span>'
       : '<span class="text-muted">[ Offline ]</span>';
@@ -131,16 +130,16 @@ $(document).ready(function () {
                                   user.blurb
                                     ? escapeHtml(user.blurb).replace(
                                         /\n/g,
-                                        "<br>"
+                                        '<br>'
                                       )
-                                    : "No blurb set."
+                                    : 'No blurb set.'
                                 }</p>
                             </div>
                         </div>
                          ${
                            isOwnProfile
                              ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
-                             : ""
+                             : ''
                          }
                     </div>
                     <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
@@ -149,8 +148,7 @@ $(document).ready(function () {
             </div>
         `;
 
-    $("#user-info").html(userInfoHtml);
-
+    $('#user-info').html(userInfoHtml);
 
     const statisticsHtml = `
     <div class="panel panel-primary" style="margin-top: 20px;">
@@ -166,8 +164,7 @@ $(document).ready(function () {
     </div>
   `;
 
-  $("#user-info").append(statisticsHtml);
-
+    $('#user-info').append(statisticsHtml);
 
     // Fetch and display friends list
     fetchFriendsList(user.username);
@@ -175,11 +172,11 @@ $(document).ready(function () {
     displayItemsPanel(user);
     // Call the new function to display the places panel
     UserGames.displayPlacesPanel(user);
-    
+
     // Initialize actions
     if (!isOwnProfile) {
       initFriendActions(user);
-      $("#message-user").on("click", function () {
+      $('#message-user').on('click', function () {
         window.location.href = `/messages/compose?recipient=${encodeURIComponent(
           user.username
         )}`;
@@ -190,9 +187,9 @@ $(document).ready(function () {
   }
 
   function fetchFriendsList(username) {
-    Friends.fetchFriendsList(username, "user-friends").catch((error) => {
-      console.error("Error fetching friends list:", error);
-      $("#user-friends").html("<p>Error loading friends list.</p>");
+    Friends.fetchFriendsList(username, 'user-friends').catch((error) => {
+      console.error('Error fetching friends list:', error);
+      $('#user-friends').html('<p>Error loading friends list.</p>');
     });
   }
 
@@ -201,17 +198,17 @@ $(document).ready(function () {
     setInterval(() => {
       if (currentUser) {
         fetchUserStatus(currentUser.username).then((isOnline) => {
-          const statusElement = $(".panel-title span");
+          const statusElement = $('.panel-title span');
           if (isOnline) {
             statusElement
-              .removeClass("text-muted")
-              .addClass("text-success")
-              .text("Online");
+              .removeClass('text-muted')
+              .addClass('text-success')
+              .text('Online');
           } else {
             statusElement
-              .removeClass("text-success")
-              .addClass("text-muted")
-              .text("Offline");
+              .removeClass('text-success')
+              .addClass('text-muted')
+              .text('Offline');
           }
         });
       }
@@ -221,28 +218,28 @@ $(document).ready(function () {
   startStatusUpdates();
 
   function initFriendActions(user) {
-    $("#send-friend-request").on("click", function () {
+    $('#send-friend-request').on('click', function () {
       sendFriendRequest(user._id);
     });
 
-    $("#accept-friend-request").on("click", function () {
+    $('#accept-friend-request').on('click', function () {
       acceptFriendRequest(user._id);
     });
 
-    $("#decline-friend-request").on("click", function () {
+    $('#decline-friend-request').on('click', function () {
       declineFriendRequest(user._id);
     });
 
-    $("#unfriend").on("click", function () {
+    $('#unfriend').on('click', function () {
       unfriend(user._id);
     });
   }
 
   function checkFriendshipStatus(username) {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     $.ajax({
       url: `/api/friends/friendship-status/${username}`,
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -250,45 +247,45 @@ $(document).ready(function () {
         fetchUserProfile(username);
       },
       error: function (xhr, status, error) {
-        console.error("Error checking friendship status:", error);
+        console.error('Error checking friendship status:', error);
       },
     });
   }
 
   function sendFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/friends/send-friend-request/" + userId,
-      "POST",
-      "Friend request sent successfully"
+      '/api/friends/send-friend-request/' + userId,
+      'POST',
+      'Friend request sent successfully'
     );
   }
 
   function acceptFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/friends/accept-friend-request/" + userId,
-      "POST",
-      "Friend request accepted"
+      '/api/friends/accept-friend-request/' + userId,
+      'POST',
+      'Friend request accepted'
     );
   }
 
   function declineFriendRequest(userId) {
     sendAjaxRequest(
-      "/api/friends/decline-friend-request/" + userId,
-      "POST",
-      "Friend request declined"
+      '/api/friends/decline-friend-request/' + userId,
+      'POST',
+      'Friend request declined'
     );
   }
 
   function unfriend(userId) {
     sendAjaxRequest(
-      "/api/friends/unfriend/" + userId,
-      "POST",
-      "Unfriended successfully"
+      '/api/friends/unfriend/' + userId,
+      'POST',
+      'Unfriended successfully'
     );
   }
 
   function sendAjaxRequest(url, method, successMessage) {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     $.ajax({
       url: url,
       method: method,
@@ -303,15 +300,15 @@ $(document).ready(function () {
         if (
           xhr.responseJSON &&
           xhr.responseJSON.error ===
-            "You have already received a friend request from this user"
+            'You have already received a friend request from this user'
         ) {
           alert(
-            "You have already received a friend request from this user. Please check your friend requests."
+            'You have already received a friend request from this user. Please check your friend requests.'
           );
         } else {
           alert(
-            "Error: " +
-              (xhr.responseJSON ? xhr.responseJSON.error : "Unknown error")
+            'Error: ' +
+              (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error')
           );
         }
         checkFriendshipStatus(username);
@@ -320,38 +317,38 @@ $(document).ready(function () {
   }
 
   function initBlurbEdit(currentBlurb) {
-    $("#edit-blurb").on("click", function () {
-      const blurbContainer = $("#blurb-container");
+    $('#edit-blurb').on('click', function () {
+      const blurbContainer = $('#blurb-container');
       blurbContainer.html(`
                 <h4>Edit About Me</h4>
                 <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(
-                  currentBlurb || ""
+                  currentBlurb || ''
                 )}</textarea>
                 <p id="char-count">0/500</p>
                 <button id="save-blurb" class="btn btn-success btn-sm mt-2">Save</button>
                 <button id="cancel-blurb" class="btn btn-secondary btn-sm mt-2">Cancel</button>
             `);
 
-      const textarea = $("#blurb-textarea");
-      const charCount = $("#char-count");
+      const textarea = $('#blurb-textarea');
+      const charCount = $('#char-count');
 
-      textarea.on("input", function () {
+      textarea.on('input', function () {
         const remaining = 500 - this.value.length;
         charCount.text(`${this.value.length}/500`);
       });
 
-      textarea.trigger("input");
+      textarea.trigger('input');
 
-      $("#save-blurb").on("click", function () {
+      $('#save-blurb').on('click', function () {
         let newBlurb = textarea.val().trim();
-        newBlurb = newBlurb.replace(/\n+/g, "\n").replace(/^\n|\n$/g, "");
-        const token = localStorage.getItem("token");
+        newBlurb = newBlurb.replace(/\n+/g, '\n').replace(/^\n|\n$/g, '');
+        const token = localStorage.getItem('token');
         $.ajax({
-          url: "/api/user/blurb",
-          method: "PUT",
+          url: '/api/user/blurb',
+          method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           data: JSON.stringify({ blurb: newBlurb }),
           success: function (response) {
@@ -360,14 +357,14 @@ $(document).ready(function () {
           },
           error: function (xhr, status, error) {
             alert(
-              "Error updating blurb: " +
-                (xhr.responseJSON ? xhr.responseJSON.error : "Unknown error")
+              'Error updating blurb: ' +
+                (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error')
             );
           },
         });
       });
 
-      $("#cancel-blurb").on("click", function () {
+      $('#cancel-blurb').on('click', function () {
         displayUserProfile(currentUser);
       });
     });
@@ -397,36 +394,106 @@ $(document).ready(function () {
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="heads">
                   <div class="row">
-                    ${generateItemHtml("BlockHead", "https://static.wikia.nocookie.net/roblox/images/f/fe/BlockHead.png", "Roblox", "Free")}
-                    ${generateItemHtml("Roundy", "https://static.wikia.nocookie.net/roblox/images/7/71/Roundy1.png", "Roblox", "Free")}
-                    ${generateItemHtml("Trim", "https://static.wikia.nocookie.net/roblox/images/c/c9/Trim.png", "Roblox", "Free")}
-                    ${generateItemHtml("Diamond", "https://static.wikia.nocookie.net/roblox/images/e/ea/Diamond.png", "Roblox", "142")}
-                    ${generateItemHtml("Peabrain", "https://static.wikia.nocookie.net/roblox/images/1/15/PeabrainV2.png", "Roblox", "1,000")}
+                    ${generateItemHtml(
+                      'BlockHead',
+                      'https://static.wikia.nocookie.net/roblox/images/f/fe/BlockHead.png',
+                      'Roblox',
+                      'Free'
+                    )}
+                    ${generateItemHtml(
+                      'Roundy',
+                      'https://static.wikia.nocookie.net/roblox/images/7/71/Roundy1.png',
+                      'Roblox',
+                      'Free'
+                    )}
+                    ${generateItemHtml(
+                      'Trim',
+                      'https://static.wikia.nocookie.net/roblox/images/c/c9/Trim.png',
+                      'Roblox',
+                      'Free'
+                    )}
+                    ${generateItemHtml(
+                      'Diamond',
+                      'https://static.wikia.nocookie.net/roblox/images/e/ea/Diamond.png',
+                      'Roblox',
+                      '142'
+                    )}
+                    ${generateItemHtml(
+                      'Peabrain',
+                      'https://static.wikia.nocookie.net/roblox/images/1/15/PeabrainV2.png',
+                      'Roblox',
+                      '1,000'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="faces">
                   <div class="row">
-                    ${generateItemHtml("Face 1", "placeholder-face.jpg", "Roblox", "100")}
-                    ${generateItemHtml("Face 2", "placeholder-face.jpg", "Roblox", "150")}
-                    ${generateItemHtml("Face 3", "placeholder-face.jpg", "Roblox", "200")}
+                    ${generateItemHtml(
+                      'Face 1',
+                      'placeholder-face.jpg',
+                      'Roblox',
+                      '100'
+                    )}
+                    ${generateItemHtml(
+                      'Face 2',
+                      'placeholder-face.jpg',
+                      'Roblox',
+                      '150'
+                    )}
+                    ${generateItemHtml(
+                      'Face 3',
+                      'placeholder-face.jpg',
+                      'Roblox',
+                      '200'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="gears">
                   <div class="row">
-                    ${generateItemHtml("Gear 1", "placeholder-gear.jpg", "Roblox", "300")}
+                    ${generateItemHtml(
+                      'Gear 1',
+                      'placeholder-gear.jpg',
+                      'Roblox',
+                      '300'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="hats">
                   <div class="row">
-                    ${generateItemHtml("Hat 1", "https://web.archive.org/web/20100430210534im_/http://t7bg.roblox.com/b86a5b790555d5219ea463bf38c74231", "Roblox", "100")}
-                    ${generateItemHtml("Hat 2", "placeholder-hat.jpg", "Roblox", "150")}
-                    ${generateItemHtml("Hat 3", "placeholder-hat.jpg", "Roblox", "200")}
+                    ${generateItemHtml(
+                      'Hat 1',
+                      'https://web.archive.org/web/20100430210534im_/http://t7bg.roblox.com/b86a5b790555d5219ea463bf38c74231',
+                      'Roblox',
+                      '100'
+                    )}
+                    ${generateItemHtml(
+                      'Hat 2',
+                      'placeholder-hat.jpg',
+                      'Roblox',
+                      '150'
+                    )}
+                    ${generateItemHtml(
+                      'Hat 3',
+                      'placeholder-hat.jpg',
+                      'Roblox',
+                      '200'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="tshirts">
                   <div class="row">
-                    ${generateItemHtml("T-shirt 1", "placeholder-tshirt.jpg", "Roblox", "50")}
-                    ${generateItemHtml("T-shirt 2", "placeholder-tshirt.jpg", "Roblox", "75")}
+                    ${generateItemHtml(
+                      'T-shirt 1',
+                      'placeholder-tshirt.jpg',
+                      'Roblox',
+                      '50'
+                    )}
+                    ${generateItemHtml(
+                      'T-shirt 2',
+                      'placeholder-tshirt.jpg',
+                      'Roblox',
+                      '75'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane active" id="shirts">
@@ -434,14 +501,34 @@ $(document).ready(function () {
                 </div>
                 <div role="tabpanel" class="tab-pane" id="pants">
                   <div class="row">
-                    ${generateItemHtml("Pants 1", "placeholder-pants.jpg", "Roblox", "80")}
-                    ${generateItemHtml("Pants 2", "placeholder-pants.jpg", "Roblox", "90")}
+                    ${generateItemHtml(
+                      'Pants 1',
+                      'placeholder-pants.jpg',
+                      'Roblox',
+                      '80'
+                    )}
+                    ${generateItemHtml(
+                      'Pants 2',
+                      'placeholder-pants.jpg',
+                      'Roblox',
+                      '90'
+                    )}
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="decals">
                   <div class="row">
-                    ${generateItemHtml("Decal 1", "placeholder-decal.jpg", "Roblox", "25")}
-                    ${generateItemHtml("Decal 2", "placeholder-decal.jpg", "Roblox", "30")}
+                    ${generateItemHtml(
+                      'Decal 1',
+                      'placeholder-decal.jpg',
+                      'Roblox',
+                      '25'
+                    )}
+                    ${generateItemHtml(
+                      'Decal 2',
+                      'placeholder-decal.jpg',
+                      'Roblox',
+                      '30'
+                    )}
                   </div>
                 </div>
               </div>
@@ -450,16 +537,16 @@ $(document).ready(function () {
         </div>
       </div>
     `;
-  
-    $("#user-items-panel").html(itemsHtml);
-  
+
+    $('#user-items-panel').html(itemsHtml);
+
     // Load user's shirts
     loadUserShirts(user._id);
 
     // Initialize Bootstrap tabs
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       // You can add logic here to load items dynamically if needed
-   //   console.log('Tab switched to: ' + $(e.target).attr('href'));
+      //   console.log('Tab switched to: ' + $(e.target).attr('href'));
     });
   }
 
@@ -468,15 +555,17 @@ $(document).ready(function () {
       url: `/api/shirts/user/id/${userId}`, // Updated URL
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-      success: function(shirts) {
+      success: function (shirts) {
         displayUserShirts(shirts);
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         console.error('Error fetching user shirts:', error);
-        $('#user-shirts').html('<p>Error loading your shirts. Please try again later.</p>');
-      }
+        $('#user-shirts').html(
+          '<p>Error loading your shirts. Please try again later.</p>'
+        );
+      },
     });
   }
 
@@ -485,18 +574,23 @@ $(document).ready(function () {
     shirtsContainer.empty();
 
     if (shirts.length === 0) {
-        shirtsContainer.append('<p>No shirts available.</p>');
-        return;
+      shirtsContainer.append('<p>No shirts available.</p>');
+      return;
     }
 
-    shirts.forEach(shirt => {
-        const shirtHtml = generateItemHtml(shirt.Name, shirt.ThumbnailLocation, shirt.creator.username, shirt.Price);
-        shirtsContainer.append(shirtHtml);
+    shirts.forEach((shirt) => {
+      const shirtHtml = generateItemHtml(
+        shirt.Name,
+        shirt.ThumbnailLocation,
+        shirt.creator.username,
+        shirt.Price
+      );
+      shirtsContainer.append(shirtHtml);
     });
-}
-  
+  }
+
   function generateItemHtml(name, imageSrc, creator, price) {
-    const priceDisplay = price === "Free" ? "Free" : `$${price}`;
+    const priceDisplay = price === 'Free' ? 'Free' : `$${price}`;
     return `
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 text-center mb-3">
         <div class="item-card center-block">
@@ -515,22 +609,22 @@ $(document).ready(function () {
 
   function escapeHtml(unsafe) {
     return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 });
 
 function formatDate(dateString) {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
-  return date.toLocaleString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }

@@ -3,7 +3,7 @@ name: Deploy Site via Git
 on:
   push:
     branches:
-      - main  # Run this workflow whenever code is pushed to the main branch
+      - main # Run this workflow whenever code is pushed to the main branch
 
 jobs:
   deploy:
@@ -18,9 +18,9 @@ jobs:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v0.1.9
         with:
-          host: ${{ secrets.VPS_IP }}   # Your VPS IP address stored as a secret
-          username: ${{ secrets.VPS_USER }}  # Your VPS user stored as a secret
-          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Your SSH private key stored as a secret
+          host: ${{ secrets.VPS_IP }} # Your VPS IP address stored as a secret
+          username: ${{ secrets.VPS_USER }} # Your VPS user stored as a secret
+          key: ${{ secrets.SSH_PRIVATE_KEY }} # Your SSH private key stored as a secret
           script: |
             cd Valkyrie/Valk.Website/AlphaBloxWeb        # Navigate to your project directory
             git pull origin main        # Pull the latest code from GitHub

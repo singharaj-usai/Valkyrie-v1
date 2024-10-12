@@ -6,7 +6,7 @@
  * @returns {string} - The escaped string.
  */
 function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 module.exports = escapeRegex;

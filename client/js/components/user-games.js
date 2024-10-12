@@ -1,14 +1,14 @@
 function escapeHtml(unsafe) {
   return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function displayPlacesPanel(user) {
-    const placesHtml = `
+  const placesHtml = `
       <div class="panel panel-primary">
         <div class="panel-heading">
           <h3 class="panel-title">${escapeHtml(user.username)}'s Places</h3>
@@ -20,16 +20,16 @@ function displayPlacesPanel(user) {
         </div>
       </div>
     `;
-  
-    $("#user-places-panel").html(placesHtml);
-    fetchUserPlaces(user.username);
-  }
+
+  $('#user-places-panel').html(placesHtml);
+  fetchUserPlaces(user.username);
+}
 
 function fetchUserPlaces(username) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   $.ajax({
     url: `/api/games/user/${username}`,
-    method: "GET",
+    method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -37,18 +37,18 @@ function fetchUserPlaces(username) {
       displayPlaces(places, 'all');
     },
     error: function (xhr, status, error) {
-      console.error("Error fetching user places:", error);
-      $("#user-places-all").html("<p>Error loading places.</p>");
+      console.error('Error fetching user places:', error);
+      $('#user-places-all').html('<p>Error loading places.</p>');
     },
   });
 }
 
 function displayPlaces(places, category) {
-    const placesContainer = $(`#user-places-${category}`);
-    placesContainer.empty();
-  
-    if (places.length === 0) {
-      const noPlacesHtml = `
+  const placesContainer = $(`#user-places-${category}`);
+  placesContainer.empty();
+
+  if (places.length === 0) {
+    const noPlacesHtml = `
       <div class="panel panel-default">
         <div class="panel-body text-center">
           <i class="bi bi-emoji-frown" style="font-size: 48px; color: #999;"></i>
@@ -61,9 +61,9 @@ function displayPlaces(places, category) {
     placesContainer.html(noPlacesHtml);
     return;
   }
-  
-    places.forEach((place, index) => {
-      const placeHtml = `
+
+  places.forEach((place, index) => {
+    const placeHtml = `
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -72,23 +72,45 @@ function displayPlaces(places, category) {
               </a>
             </h4>
           </div>
-          <div id="collapse-${category}-${index}" class="panel-collapse collapse ${index === 0 ? 'in' : ''}">
+          <div id="collapse-${category}-${index}" class="panel-collapse collapse ${
+      index === 0 ? 'in' : ''
+    }">
             <div class="panel-body">
               <div class="row">
                 <div class="col-xs-12 col-sm-6">
                   <a href="/game?id=${place._id}">
-                    <img src="${place.thumbnailUrl ? (place.thumbnailUrl.startsWith('http') ? place.thumbnailUrl : '/' + place.thumbnailUrl.replace(/^\//, '')) : '/images/placeholder-image.jpg'}" alt="${escapeHtml(place.title)}" class="img-responsive" style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
+                    <img src="${
+                      place.thumbnailUrl
+                        ? place.thumbnailUrl.startsWith('http')
+                          ? place.thumbnailUrl
+                          : '/' + place.thumbnailUrl.replace(/^\//, '')
+                        : '/images/placeholder-image.jpg'
+                    }" alt="${escapeHtml(
+      place.title
+    )}" class="img-responsive" style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
                   </a>
-                  <a href="/game?id=${place._id}" class="btn btn-success btn-block" style="margin-top: 10px;">Play</a>
+                  <a href="/game?id=${
+                    place._id
+                  }" class="btn btn-success btn-block" style="margin-top: 10px;">Play</a>
                 </div>
                 <div class="col-xs-12 col-sm-6">
-                  <p><strong>Genre:</strong> ${escapeHtml(place.genre || 'Not specified')}</p>
-                  <p><strong>Max Players:</strong> ${place.maxPlayers || 'Not specified'}</p>
+                  <p><strong>Genre:</strong> ${escapeHtml(
+                    place.genre || 'Not specified'
+                  )}</p>
+                  <p><strong>Max Players:</strong> ${
+                    place.maxPlayers || 'Not specified'
+                  }</p>
                   <p>
                     <strong>Year:</strong>
-                    ${place.year ? `<span class="badge" style="background-color: #337ab7;">${place.year}</span>` : '<span class="badge" style="background-color: #d9534f;">No Year</span>'}
+                    ${
+                      place.year
+                        ? `<span class="badge" style="background-color: #337ab7;">${place.year}</span>`
+                        : '<span class="badge" style="background-color: #d9534f;">No Year</span>'
+                    }
                   </p>
-                  <p><strong>Last Updated:</strong> ${new Date(place.updatedAt).toLocaleDateString()}</p>
+                  <p><strong>Last Updated:</strong> ${new Date(
+                    place.updatedAt
+                  ).toLocaleDateString()}</p>
                 </div>
               </div>
               <div class="row" style="margin-top: 15px;">
@@ -102,11 +124,11 @@ function displayPlaces(places, category) {
           </div>
         </div>
       `;
-      placesContainer.append(placeHtml);
-    });
-  }
-  
+    placesContainer.append(placeHtml);
+  });
+}
+
 // Export the main function
 window.UserGames = {
-  displayPlacesPanel: displayPlacesPanel
+  displayPlacesPanel: displayPlacesPanel,
 };

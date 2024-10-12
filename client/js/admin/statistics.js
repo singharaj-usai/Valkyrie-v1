@@ -1,25 +1,29 @@
 function loadStatistics() {
-    const contentArea = $('#content-area');
-    contentArea.html('<h2 class="text-primary">Statistics Dashboard</h2><div id="statistics" class="mt-4"></div>');
+  const contentArea = $('#content-area');
+  contentArea.html(
+    '<h2 class="text-primary">Statistics Dashboard</h2><div id="statistics" class="mt-4"></div>'
+  );
 
-    $.ajax({
-        url: '/api/admin/statistics',
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        success: function(stats) {
-            displayStatistics(stats);
-        },
-        error: function() {
-            contentArea.html('<div class="alert alert-danger" role="alert">Error loading statistics.</div>');
-        }
-    });
+  $.ajax({
+    url: '/api/admin/statistics',
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    success: function (stats) {
+      displayStatistics(stats);
+    },
+    error: function () {
+      contentArea.html(
+        '<div class="alert alert-danger" role="alert">Error loading statistics.</div>'
+      );
+    },
+  });
 }
 
 function displayStatistics(stats) {
-    const statistics = $('#statistics');
-    statistics.html(`
+  const statistics = $('#statistics');
+  statistics.html(`
         <div class="row">
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="panel panel-primary">

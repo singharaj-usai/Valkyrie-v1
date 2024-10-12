@@ -1,12 +1,12 @@
 let VERSION;
 
-$.getScript('/js/version.js', function() {
+$.getScript('/js/version.js', function () {
   VERSION = window.VERSION;
 });
 
 let csrfToken = '';
 
-$.get('/api/auth/csrf-token', function(data) {
+$.get('/api/auth/csrf-token', function (data) {
   csrfToken = data.csrfToken;
 });
 
@@ -14,9 +14,9 @@ $.get('/api/auth/csrf-token', function(data) {
 const App = {
   // Configuration
   config: {
-    apiUrl: "/api/data",
-    dataContainerId: "data-container",
-    authContainerId: "auth-container",
+    apiUrl: '/api/data',
+    dataContainerId: 'data-container',
+    authContainerId: 'auth-container',
   },
 
   // Initialize the application
@@ -29,16 +29,14 @@ const App = {
       this.initLogout();
       this.loadFooter();
       this.updateAuthUI();
-//      this.loadTurnstileScript();
+      //      this.loadTurnstileScript();
 
-   //   this.checkForAnnouncements();
-   //   this.initParticles();
+      //   this.checkForAnnouncements();
+      //   this.initParticles();
     });
   },
 
- 
-
-/*   checkForAnnouncements: function () {
+  /*   checkForAnnouncements: function () {
     $.ajax({
       url: "/api/announcements",
       method: "GET",
@@ -68,8 +66,8 @@ const App = {
 
   // Load navbar
   loadNavbar: function () {
-    $.get("/html/components/navbar.html", (data) => {
-      $("#navbar-container").html(data);
+    $.get('/html/components/navbar.html', (data) => {
+      $('#navbar-container').html(data);
       this.updateAuthUI();
       if (typeof updateAnnouncementPosition === 'function') {
         updateAnnouncementPosition();
@@ -79,94 +77,96 @@ const App = {
     });
   },
 
-
-
   // Check authentication status
   checkAuth: function () {
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
     const currentPath = window.location.pathname;
 
     // this whole public pages stuff need to be improved, requires whole site refactoring so unauthorized users can view other pages but certain div elements are hidden from them
     const publicPages = [
-      "/login",
-      "/register",
-      "/legal/terms-of-service",
-      "/legal/about",
-      "/legal/privacy-policy",
-      "/forum/home",
-      "/games",
+      '/login',
+      '/register',
+      '/legal/terms-of-service',
+      '/legal/about',
+      '/legal/privacy-policy',
+      '/forum/home',
+      '/games',
     ];
 
     // all forum pages
-    const isForumPage = currentPath.startsWith("/forum/");
-
+    const isForumPage = currentPath.startsWith('/forum/');
 
     if (token && username) {
       $.ajax({
-        url: "/api/validate-session",
-        method: "GET",
+        url: '/api/validate-session',
+        method: 'GET',
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         success: () => {
-          if (["/login", "/register"	].includes(currentPath)) {
-            window.location.href = "/";
+          if (['/login', '/register'].includes(currentPath)) {
+            window.location.href = '/';
           } else {
-            $("#loading").hide();
-            $("#content").show();
-          //  this.fetchData();
+            $('#loading').hide();
+            $('#content').show();
+            //  this.fetchData();
             this.updateAuthUI();
             this.updateUserStatus();
             // Set up periodic status update
             setInterval(() => this.updateUserStatus(), 60000); // Update every minute
-            $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
+            $('#profile-link').attr(
+              'href',
+              `/user-profile?username=${encodeURIComponent(username)}`
+            );
           }
         },
         error: (xhr, status, error) => {
-          if (status === "timeout") {
-            console.error("Request timed out. Please check your network connection.");
+          if (status === 'timeout') {
+            console.error(
+              'Request timed out. Please check your network connection.'
+            );
           } else {
-            console.error("Error validating session:", xhr.responseText);
+            console.error('Error validating session:', xhr.responseText);
           }
           this.logout();
           if (!publicPages.includes(currentPath) && !isForumPage) {
-            window.location.href = "/login";
+            window.location.href = '/login';
           }
         },
       });
     } else {
       if (!publicPages.includes(currentPath) && !isForumPage) {
-        window.location.href = "/login";
+        window.location.href = '/login';
       } else {
-        $("#loading").hide();
-        $("#content").show();
+        $('#loading').hide();
+        $('#content').show();
       }
     }
-    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
+    if (typeof updateAnnouncementPosition === 'function')
+      updateAnnouncementPosition();
   },
-
 
   // Add this new method to update user status
   updateUserStatus: function () {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (token) {
       $.ajax({
-        url: "/api/update-status",
-        method: "POST",
+        url: '/api/update-status',
+        method: 'POST',
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         success: (response) => {
-         // console.log("User status updated:", response.isOnline);
+          // console.log("User status updated:", response.isOnline);
         },
         error: (xhr, status, error) => {
-       //   console.error("Error updating user status:", error);
+          //   console.error("Error updating user status:", error);
           if (xhr.status === 401) {
             // Token is invalid or expired, log out the user
             this.logout();
           }
-        }
+        },
       });
     } else {
       // User is not logged in, clear the interval
@@ -174,7 +174,7 @@ const App = {
     }
   },
 
- /*  // Fetch data from the API
+  /*  // Fetch data from the API
   fetchData: function () {
     $.ajax({
       url: this.config.apiUrl + '?v=' + VERSION,
@@ -198,27 +198,35 @@ const App = {
   // Escape HTML to prevent XSS
   escapeHtml: function (unsafe) {
     return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;")
-      .replace(/`/g, "&#96;")
-      .replace(/\//g, "&#47;")
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+      .replace(/`/g, '&#96;')
+      .replace(/\//g, '&#47;');
   },
 
-  rateLimitedRequest: function(url, method, data, successCallback, errorCallback) {
+  rateLimitedRequest: function (
+    url,
+    method,
+    data,
+    successCallback,
+    errorCallback
+  ) {
     const now = Date.now();
     const lastRequestTime = this.lastRequestTime || 0;
     const minInterval = 1000; // Minimum 1 second between requests
-  
+
     if (now - lastRequestTime < minInterval) {
-      console.warn("Rate limit exceeded. Please wait before making another request.");
+      console.warn(
+        'Rate limit exceeded. Please wait before making another request.'
+      );
       return;
     }
-  
+
     this.lastRequestTime = now;
-  
+
     $.ajax({
       url: url,
       method: method,
@@ -226,29 +234,34 @@ const App = {
       timeout: 10000, // 10 seconds timeout
       success: successCallback,
       error: (xhr, status, error) => {
-        if (status === "timeout") {
-          console.error("Request timed out. Please check your network connection.");
+        if (status === 'timeout') {
+          console.error(
+            'Request timed out. Please check your network connection.'
+          );
         } else {
-          console.error("Error:", error);
+          console.error('Error:', error);
         }
         if (errorCallback) errorCallback(xhr, status, error);
-      }
+      },
     });
   },
 
   // Update authentication UI
   updateAuthUI: function () {
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
-    const authContainer = $("#auth-container");
+    const username = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
+    const authContainer = $('#auth-container');
 
     if (username && token) {
-      $('#profile-link').attr('href', `/user-profile?username=${encodeURIComponent(username)}`);
+      $('#profile-link').attr(
+        'href',
+        `/user-profile?username=${encodeURIComponent(username)}`
+      );
 
       $.ajax({
-        url: "/api/user-info",
-        method: "GET",
-        headers: { "Authorization": `Bearer ${token}` },
+        url: '/api/user-info',
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
         success: (response) => {
           authContainer.html(`
             <div class="navbar-text d-flex align-items-center">
@@ -276,13 +289,13 @@ const App = {
           $('#currency-container').tooltip({
             trigger: 'hover',
             html: true,
-            container: 'body'
+            container: 'body',
           });
         },
         error: (xhr, status, error) => {
-          console.error("Error fetching user info:", error);
+          console.error('Error fetching user info:', error);
           this.logout();
-        }
+        },
       });
     } else {
       authContainer.html(`
@@ -291,7 +304,8 @@ const App = {
       `);
       $('#user-submenu').hide();
     }
-    if (typeof updateAnnouncementPosition === 'function') updateAnnouncementPosition();
+    if (typeof updateAnnouncementPosition === 'function')
+      updateAnnouncementPosition();
   },
 
   // Update the currency tooltip with countdown
@@ -306,7 +320,10 @@ const App = {
 
       if (timeUntilNextClaim <= 0) {
         // Currency is available; automatically claim it
-        tooltipElement.attr('data-original-title', 'Currency available! Granting now...');
+        tooltipElement.attr(
+          'data-original-title',
+          'Currency available! Granting now...'
+        );
         tooltipElement.tooltip('fixTitle');
         this.claimCurrency();
         clearInterval(this.currencyInterval);
@@ -314,7 +331,9 @@ const App = {
       }
 
       const hours = Math.floor(timeUntilNextClaim / (60 * 60 * 1000));
-      const minutes = Math.floor((timeUntilNextClaim % (60 * 60 * 1000)) / (60 * 1000));
+      const minutes = Math.floor(
+        (timeUntilNextClaim % (60 * 60 * 1000)) / (60 * 1000)
+      );
       const seconds = Math.floor((timeUntilNextClaim % (60 * 1000)) / 1000);
 
       const tooltipText = `Next currency in ${hours}h ${minutes}m ${seconds}s`;
@@ -341,22 +360,25 @@ const App = {
   },
   // Claim currency when available
   claimCurrency: function () {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
-      console.error("No token found. User might not be logged in.");
+      console.error('No token found. User might not be logged in.');
       return;
     }
     $.ajax({
-      url: "/api/claim-daily-currency",
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
+      url: '/api/claim-daily-currency',
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
       success: (response) => {
-        $("#currency-amount").text(response.newBalance);
+        $('#currency-amount').text(response.newBalance);
         this.updateCurrencyTooltip(response.lastClaimDate);
-        $('#currency-container').tooltip('show').attr('data-original-title', 'Currency granted!').tooltip('fixTitle');
+        $('#currency-container')
+          .tooltip('show')
+          .attr('data-original-title', 'Currency granted!')
+          .tooltip('fixTitle');
       },
       error: (xhr) => {
-        console.error("Error claiming currency:", xhr.responseText);
+        console.error('Error claiming currency:', xhr.responseText);
         if (xhr.status === 400) {
           // If currency was already claimed, update the tooltip with the correct time
           const errorData = JSON.parse(xhr.responseText);
@@ -370,128 +392,130 @@ const App = {
 
   // Handle user logout
   logout: function () {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     $.ajax({
-      url: "/api/logout",
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
+      url: '/api/logout',
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
       success: () => {
-        localStorage.removeItem("username");
-        localStorage.removeItem("token");
+        localStorage.removeItem('username');
+        localStorage.removeItem('token');
         clearInterval(this.statusUpdateInterval);
         clearInterval(this.currencyInterval);
 
-        window.location.href = "/login";
+        window.location.href = '/login';
       },
       error: (xhr) => {
-        console.error("Error logging out:", xhr.responseText);
-      } 
+        console.error('Error logging out:', xhr.responseText);
+      },
     });
   },
 
   // Initialize search functionality
   initSearch: function () {
-    $(document).on("submit", ".navbar-form", (e) => {
+    $(document).on('submit', '.navbar-form', (e) => {
       e.preventDefault();
-      const searchTerm = $("#search-input").val().trim();
+      const searchTerm = $('#search-input').val().trim();
       window.location.href = `/users?q=${encodeURIComponent(searchTerm)}`;
     });
   },
 
- 
-
   // Initialize form validations
   initForms: function () {
-    $("#signup-form").on("submit", (e) => {
+    $('#signup-form').on('submit', (e) => {
       e.preventDefault();
       this.hideAlert(); // Clear any existing alerts
 
       if (this.validateForm(true)) {
         const formData = {
-          username: $("#username").val(),
-          email: $("#email").val(),
-          password: $("#password").val(),
-          confirmPassword: $("#confirm-password").val(),
-          _csrf: csrfToken
+          username: $('#username').val(),
+          email: $('#email').val(),
+          password: $('#password').val(),
+          confirmPassword: $('#confirm-password').val(),
+          _csrf: csrfToken,
         };
-  
+
         this.showLoadingIndicator();
 
         $.ajax({
-          url: "/api/register-create",
-          type: "POST",
+          url: '/api/register-create',
+          type: 'POST',
           data: JSON.stringify(formData),
-          contentType: "application/json",
+          contentType: 'application/json',
           headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
           success: (response) => {
             this.hideLoadingIndicator();
-            this.showAlert("success", response.message);
+            this.showAlert('success', response.message);
             setTimeout(() => {
-              window.location.href = "/login";
+              window.location.href = '/login';
             }, 2000);
           },
           error: (xhr, status, error) => {
             this.hideLoadingIndicator();
-            if (status === "timeout") {
-              this.showAlert("success", "Your account has been created successfully. You can now log in.");
+            if (status === 'timeout') {
+              this.showAlert(
+                'success',
+                'Your account has been created successfully. You can now log in.'
+              );
               setTimeout(() => {
-                window.location.href = "/login";
+                window.location.href = '/login';
               }, 5000);
             } else {
               this.handleRegistrationError(xhr, status, error);
             }
-          }
+          },
         });
       }
     });
-    
 
-    $("#login-form").on("submit", (e) => {
+    $('#login-form').on('submit', (e) => {
       e.preventDefault();
       this.hideAlert(); // Clear any existing alerts
 
       if (this.validateForm(false)) {
-        const username = $("#username").val();
-        const password = $("#password").val();
+        const username = $('#username').val();
+        const password = $('#password').val();
 
         const data = { username, password };
         const headers = {};
 
         // cloudflare captcha
- /*        const turnstileResponse = turnstile.getResponse();
+        /*        const turnstileResponse = turnstile.getResponse();
         console.log("Turnstile response:", turnstileResponse);
         if (!turnstileResponse) {
           this.showAlert("danger", "Please complete the captcha.");
           return;
         } */
-  
-      // Add CSRF token if available
-      if (csrfToken) {
-        data._csrf = csrfToken;
+
+        // Add CSRF token if available
+        if (csrfToken) {
+          data._csrf = csrfToken;
           headers['X-CSRF-Token'] = csrfToken;
         }
 
         $.ajax({
-          url: "/api/login",
-          method: "POST",
+          url: '/api/login',
+          method: 'POST',
           data: data, //captchaResponse: turnstileResponse },
           headers: headers,
           xhrFields: {
-            withCredentials: true //  cookies are sent with the request
+            withCredentials: true, //  cookies are sent with the request
           },
           success: (response) => {
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("username", response.username);
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('username', response.username);
             localStorage.setItem('userId', response.userId);
-            this.showAlert("success", "Logged in successfully. Redirecting...");
+            this.showAlert('success', 'Logged in successfully. Redirecting...');
             setTimeout(() => {
               window.location.href = '/';
             }, 3000);
           },
           error: (xhr) => {
-            console.error("Login error:", xhr.responseText);
-            const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "Unknown error";
-            this.showAlert("danger", `Error logging in: ${errorMessage}`);
+            console.error('Login error:', xhr.responseText);
+            const errorMessage = xhr.responseJSON
+              ? xhr.responseJSON.message
+              : 'Unknown error';
+            this.showAlert('danger', `Error logging in: ${errorMessage}`);
             turnstile.reset();
           },
         });
@@ -499,168 +523,280 @@ const App = {
     });
   },
 
-
-// load cloudflare captcha
-   loadTurnstileScript: function() {
-     const script = document.createElement('script');
-     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback';
-     script.async = true;
-     script.defer = true;
-     document.head.appendChild(script);
-   },
+  // load cloudflare captcha
+  loadTurnstileScript: function () {
+    const script = document.createElement('script');
+    script.src =
+      'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  },
 
   validateForm: function (isSignup) {
-    const username = $("#username").val();
-    const email = $("#email").val();
-    const password = $("#password").val();
-    const confirmPassword = isSignup ? $("#confirm-password").val() : password;
+    const username = $('#username').val();
+    const email = $('#email').val();
+    const password = $('#password').val();
+    const confirmPassword = isSignup ? $('#confirm-password').val() : password;
 
     let isValid = true;
     let errorMessages = [];
 
-    if (username.trim() === "") {
+    if (username.trim() === '') {
       isValid = false;
-      errorMessages.push("Username cannot be empty.");
+      errorMessages.push('Username cannot be empty.');
     }
 
     if (username.length < 3 || username.length > 18) {
       isValid = false;
-      errorMessages.push("Username must be between 3 and 18 characters.");
+      errorMessages.push('Username must be between 3 and 18 characters.');
     }
 
-    if (username.includes(" ")) {
+    if (username.includes(' ')) {
       isValid = false;
-      errorMessages.push("Username must not contain spaces.");
+      errorMessages.push('Username must not contain spaces.');
     }
 
     if (!/^[a-zA-Z0-9]+$/.test(username)) {
       isValid = false;
-      errorMessages.push("Username must only contain letters and numbers.");
+      errorMessages.push('Username must only contain letters and numbers.');
     }
 
     // Array of bad words to check against
     const badWords = [
-      "nlgga",
-      "nigga",
-      "sex",
-      "raping",
-      "tits",
-      "wtf",
-      "vag",
-      "diemauer",
-      "brickopolis",
-      ".com",
-      ".cf",
-      "dicc",
-      "nude",
-      "kesner",
-      "nobe",
-      "idiot",
-      "dildo",
-      "cheeks",
-      "anal",
-      "boob",
-      "horny",
-      "tit",
-      "fucking",
-      "gay",
-      "rape",
-      "rapist",
-      "incest",
-      "beastiality",
-      "cum",
-      "maggot",
-      "bloxcity",
-      "bullshit",
-      "fuck",
-      "penis",
-      "dick",
-      "vagina",
-      "faggot",
-      "fag",
-      "nigger",
-      "asshole",
-      "shit",
-      "bitch",
-      "anal",
-      "stfu",
-      "cunt",
-      "pussy",
-      "hump",
-      "meatspin",
-      "redtube",
-      "porn",
-      "kys",
-      "xvideos",
-      "hentai",
-      "gangbang",
-      "milf",
-      "whore",
-      "cock",
-      "masturbate",
+      'nlgga',
+      'nigga',
+      'sex',
+      'raping',
+      'tits',
+      'wtf',
+      'vag',
+      'diemauer',
+      'brickopolis',
+      '.com',
+      '.cf',
+      'dicc',
+      'nude',
+      'kesner',
+      'nobe',
+      'idiot',
+      'dildo',
+      'cheeks',
+      'anal',
+      'boob',
+      'horny',
+      'tit',
+      'fucking',
+      'gay',
+      'rape',
+      'rapist',
+      'incest',
+      'beastiality',
+      'cum',
+      'maggot',
+      'bloxcity',
+      'bullshit',
+      'fuck',
+      'penis',
+      'dick',
+      'vagina',
+      'faggot',
+      'fag',
+      'nigger',
+      'asshole',
+      'shit',
+      'bitch',
+      'anal',
+      'stfu',
+      'cunt',
+      'pussy',
+      'hump',
+      'meatspin',
+      'redtube',
+      'porn',
+      'kys',
+      'xvideos',
+      'hentai',
+      'gangbang',
+      'milf',
+      'whore',
+      'cock',
+      'masturbate',
     ];
 
     // Check if username contains any bad words
     if (badWords.some((word) => username.toLowerCase().includes(word))) {
       isValid = false;
-      errorMessages.push("Username contains inappropriate words.");
+      errorMessages.push('Username contains inappropriate words.');
     }
 
-    if (password.trim() === "") {
+    if (password.trim() === '') {
       isValid = false;
-      errorMessages.push("Password cannot be empty.");
+      errorMessages.push('Password cannot be empty.');
     }
 
     if (isSignup && password !== confirmPassword) {
       isValid = false;
-      errorMessages.push("Passwords do not match.");
+      errorMessages.push('Passwords do not match.');
     }
 
     // Email domain verification
     if (isSignup) {
-      const validDomains = ['outlook.com', 'protonmail.com', 'xdiscuss.net', 'roblox.com', 'icloud.com', 'protonmail.ch', 'google.com',
-        "yahoo.com.br", "hotmail.com.br", "outlook.com.br", "uol.com.br", "bol.com.br", "terra.com.br", "ig.com.br", "itelefonica.com.br", "r7.com", "zipmail.com.br", "globo.com", "globomail.com", "oi.com.br",
-        "yahoo.com.mx", "live.com.mx", "hotmail.es", "hotmail.com.mx", "prodigy.net.mx",
-        "hotmail.com.ar", "live.com.ar", "yahoo.com.ar", "fibertel.com.ar", "speedy.com.ar", "arnet.com.ar",
-        "hotmail.be", "live.be", "skynet.be", "voo.be", "tvcablenet.be", "telenet.be",
-        "mail.ru", "rambler.ru", "yandex.ru", "ya.ru", "list.ru",
-        "gmx.de", "hotmail.de", "live.de", "online.de", "t-online.de", "web.de", "yahoo.de",
-        "hotmail.fr", "live.fr", "laposte.net", "yahoo.fr", "wanadoo.fr", "orange.fr", "gmx.fr", "sfr.fr", "neuf.fr", "free.fr",
-        "sina.com", "qq.com", "naver.com", "hanmail.net", "daum.net", "nate.com", "yahoo.co.jp", "yahoo.co.kr", "yahoo.co.id", "yahoo.co.in", "yahoo.com.sg", "yahoo.com.ph",
-        "btinternet.com", "virginmedia.com", "blueyonder.co.uk", "freeserve.co.uk", "live.co.uk",
-        "ntlworld.com", "o2.co.uk", "orange.net", "sky.com", "talktalk.co.uk", "tiscali.co.uk",
-        "virgin.net", "wanadoo.co.uk", "bt.com", "bellsouth.net", "charter.net", "cox.net", "earthlink.net", "juno.com",
-        "email.com", "games.com", "gmx.net", "hush.com", "hushmail.com", "icloud.com", "inbox.com",
-        "lavabit.com", "love.com", "outlook.com", "pobox.com", "rocketmail.com",
-        "safe-mail.net", "wow.com", "ygm.com", "ymail.com", "zoho.com", "fastmail.fm",
-        "yandex.com", "iname.com", "aol.com", "att.net", "comcast.net", "facebook.com", "gmail.com", "gmx.com", "googlemail.com",
-        "google.com", "hotmail.com", "hotmail.co.uk", "mac.com", "me.com", "mail.com", "msn.com",
-        "live.com", "sbcglobal.net", "verizon.net", "yahoo.com", "yahoo.co.uk"
+      const validDomains = [
+        'outlook.com',
+        'protonmail.com',
+        'xdiscuss.net',
+        'roblox.com',
+        'icloud.com',
+        'protonmail.ch',
+        'google.com',
+        'yahoo.com.br',
+        'hotmail.com.br',
+        'outlook.com.br',
+        'uol.com.br',
+        'bol.com.br',
+        'terra.com.br',
+        'ig.com.br',
+        'itelefonica.com.br',
+        'r7.com',
+        'zipmail.com.br',
+        'globo.com',
+        'globomail.com',
+        'oi.com.br',
+        'yahoo.com.mx',
+        'live.com.mx',
+        'hotmail.es',
+        'hotmail.com.mx',
+        'prodigy.net.mx',
+        'hotmail.com.ar',
+        'live.com.ar',
+        'yahoo.com.ar',
+        'fibertel.com.ar',
+        'speedy.com.ar',
+        'arnet.com.ar',
+        'hotmail.be',
+        'live.be',
+        'skynet.be',
+        'voo.be',
+        'tvcablenet.be',
+        'telenet.be',
+        'mail.ru',
+        'rambler.ru',
+        'yandex.ru',
+        'ya.ru',
+        'list.ru',
+        'gmx.de',
+        'hotmail.de',
+        'live.de',
+        'online.de',
+        't-online.de',
+        'web.de',
+        'yahoo.de',
+        'hotmail.fr',
+        'live.fr',
+        'laposte.net',
+        'yahoo.fr',
+        'wanadoo.fr',
+        'orange.fr',
+        'gmx.fr',
+        'sfr.fr',
+        'neuf.fr',
+        'free.fr',
+        'sina.com',
+        'qq.com',
+        'naver.com',
+        'hanmail.net',
+        'daum.net',
+        'nate.com',
+        'yahoo.co.jp',
+        'yahoo.co.kr',
+        'yahoo.co.id',
+        'yahoo.co.in',
+        'yahoo.com.sg',
+        'yahoo.com.ph',
+        'btinternet.com',
+        'virginmedia.com',
+        'blueyonder.co.uk',
+        'freeserve.co.uk',
+        'live.co.uk',
+        'ntlworld.com',
+        'o2.co.uk',
+        'orange.net',
+        'sky.com',
+        'talktalk.co.uk',
+        'tiscali.co.uk',
+        'virgin.net',
+        'wanadoo.co.uk',
+        'bt.com',
+        'bellsouth.net',
+        'charter.net',
+        'cox.net',
+        'earthlink.net',
+        'juno.com',
+        'email.com',
+        'games.com',
+        'gmx.net',
+        'hush.com',
+        'hushmail.com',
+        'icloud.com',
+        'inbox.com',
+        'lavabit.com',
+        'love.com',
+        'outlook.com',
+        'pobox.com',
+        'rocketmail.com',
+        'safe-mail.net',
+        'wow.com',
+        'ygm.com',
+        'ymail.com',
+        'zoho.com',
+        'fastmail.fm',
+        'yandex.com',
+        'iname.com',
+        'aol.com',
+        'att.net',
+        'comcast.net',
+        'facebook.com',
+        'gmail.com',
+        'gmx.com',
+        'googlemail.com',
+        'google.com',
+        'hotmail.com',
+        'hotmail.co.uk',
+        'mac.com',
+        'me.com',
+        'mail.com',
+        'msn.com',
+        'live.com',
+        'sbcglobal.net',
+        'verizon.net',
+        'yahoo.com',
+        'yahoo.co.uk',
       ];
 
       const emailDomain = email.split('@')[1];
       if (!validDomains.includes(emailDomain)) {
         isValid = false;
-        errorMessages.push("Invalid email domain.");
+        errorMessages.push('Invalid email domain.');
       }
     }
 
     if (isSignup) {
-      if (email.trim() === "") {
+      if (email.trim() === '') {
         isValid = false;
-        errorMessages.push("Email cannot be empty.");
+        errorMessages.push('Email cannot be empty.');
       }
-  
+
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         isValid = false;
-        errorMessages.push("Invalid email format.");
+        errorMessages.push('Invalid email format.');
       }
     }
 
     if (!isValid) {
       this.hideAlert(); // Clear any existing alerts
 
-      this.showAlert("danger", errorMessages.join("<br>"));
+      this.showAlert('danger', errorMessages.join('<br>'));
     } else {
       this.hideAlert();
     }
@@ -668,30 +804,42 @@ const App = {
     return isValid;
   },
 
-  showLoadingIndicator: function() {
-    $("#signup-form button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing up...');
-  },
-  
-   hideLoadingIndicator: function() {
-    $("#signup-form button[type='submit']").prop("disabled", false).html('Sign Up');
+  showLoadingIndicator: function () {
+    $("#signup-form button[type='submit']")
+      .prop('disabled', true)
+      .html(
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing up...'
+      );
   },
 
-  handleRegistrationError: function(xhr, status, error) {
-    if (status === "timeout") {
-      showAlert("danger", "The request timed out. Please try again or check your internet connection.");
+  hideLoadingIndicator: function () {
+    $("#signup-form button[type='submit']")
+      .prop('disabled', false)
+      .html('Sign Up');
+  },
+
+  handleRegistrationError: function (xhr, status, error) {
+    if (status === 'timeout') {
+      showAlert(
+        'danger',
+        'The request timed out. Please try again or check your internet connection.'
+      );
     } else if (xhr.responseJSON && xhr.responseJSON.errors) {
       const errorMessages = xhr.responseJSON.errors
         .map((err) => err.msg)
-        .join("<br>");
-      showAlert("danger", "Error signing up:<br>" + errorMessages);
+        .join('<br>');
+      showAlert('danger', 'Error signing up:<br>' + errorMessages);
     } else if (xhr.responseJSON && xhr.responseJSON.error) {
-      showAlert("danger", "Error signing up: " + xhr.responseJSON.error);
+      showAlert('danger', 'Error signing up: ' + xhr.responseJSON.error);
     } else {
-      showAlert("danger", "An unexpected error occurred. Please try again later.");
+      showAlert(
+        'danger',
+        'An unexpected error occurred. Please try again later.'
+      );
     }
   },
 
-  showAlert: function(type, message) {
+  showAlert: function (type, message) {
     const alertHtml = `
       <div class="alert alert-${type} alert-dismissible" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -700,55 +848,51 @@ const App = {
         ${message}
       </div>
     `;
-    $("#alert-container").html(alertHtml);
+    $('#alert-container').html(alertHtml);
   },
 
-  hideAlert: function() {
-    $("#alert-container").empty();
+  hideAlert: function () {
+    $('#alert-container').empty();
   },
-
-  
 
   initLogout: function () {
-    $(document).on("click", "#logout", (e) => {
+    $(document).on('click', '#logout', (e) => {
       e.preventDefault();
       this.logout();
     });
   },
-  
-  loadFooter: function() {
-    $.get("/html/components/footer.html", (data) => {
-      $("body").append(data);
+
+  loadFooter: function () {
+    $.get('/html/components/footer.html', (data) => {
+      $('body').append(data);
       this.updateUserCount();
       setInterval(() => this.updateUserCount(), 60000); // Update every minute
-
     });
   },
 
-  updateUserCount: function() {
+  updateUserCount: function () {
     $.ajax({
-      url: "/api/user-count",
-      method: "GET",
+      url: '/api/user-count',
+      method: 'GET',
       success: (response) => {
-        const userCountElement = $("#user-count");
+        const userCountElement = $('#user-count');
         if (userCountElement.length) {
           userCountElement.text(response.count);
         } else {
-          console.warn("User count element not found in the DOM");
+          console.warn('User count element not found in the DOM');
         }
       },
       error: (xhr, status, error) => {
-        console.error("Error fetching user count:", error);
-        const userCountElement = $("#user-count");
+        console.error('Error fetching user count:', error);
+        const userCountElement = $('#user-count');
         if (userCountElement.length) {
-          userCountElement.text("Error");
+          userCountElement.text('Error');
         } else {
-          console.warn("User count element not found in the DOM");
+          console.warn('User count element not found in the DOM');
         }
-            }
+      },
     });
   },
-
 };
 
 // Add this function outside of the App object
@@ -760,6 +904,6 @@ function onloadTurnstileCallback() {
 }
 
 // Initialize the application
-$(document).ready(function() {
+$(document).ready(function () {
   App.init();
 });

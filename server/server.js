@@ -7,7 +7,6 @@ const fs = require('fs');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 
-
 // load env vars
 dotenv.config();
 
@@ -38,7 +37,6 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'false';
 const SECRET_KEY = process.env.MAINTENANCE_SECRET_KEY || 'default_secret_key';
 
-
 // Use  middlewares
 app.use(cookieParser());
 app.use(express.json());
@@ -48,7 +46,13 @@ app.use(express.urlencoded({ extended: true }));
 function encryptSecretKey(key) {
   const iv = crypto.randomBytes(16);
   const salt = crypto.randomBytes(16);
-  const derivedKey = crypto.pbkdf2Sync(process.env.ENCRYPTION_KEY, salt, 100000, 32, 'sha256');
+  const derivedKey = crypto.pbkdf2Sync(
+    process.env.ENCRYPTION_KEY,
+    salt,
+    100000,
+    32,
+    'sha256'
+  );
   const cipher = crypto.createCipheriv('aes-256-cbc', derivedKey, iv);
   let encrypted = cipher.update(key, 'utf8', 'hex');
   encrypted += cipher.final('hex');
@@ -61,7 +65,13 @@ function decryptSecretKey(encryptedKey) {
   const salt = Buffer.from(parts.shift(), 'hex');
   const iv = Buffer.from(parts.shift(), 'hex');
   const encrypted = Buffer.from(parts.join(':'), 'hex');
-  const derivedKey = crypto.pbkdf2Sync(process.env.ENCRYPTION_KEY, salt, 100000, 32, 'sha256');
+  const derivedKey = crypto.pbkdf2Sync(
+    process.env.ENCRYPTION_KEY,
+    salt,
+    100000,
+    32,
+    'sha256'
+  );
   const decipher = crypto.createDecipheriv('aes-256-cbc', derivedKey, iv);
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
@@ -70,24 +80,33 @@ function decryptSecretKey(encryptedKey) {
 
 // Maintenance mode middleware
 app.use((req, res, next) => {
-  console.log('Checking maintenance mode...'); 
+  console.log('Checking maintenance mode...');
 
-  if (req.path.startsWith('/game/players/') || req.path.startsWith('/moderation/filtertext/') || req.path.startsWith('/js/') || req.path === '/images/Valkyrie404.png' || req.path === '/images/Valkyrie.ico' || req.path.startsWith('/video/')) {
-    return next();  // Skip maintenance check for these routes
+  if (
+    req.path.startsWith('/game/players/') ||
+    req.path.startsWith('/moderation/filtertext/') ||
+    req.path.startsWith('/js/') ||
+    req.path === '/images/Valkyrie404.png' ||
+    req.path === '/images/Valkyrie.ico' ||
+    req.path.startsWith('/video/')
+  ) {
+    return next(); // Skip maintenance check for these routes
   }
-  
+
   if (MAINTENANCE_MODE && !req.path.startsWith('/api/verify-secret-key')) {
     const bypassCookie = req.cookies.maintenanceBypass;
     if (!bypassCookie || decryptSecretKey(bypassCookie) !== SECRET_KEY) {
-
-    console.log('Maintenance mode is active, serving maintenance page');
-    return res.sendFile(path.join(__dirname, '../client/html/pages/maintenance/maintenance.html'));
+      console.log('Maintenance mode is active, serving maintenance page');
+      return res.sendFile(
+        path.join(
+          __dirname,
+          '../client/html/pages/maintenance/maintenance.html'
+        )
+      );
+    }
   }
-}
   next();
 });
-
-
 
 let isConnected = false;
 
@@ -110,26 +129,31 @@ app.use(async (req, res, next) => {
     await connectToDatabase();
     next();
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error', details: 'Database connection failed' });
+    res.status(500).json({
+      error: 'Internal Server Error',
+      details: 'Database connection failed',
+    });
   }
 });
 
 // session config
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost/my-app',
-    ttl: 24 * 60 * 60 // 1 day
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-  }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost/my-app',
+      ttl: 24 * 60 * 60, // 1 day
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    },
+  })
+);
 
 // update user status
 app.use(updateUserStatus);
@@ -137,7 +161,10 @@ app.use(updateUserStatus);
 // error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error', details: err.message || 'Unknown error' });
+  res.status(500).json({
+    error: 'Internal Server Error',
+    details: err.message || 'Unknown error',
+  });
 });
 
 app.use('/api', authRoutes);
@@ -155,27 +182,33 @@ app.use('/api/catalog', catalogRoutes);
 
 app.use('/api', userRoutes);
 
-
 app.use('/video', express.static(path.join(__dirname, '../video')));
 // Serve static files from the client directory
-app.use('/', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  next();
-}, express.static(path.join(__dirname, '../client')));
+app.use(
+  '/',
+  (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    next();
+  },
+  express.static(path.join(__dirname, '../client'))
+);
 
 // Serve static files from the images directory
-app.use('/images', express.static(path.join(__dirname, '../images'), {
-  setHeaders: (res, path) => {
-    res.set('X-Content-Type-Options', 'nosniff');
-  }
-}));
+app.use(
+  '/images',
+  express.static(path.join(__dirname, '../images'), {
+    setHeaders: (res, path) => {
+      res.set('X-Content-Type-Options', 'nosniff');
+    },
+  })
+);
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Handle clean URLs for HTML files
 app.get('*', (req, res, next) => {
   const filePath = path.join(__dirname, '../client', req.path + '.html');
-  
+
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
@@ -183,59 +216,57 @@ app.get('*', (req, res, next) => {
   }
 });
 
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/html/pages/home/index.html'));
 });
 
 app.get('/game/players/:id', (req, res) => {
-    res.json({ ChatFilter: 'blacklist' });
+  res.json({ ChatFilter: 'blacklist' });
 });
 
 app.post('/moderation/filtertext', (req, res) => {
-    const { text } = req.body; // Extract 'text' from the request body
-  
-    const whiteText = text;  // Original posted text
-  
-    const response = {
-        message: "",
-        success: true,
-        data: {
-            white: whiteText, // Can represent the original text or censored version
-            black: whiteText,
-        }
-    };
-  
-    res.json(response);
+  const { text } = req.body; // Extract 'text' from the request body
+
+  const whiteText = text; // Original posted text
+
+  const response = {
+    message: '',
+    success: true,
+    data: {
+      white: whiteText, // Can represent the original text or censored version
+      black: whiteText,
+    },
+  };
+
+  res.json(response);
 });
 
 app.post('/api/verify-secret-key', (req, res) => {
   const { secretKey } = req.body;
   if (secretKey === SECRET_KEY) {
     const encryptedKey = encryptSecretKey(SECRET_KEY);
-    res.cookie('maintenanceBypass', encryptedKey, 
-      
-      { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: "strict" }); // Set cookie for 24 hours
+    res.cookie(
+      'maintenanceBypass',
+      encryptedKey,
+
+      { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'strict' }
+    ); // Set cookie for 24 hours
     res.json({ success: true });
   } else {
     res.json({ success: false });
   }
 });
 
-
-
-
-
-const uploadsDir = process.env.NODE_ENV === 'production' 
-  ? '/tmp/uploads'  // Use /tmp in production (Vercel)
-  : path.join(__dirname, '../uploads');  // Use local path in development
+const uploadsDir =
+  process.env.NODE_ENV === 'production'
+    ? '/tmp/uploads' // Use /tmp in production (Vercel)
+    : path.join(__dirname, '../uploads'); // Use local path in development
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 //app.use('/uploads', express.static(uploadsDir));
-
 
 async function resetUserIdsIfNeeded() {
   try {
@@ -255,12 +286,21 @@ app.use((req, res, next) => {
   if (MAINTENANCE_MODE) {
     const bypassCookie = req.cookies.maintenanceBypass;
     if (bypassCookie && decryptSecretKey(bypassCookie) === SECRET_KEY) {
-      res.status(404).sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
+      res
+        .status(404)
+        .sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
     } else {
-      res.sendFile(path.join(__dirname, '../client/html/pages/maintenance/maintenance.html'));
+      res.sendFile(
+        path.join(
+          __dirname,
+          '../client/html/pages/maintenance/maintenance.html'
+        )
+      );
     }
   } else {
-    res.status(404).sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
+    res
+      .status(404)
+      .sendFile(path.join(__dirname, '../client/html/pages/404/404.html'));
   }
 });
 
