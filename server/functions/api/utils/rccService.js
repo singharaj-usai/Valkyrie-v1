@@ -38,3 +38,5 @@ class RCCService {
         }
     }
 }
+
+module.exports = RCCService;
