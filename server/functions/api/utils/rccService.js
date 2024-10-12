@@ -28,7 +28,7 @@ class RCCService {
                     assetId: assetId,
                     assetType: assetType,
                     jobId: jobId,
-                    accessKey: process.env.RCC_ACCESS_KEY
+                    accessKey: 'RBX-3EBfcdY29VNKbxuMiDs4VOQ6IQUKRj8a-n2jmMH6Ca7RgOFj2Rq1EHyhtL01DMopS'
                 });
 
              return response.data;
