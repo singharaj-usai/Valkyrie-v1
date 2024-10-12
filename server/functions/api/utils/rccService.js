@@ -24,7 +24,7 @@ class RCCService {
     async renderAssetThumbnail(assetId, assetType) {
         try {
             const jobId = generateJobId();
-            const response = await axios.post(this.serviceUrl, {
+            const response = await axios.post(this.serviceUrl + '/render-asset', {
                     assetId: assetId,
                     assetType: assetType,
                     jobId: jobId,
