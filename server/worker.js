@@ -5,7 +5,7 @@ const Asset = require('./functions/api/models/Asset');
 const rccService = new RCCService('http://128.254.193.148:8484');
 
 async function consumeQueue() {
-    const connection = await amqp.connect('amqp://rabbitmq');
+    const connection = await amqp.connect('amqp://valk:smoothcriminal@rabbitmq');
     const channel = await connection.createChannel();
     await channel.assertQueue('thumbnail_render_queue', { durable: true });
 
