@@ -5,9 +5,6 @@ const Asset = require('./functions/api/models/Asset');
 const rccService = new RCCService('http://128.254.193.148:8484');
 
 async function consumeQueue() {
-    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-       .then(() => console.log('MongoDB connected'))
-       .catch(err => console.error('MongoDB connection error:', err));
     const connection = await amqp.connect('amqp://valk:smoothcriminal@rabbitmq');
     const channel = await connection.createChannel();
     await channel.assertQueue('thumbnail_render_queue', { durable: true });
