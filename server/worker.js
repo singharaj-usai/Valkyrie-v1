@@ -1,6 +1,7 @@
 const amqp = require('amqplib');
 const RCCService = require('./functions/api/utils/rccService');
 const Asset = require('./functions/api/models/Asset');
+const Game = require('../models/Game');
 const connectDB = require('./functions/api/config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -33,8 +34,13 @@ async function consumeQueue() {
         try {
             const renderedThumbnailUrl = await rccService.renderAssetThumbnail(assetId, assetType);
 
-            // Update the asset in the MongoDB collection with the new thumbnail URL
-            await Asset.updateOne({ assetId: assetId }, { ThumbnailLocation: renderedThumbnailUrl });
+            // Update the asset in the MongoDB collection with the new thumbnail URL (improve later)
+            if(assetType == 'Place') {
+                await Asset.updateOne({ assetId: assetId }, { ThumbnailLocation: renderedThumbnailUrl });
+                await Game.updateOne({ assetId: assetId }, { thumbnailUrl: renderedThumbnailUrl });
+            } else {
+                await Asset.updateOne({ assetId: assetId }, { ThumbnailLocation: renderedThumbnailUrl });
+            }
             console.log(`Asset ${assetId} thumbnail updated with ${renderedThumbnailUrl}`);
 
         } catch (error) {
