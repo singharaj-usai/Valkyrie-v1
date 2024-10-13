@@ -5,8 +5,10 @@ const connectDB = require('./functions/api/config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-async function connectToDatabase() {
-  try {
+const rccService = new RCCService('http://128.254.193.148:8484');
+
+async function consumeQueue() {
+    try {
       console.log('Attempting to connect to MongoDB...');
       await connectDB(MONGODB_URI);
       console.log('Connected to MongoDB');
@@ -14,13 +16,7 @@ async function connectToDatabase() {
       console.error('Error connecting to database:', error);
       throw error;
     }
-}
-
-await connectToDatabase();
-
-const rccService = new RCCService('http://128.254.193.148:8484');
-
-async function consumeQueue() {
+  
     const connection = await amqp.connect('amqp://valk:smoothcriminal@rabbitmq');
     const channel = await connection.createChannel();
     await channel.assertQueue('thumbnail_render_queue', { durable: true });
