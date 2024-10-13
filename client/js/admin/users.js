@@ -31,53 +31,27 @@ function displayUsers(users) {
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        <h3 class="panel-title">${escapeHtml(
-                          user.username
-                        )}</h3>
+                        <h3 class="panel-title">${escapeHtml(user.username)}</h3>
                     </div>
                     <div class="panel-body">
                         <div class="user-info">
-                            <p><i class="fa fa-envelope"></i> ${escapeHtml(
-                              user.email
-                            )}</p>
-                            <p><i class="fa fa-calendar"></i> ${new Date(
-                              user.signupDate
-                            ).toLocaleString()}</p>
+                            <p><i class="fa fa-envelope"></i> ${escapeHtml(user.email)}</p>
+                            <p><i class="fa fa-calendar"></i> ${new Date(user.signupDate).toLocaleString()}</p>
+                            <p><i class="fa fa-money"></i> Currency: ${user.currency}</p>
                             <p>
-                                <span class="label label-${
-                                  user.isBanned ? 'danger' : 'success'
-                                }">
-                                    <i class="fa fa-${
-                                      user.isBanned ? 'ban' : 'check'
-                                    }"></i> ${
-      user.isBanned ? 'Banned' : 'Active'
-    }
+                                <span class="label label-${user.isBanned ? 'danger' : 'success'}">
+                                    <i class="fa fa-${user.isBanned ? 'ban' : 'check'}"></i> ${user.isBanned ? 'Banned' : 'Active'}
                                 </span>
-                                <span class="label label-${
-                                  user.isAdmin ? 'primary' : 'default'
-                                }">
-                                    <i class="fa fa-${
-                                      user.isAdmin ? 'shield' : 'user'
-                                    }"></i> ${user.isAdmin ? 'Admin' : 'User'}
+                                <span class="label label-${user.isAdmin ? 'primary' : 'default'}">
+                                    <i class="fa fa-${user.isAdmin ? 'shield' : 'user'}"></i> ${user.isAdmin ? 'Admin' : 'User'}
                                 </span>
                             </p>
                         </div>
                         <div class="user-actions mt-3">
-                            <button class="btn btn-sm btn-${
-                              user.isBanned ? 'success' : 'warning'
-                            } ban-user" data-user-id="${
-      user._id
-    }" data-is-banned="${user.isBanned}">
-                                <i class="fa fa-${
-                                  user.isBanned ? 'unlock' : 'ban'
-                                }"></i> ${
-      user.isBanned ? 'Unban User' : 'Ban User'
-    }
+                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                                <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
                             </button>
-                            ${
-                              user.isAdmin
-                                ? user._id !== currentAdminId
-                                  ? `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote from Admin</button>`
+                            ${user.isAdmin ? user._id !== currentAdminId ? `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote from Admin</button>`
                                   : '<button class="btn btn-sm btn-success" disabled><i class="fa fa-user-circle"></i> Current Admin</button>'
                                 : `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>`
                             }

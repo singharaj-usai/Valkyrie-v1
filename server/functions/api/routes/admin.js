@@ -328,7 +328,7 @@ router.post('/reset-forum-post-count', authenticateToken, async (req, res) => {
 // Get all users
 router.get('/users', authenticateToken, async (req, res) => {
   try {
-    const users = await User.find({}, '-password');
+    const users = await User.find({}, '-password').select('username email signupDate isBanned isAdmin currency');
     res.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
