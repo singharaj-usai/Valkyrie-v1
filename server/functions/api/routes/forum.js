@@ -25,9 +25,20 @@ router.get('/sections', (req, res) => {
 });
 
 // Get posts for a specific section with pagination
-router.get('/sections/:section?', async (req, res) => {
+router.get('/sections/:section', async (req, res) => {
   try {
-    const { section } = req.params;
+    let { section } = req.params;
+
+    // Alias mapping: singular to plural
+    const sectionAliases = {
+      announcement: 'announcements',
+      changelog: 'change-log',
+    };
+
+    if (sectionAliases[section.toLowerCase()]) {
+      section = sectionAliases[section.toLowerCase()];
+    }
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
