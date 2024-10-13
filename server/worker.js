@@ -1,7 +1,7 @@
 const amqp = require('amqplib');
 const RCCService = require('./functions/api/utils/rccService');
 const Asset = require('./functions/api/models/Asset');
-const Game = require('../models/Game');
+const Game = require('./functions/api/models/Game');
 const connectDB = require('./functions/api/config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI;
