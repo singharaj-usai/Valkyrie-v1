@@ -1,6 +1,7 @@
 const amqp = require('amqplib');
 const RCCService = require('./functions/api/utils/rccService');
 const Asset = require('./functions/api/models/Asset');
+const Game = require('./functions/api/models/Game');
 const connectDB = require('./functions/api/config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -38,17 +39,13 @@ async function consumeQueue() {
           assetType
         );
 
-        // Update the asset in the MongoDB collection with the new thumbnail URL
-        await Asset.updateOne(
-          { assetId: assetId },
-          { ThumbnailLocation: renderedThumbnailUrl }
-        );
-        console.log(
-          `Asset ${assetId} thumbnail updated with ${renderedThumbnailUrl}`
-        );
-      } catch (error) {
-        console.error(`Failed to process asset ${assetId}:`, error);
-      }
+            // Update the asset in the MongoDB collection with the new thumbnail URL
+            await Asset.updateOne({ assetId: assetId }, { ThumbnailLocation: renderedThumbnailUrl });
+            console.log(`Asset ${assetId} thumbnail updated with ${renderedThumbnailUrl}`);
+
+        } catch (error) {
+            console.error(`Failed to process asset ${assetId}:`, error);
+        }
 
       // Acknowledge the message after processing
       channel.ack(message);

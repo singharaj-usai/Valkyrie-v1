@@ -8,6 +8,7 @@ const User = require('../models/User');
 const Asset = require('../models/Asset');
 const Counter = require('../models/Counter');
 const jwt = require('jsonwebtoken');
+const thumbnailQueue = require('../queues/thumbnailQueue');
 const Filter = require('bad-words');
 const crypto = require('crypto'); // Add this line to import the crypto module
 
@@ -169,6 +170,9 @@ router.post(
       });
 
       await game.save();
+
+      await thumbnailQueue.addToQueue(assetId, 'Place');
+      
       await User.findByIdAndUpdate(req.user.userId, {
         $push: { games: game._id },
       });
