@@ -1,6 +1,25 @@
 const amqp = require('amqplib');
 const RCCService = require('./functions/api/utils/rccService');
 const Asset = require('./functions/api/models/Asset');
+const mongoose = require('mongoose');
+
+const mongoUri = process.env.MONGODB_URI;
+async function connectToDatabase() {
+    try {
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false,
+            useCreateIndex: true
+        });
+        console.log('Successfully connected to MongoDB');
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    }
+}
+
+connectToDatabase();
 
 const rccService = new RCCService('http://128.254.193.148:8484');
 
