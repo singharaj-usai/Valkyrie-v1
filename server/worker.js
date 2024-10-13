@@ -8,6 +8,10 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const rccService = new RCCService('http://128.254.193.148:8484');
 
 async function consumeQueue() {
+    const connection = await amqp.connect('amqp://valk:smoothcriminal@rabbitmq');
+    const channel = await connection.createChannel();
+    await channel.assertQueue('thumbnail_render_queue', { durable: true });
+
     try {
       console.log('Attempting to connect to MongoDB...');
       await connectDB(MONGODB_URI);
@@ -16,10 +20,6 @@ async function consumeQueue() {
       console.error('Error connecting to database:', error);
       throw error;
     }
-  
-    const connection = await amqp.connect('amqp://valk:smoothcriminal@rabbitmq');
-    const channel = await connection.createChannel();
-    await channel.assertQueue('thumbnail_render_queue', { durable: true });
 
     console.log('Waiting for messages in the thumbnail render queue...');
 
