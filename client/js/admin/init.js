@@ -6,8 +6,6 @@ $(document).ready(function () {
 
   createEditAssetModal();
 
-  
-
   // Handle sidebar navigation
   $('.nav-sidebar a').on('click', function (e) {
     e.preventDefault();
