@@ -4,7 +4,7 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) {
+  if (token === null) {
     console.log('No token provided');
     return res.sendStatus(401);
   }

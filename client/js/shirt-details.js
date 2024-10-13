@@ -13,6 +13,8 @@ function loadShirtDetails(shirtId) {
     },
     error: function (xhr, status, error) {
       console.error('Error fetching shirt details:', error);
+      console.error('Status:', status);
+      console.error('Response:', xhr.responseText);
       $('#shirt-details').html(
         '<p>Error loading shirt details. Please try again later.</p>'
       );
@@ -26,16 +28,12 @@ function displayShirtDetails(shirt) {
   const detailsHtml = `
         <div class="col-md-6">
             <div class="thumbnail">
-                <img src="${shirt.ThumbnailLocation}" alt="${
-    shirt.Name
-  }" class="img-responsive">
+                <img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" class="img-responsive">
             </div>
         </div>
         <div class="col-md-6">
             <h1>${shirt.Name}</h1>
-            <p class="lead">By <a href="/user-profile?username=${encodeURIComponent(
-              shirt.creator.username
-            )}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></p>
+            <p class="lead">By <a href="/user-profile?username=${encodeURIComponent(shirt.creator.username)}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></p>
             <hr>
             <div class="well">
                 <h3>Description</h3>
@@ -47,9 +45,7 @@ function displayShirtDetails(shirt) {
                 </div>
                 <div class="panel-body">
                     <p><strong>Price:</strong> ${shirt.Price} currency</p>
-                    <p><strong>For Sale:</strong> ${
-                      shirt.IsForSale ? 'Yes' : 'No'
-                    }</p>
+                    <p><strong>For Sale:</strong> ${shirt.IsForSale ? 'Yes' : 'No'}</p>
                 </div>
             </div>
             <div id="purchase-section"></div>
@@ -79,10 +75,10 @@ function checkOwnership(shirtId) {
       } else {
         // Use response.price instead of shirt.Price
         $('#purchase-section').html(`
-                    <button id="purchase-btn" class="btn btn-primary btn-lg btn-block">
-                        <i class="fa fa-shopping-cart"></i> Purchase for ${response.price} currency
-                    </button>
-                `);
+          <button id="purchase-btn" class="btn btn-primary btn-lg btn-block">
+            <i class="fa fa-shopping-cart"></i> Purchase for ${response.price} currency
+          </button>
+        `);
         $('#purchase-btn').on('click', function () {
           purchaseShirt(shirtId);
         });

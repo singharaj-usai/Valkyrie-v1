@@ -183,7 +183,7 @@ router.post(
         ThumbnailLocation: thumbnailUrl,
         IsForSale: 0,
         Price: parseInt(price),
-        IsForSale: 1,
+        IsForSale: 1, //why is there 2 isforsale?
         Sales: 0,
         IsPublicDomain: 0,
       });

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Asset = require('../models/Asset');
+const mongoose = require('mongoose');
+const thumbnailQueue = require('../queues/thumbnailQueue');
 const Game = require('../models/Game');
 const ForumPost = require('../models/ForumPost');
 const Reply = require('../models/Reply');
@@ -64,7 +67,137 @@ router.post('/demote-admin/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Get all forum posts
+// get all recent assets sorted by order of creation, were gonna include shirts and pants and stuff in here  separately later on
+router.get('/assets/recent', authenticateToken, async (req, res) => {
+  try {
+    const recentAssets = await Asset.find()
+      .populate('creator', 'username')
+      .sort({ createdAt: -1 });
+    res.json(recentAssets);
+  } catch (error) {
+    console.error('Error fetching recent assets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// redraw the specific asset
+router.post('/assets/:id/redraw', authenticateToken, async (req, res) => {
+  const assetId = req.params.id;
+
+  try {
+    const asset = await Asset.findById(assetId);
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+
+    if (asset.AssetType === 'Image') {
+      return res.status(400).json({ error: 'Image assets cannot be redrawn' });
+    }
+
+    try {
+      await thumbnailQueue.addToQueue(asset.assetId, asset.AssetType);
+      res.json({ message: 'Asset redraw queued successfully' });
+    } catch (queueError) {
+      console.error('Error adding to thumbnail queue:', queueError);
+      res.status(500).json({ error: 'Error queuing asset redraw' });
+    }
+  } catch (error) {
+    console.error('Error processing asset redraw:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// get the asset by id
+router.get('/assets/:id', authenticateToken, async (req, res) => {
+  const assetId = req.params.id;
+
+  try {
+    let asset;
+
+
+
+    if (mongoose.Types.ObjectId.isValid(assetId)) {
+      asset = await Asset.findById(assetId).populate('creator', 'username');
+    } else {
+      const numericId = Number(assetId);
+      if (isNaN(numericId)) {
+        return res.status(400).json({ error: 'Invalid asset ID' });
+      }
+
+      asset = await Asset.findOne({ assetId: numericId }).populate(
+        'creator',
+        'username'
+      );
+    }
+
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+
+    // only non image assets redrawn
+    asset = asset.toObject();
+    asset.canRedraw = asset.AssetType !== 'Image';
+
+    res.json(asset);
+  } catch (error) {
+    console.error('Error fetching asset:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// update asset
+router.put('/assets/:id', authenticateToken, async (req, res) => {
+  const assetId = req.params.id;
+  const { Name, Description, Price } = req.body;
+
+  if (!Name || !Description || typeof Price !== 'number') {
+    return res.status(400).json({
+      error: 'Invalid input. Name, Description, and Price are required.',
+    });
+  }
+
+  try {
+    let asset;
+    if (mongoose.Types.ObjectId.isValid(assetId)) {
+      asset = await Asset.findById(assetId);
+    } else {
+      const numericId = Number(assetId);
+      if (isNaN(numericId)) {
+        return res.status(400).json({ error: 'Invalid asset ID' });
+      }
+      asset = await Asset.findOne({ assetId: numericId });
+    }
+
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+
+    asset.Name = Name;
+    asset.Description = Description;
+    asset.Price = Price;
+    await asset.save();
+
+    res.json(asset);
+  } catch (error) {
+    console.error('Error updating asset:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete asset
+router.delete('/assets/:id', authenticateToken, async (req, res) => {
+  try {
+    const asset = await Asset.findByIdAndDelete(req.params.id);
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+    res.json({ message: 'Asset deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting asset:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get all forum posts
 router.get('/forum-posts', authenticateToken, async (req, res) => {
   try {
@@ -82,6 +215,7 @@ router.get('/forum-posts', authenticateToken, async (req, res) => {
   }
 });
 
+// pin the forum post
 router.post(
   '/forum-posts/:id/toggle-pin',
   authenticateToken,
@@ -173,7 +307,7 @@ router.delete('/forum-replies/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Reset forum post count
+// (ONLY USE THIS IF ALL FORUM POSTS IS DELETED AS THIS IS DESTRUCTIVE)
 router.post('/reset-forum-post-count', authenticateToken, async (req, res) => {
   try {
     const users = await User.find();
@@ -202,6 +336,7 @@ router.get('/users', authenticateToken, async (req, res) => {
   }
 });
 
+// ban the user (does not work yet, needs to be worked on more on the server side)
 router.post('/users/:userId/ban', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -250,7 +385,7 @@ router.delete('/games/:id', async (req, res) => {
   }
 });
 
-// Delete a user
+// Delete a user (ONLY USE AS LAST RESORT, THIS IS DESTRUCTIVE)
 router.delete('/users/:id', async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);

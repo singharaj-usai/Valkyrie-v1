@@ -26,7 +26,7 @@ function displayShirts(shirts) {
   shirtsContainer.empty();
 
   if (shirts.length === 0) {
-    shirtsContainer.append('<p>You have not created any shirts yet.</p>');
+    shirtsContainer.append('<p>You have not created any shirts yet</p>');
     return;
   }
 
@@ -52,19 +52,13 @@ function displayShirts(shirts) {
   shirts.forEach((shirt) => {
     const row = $(`
             <tr>
-                <td><img src="${shirt.ThumbnailLocation}" alt="${
-      shirt.Name
-    }" style="max-width: 50px; max-height: 50px;"></td>
+                <td><img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" style="max-width: 50px; max-height: 50px;"></td>
                 <td>${shirt.Name}</td>
-                <td>${shirt.Description.substring(0, 50)}${
-      shirt.Description.length > 50 ? '...' : ''
-    }</td>
+                <td>${shirt.Description.substring(0, 50)}${shirt.Description.length > 50 ? '...' : ''}</td>
                 <td>${shirt.assetId}</td>
                 <td>${shirt.Price}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${
-                      shirt._id
-                    }">Edit</button>
+                    <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
                 </td>
             </tr>
         `);

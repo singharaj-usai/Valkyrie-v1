@@ -4,6 +4,10 @@ $(document).ready(function () {
   // Check if the user is authenticated and has admin privileges
   checkAdminAuth();
 
+  createEditAssetModal();
+
+  
+
   // Handle sidebar navigation
   $('.nav-sidebar a').on('click', function (e) {
     e.preventDefault();
@@ -26,6 +30,9 @@ function loadSection(section) {
   switch (section) {
     case 'overview':
       loadOverview();
+      break;
+    case 'assets':
+      loadAssets();
       break;
     case 'forum-posts':
       loadForumPosts();
