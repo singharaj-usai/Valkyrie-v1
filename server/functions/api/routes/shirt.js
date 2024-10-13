@@ -190,7 +190,7 @@ router.post(
 
       await shirt.save();
 
-      await thumbnailQueue.addToQueue(assetId, 'Shirt');
+      await thumbnailQueue.addToQueue(shirtassetId, 'Shirt');
 
       /*const shirt = new Shirt({
           title: filter.clean(title),
