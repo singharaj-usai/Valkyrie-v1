@@ -82,31 +82,9 @@
         </div>
       </div>
     </div>
-    <script>
-      $(document).ready(function () {
-        $.ajax({
-          url: '/api/auth/check-ban',
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          success: function (response) {
-            if (response.isBanned) {
-              $('#ban-reason').text(`Reason: ${response.banReason}`);
-            } else {
-              window.location.href = '/';
-            }
-          },
-          error: function (xhr) {
-            if (xhr.status !== 403) {
-              window.location.href = '/';
-            }
-          },
-        });
-      });
-    </script>
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="/js/banned.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="./js/auth/auth.js?v=VERSION_NUMBER"></script>
     <script src="/js/theme-loader.js"></script>

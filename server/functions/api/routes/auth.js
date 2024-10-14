@@ -500,11 +500,14 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
       });
     }
 
-    if (user.isBanned) {
-      return res.status(403).json({
-        message: 'Your account is banned. Please contact the administrator for more information.',
-      });
-    }
+    // if (user.isBanned) {
+    //   return res.status(403).json({
+    //     message:
+    //       'Your account is banned. Please contact the administrator for more information.',
+    //     banReason: user.banReason,
+    //     isBanned: user.isBanned,
+    //   });
+    // }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
@@ -574,14 +577,25 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1  day
     });
 
+    if (user.isBanned) {
+      return res.json({
+        token,
+        message: 'Your account is banned.',
+        username: user.username,
+        userId: user._id,
+        isBanned: true,
+        banReason: user.banReason || 'No reason provided',
+        redirect: '/banned'
+      });
+    }
+
     res.json({
       token,
       username: user.username,
       userId: user._id,
       signupDate: user.signupDate,
       lastLoggedIn: user.lastLoggedIn,
-      isBanned: user.isBanned,
-      banReason: user.banReason,
+      isBanned: false,
     });
   } catch (error) {
     console.error('Login error:', error);

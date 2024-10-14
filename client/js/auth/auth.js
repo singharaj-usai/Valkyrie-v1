@@ -81,6 +81,7 @@ const App = {
   checkAuth: function () {
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
+    const isBanned = localStorage.getItem('isBanned');
     const currentPath = window.location.pathname;
 
     // this whole public pages stuff need to be improved, requires whole site refactoring so unauthorized users can view other pages but certain div elements are hidden from them
@@ -92,20 +93,33 @@ const App = {
       '/legal/privacy-policy',
       '/forum/home',
       '/games',
+      '/banned',
     ];
 
     // all forum pages
     const isForumPage = currentPath.startsWith('/forum/');
 
     if (token && username) {
+      if (isBanned) {
+        if (currentPath !== '/banned') {
+          window.location.href = '/banned';
+        } else {
+          $('#loading').hide();
+          $('#content').show();
+        }
+      } else {
       $.ajax({
         url: '/api/validate-session',
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        success: () => {
-          if (['/login', '/register'].includes(currentPath)) {
+        success: (response) => {
+          if (response.isBanned) {
+            localStorage.setItem('isBanned', 'true');
+            localStorage.setItem('banReason', response.banReason);
+            window.location.href = '/banned';
+          } else if (['/login', '/register', '/banned'].includes(currentPath)) {
             window.location.href = '/';
           } else {
             $('#loading').hide();
@@ -132,9 +146,10 @@ const App = {
           this.logout();
           if (!publicPages.includes(currentPath) && !isForumPage) {
             window.location.href = '/login';
-          }
-        },
-      });
+            }
+          },
+        });
+      }
     } else {
       if (!publicPages.includes(currentPath) && !isForumPage) {
         window.location.href = '/login';
@@ -415,8 +430,11 @@ const App = {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       success: () => {
+        localStorage.removeItem('userId');
         localStorage.removeItem('username');
         localStorage.removeItem('token');
+        localStorage.removeItem('isBanned');
+        localStorage.removeItem('banReason');
         clearInterval(this.statusUpdateInterval);
         clearInterval(this.currencyInterval);
 
@@ -522,10 +540,17 @@ const App = {
             localStorage.setItem('token', response.token);
             localStorage.setItem('username', response.username);
             localStorage.setItem('userId', response.userId);
-            this.showAlert('success', 'Logged in successfully. Redirecting...');
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 3000);
+    
+            if (response.isBanned) {
+              localStorage.setItem('isBanned', 'true');
+              localStorage.setItem('banReason', response.banReason || 'No reason provided');
+              window.location.href = '/banned';
+            } else {
+              this.showAlert('success', 'Logged in successfully. Redirecting...');
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 3000);
+            }
           },
           error: (xhr) => {
             console.error('Login error:', xhr.responseText);
@@ -533,7 +558,7 @@ const App = {
               ? xhr.responseJSON.message
               : 'Unknown error';
             this.showAlert('danger', `Error logging in: ${errorMessage}`);
-            turnstile.reset();
+          //  turnstile.reset();
           },
         });
       }

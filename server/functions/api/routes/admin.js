@@ -385,6 +385,33 @@ router.delete('/games/:id', async (req, res) => {
   }
 });
 
+// ban users
+router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { ban, banReason } = req.body;
+
+    if (ban && (!banReason || banReason.trim() === '')) {
+      return res.status(400).json({ error: 'Ban reason is required when banning a user.' });
+    }
+
+    const updateFields = {
+      isBanned: ban,
+      banReason: ban ? banReason.trim() : null,
+    };
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    return res.json({ message: ban ? 'User banned successfully.' : 'User unbanned successfully.' });
+  } catch (error) {
+    console.error('Error updating user ban status:', error);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // Delete a user (ONLY USE AS LAST RESORT, THIS IS DESTRUCTIVE)
 router.delete('/users/:id', async (req, res) => {
   try {

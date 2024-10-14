@@ -63,7 +63,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
   },
 
-  verificationToken: String,
   currency: {
     type: Number,
     default: 10,
@@ -86,6 +85,12 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  banReason: {
+    type: String,
+    default: null,
+  },
+
   lastActiveAt: {
     type: Date,
     default: Date.now,
