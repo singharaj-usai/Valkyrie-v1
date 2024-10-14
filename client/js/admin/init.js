@@ -57,7 +57,20 @@ function loadOverview() {
             <div class="panel-body">
                 <p class="lead">Select a section from the sidebar or click on a panel below to manage different aspects of the website.</p>
                 <div class="row">
-                    <div class="col-md-4">
+                 <div class="col-md-3">
+                        <div class="panel panel-primary clickable-panel" data-section="assets">
+                            <div class="panel-heading">
+                                <h4 class="panel-title"><i class="fa fa-comments"></i> Assets</h4>
+                            </div>
+                            <div class="panel-body">
+                                <p>View and manage assets.</p>
+                                <button class="btn btn-primary btn-block">
+                                    <span class="underline">Go to Assets</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="panel panel-info clickable-panel" data-section="forum-posts">
                             <div class="panel-heading">
                                 <h4 class="panel-title"><i class="fa fa-comments"></i> Forum Posts</h4>
@@ -70,7 +83,7 @@ function loadOverview() {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="panel panel-success clickable-panel" data-section="users">
                             <div class="panel-heading">
                                 <h4 class="panel-title"><i class="fa fa-users"></i> Users</h4>
@@ -83,7 +96,7 @@ function loadOverview() {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="panel panel-warning clickable-panel" data-section="games">
                             <div class="panel-heading">
                                 <h4 class="panel-title"><i class="fa fa-gamepad"></i> Games</h4>

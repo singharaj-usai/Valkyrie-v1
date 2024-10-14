@@ -500,6 +500,12 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
       });
     }
 
+    if (user.isBanned) {
+      return res.status(403).json({
+        message: 'Your account is banned. Please contact the administrator for more information.',
+      });
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       user.loginAttempts += 1;

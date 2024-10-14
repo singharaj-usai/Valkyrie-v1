@@ -99,6 +99,7 @@ router.get('/user-info', authenticateToken, async (req, res) => {
       username: user.username,
       currency: user.currency,
       lastCurrencyClaimDate: user.lastCurrencyClaimDate,
+      isAdmin: user.isAdmin,
     });
   } catch (error) {
     console.error('Error fetching user info:', error);

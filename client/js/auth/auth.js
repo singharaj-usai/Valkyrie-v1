@@ -294,6 +294,17 @@ const App = {
             html: true,
             container: 'body',
           });
+
+          if (response.isAdmin) {
+            $('.admin-dashboard-link').show();
+          } else {
+            $('.admin-dashboard-link').hide();
+          }
+
+        
+        // Show mobile user submenu for all authenticated users
+        $('#mobile-user-submenu').show();
+
         },
         error: (xhr, status, error) => {
           console.error('Error fetching user info:', error);
@@ -306,6 +317,8 @@ const App = {
         <a href="/register" class="btn btn-sm btn-default ml-2 navbar-btn">Register</a>
       `);
       $('#user-submenu').hide();
+      $('#mobile-user-submenu').hide();
+      $('.admin-dashboard-link').hide();
     }
     if (typeof updateAnnouncementPosition === 'function') {
       updateAnnouncementPosition();
