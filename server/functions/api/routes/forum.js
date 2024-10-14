@@ -51,10 +51,15 @@ router.get('/sections/:section', async (req, res) => {
     console.log('Query:', query);
 
     const posts = await ForumPost.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ isPinned: -1, updatedAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('author', 'username');
+      .populate('author', 'username')
+      .populate({
+        path: 'replies',
+        options: { sort: { createdAt: -1 }, limit: 1 },
+        populate: { path: 'author', select: 'username' }
+      });
 
     const totalPosts = await ForumPost.countDocuments(query);
     const totalPages = Math.ceil(totalPosts / limit);

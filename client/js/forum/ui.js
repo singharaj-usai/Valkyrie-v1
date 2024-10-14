@@ -59,13 +59,11 @@ function displayPosts(posts, containerId = '#recent-posts') {
       sectionPosts.forEach((post) => {
         const replyCount = post.replyCount || 0;
         const lastReply = post.replies && post.replies.length > 0
-          ? post.replies[post.replies.length - 1]
+          ? post.replies[0] // Since replies are sorted by createdAt descending and limited to 1
           : null;
 
-        const postedOn = new Date(post.createdAt).toLocaleString();
-        const lastReplyDate = lastReply
-          ? new Date(lastReply.createdAt).toLocaleString()
-          : 'N/A';
+        const postedOn = formatDate(post.createdAt);
+        const lastReplyDate = lastReply ? formatDate(lastReply.createdAt) : 'N/A';
         const lastReplyAuthor = lastReply && lastReply.author
           ? escapeHtml(lastReply.author.username)
           : 'N/A';

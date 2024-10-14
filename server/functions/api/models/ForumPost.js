@@ -89,6 +89,10 @@ const forumPostSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  lastReplyDate: {
+    type: Date,
+    default: null
+  },
 });
 
 forumPostSchema.statics.countUserPosts = function (userId) {
