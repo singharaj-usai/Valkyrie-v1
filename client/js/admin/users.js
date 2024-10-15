@@ -48,17 +48,14 @@ function displayUsers(users) {
                             </p>
                         </div>
                         <div class="user-actions mt-3">
-                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
+                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}" ${user.isAdmin ? 'disabled' : ''}>
                                 <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
                             </button>
                             ${user.isAdmin ? user._id !== currentAdminId ? `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote from Admin</button>`
                                   : '<button class="btn btn-sm btn-success" disabled><i class="fa fa-user-circle"></i> Current Admin</button>'
                                 : `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>`
                             }
-                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${
-                              user._id
-                            }"><i class="fa fa-trash"></i> Delete User</button>
-
+                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}" ${user.isAdmin ? 'disabled' : ''}><i class="fa fa-trash"></i> Delete User</button>
                             <button class="btn btn-sm btn-info view-messages" data-user-id="${user._id}"><i class="fa fa-envelope"></i> View Messages</button>
                         </div>
                     </div>
@@ -161,8 +158,8 @@ function banUser(userId, banReason) {
       showAlert('success', 'User banned successfully.');
       loadUsers();
     },
-    error: function () {
-      showAlert('danger', 'Error banning user. Please try again.');
+    error: function (xhr) {
+      showAlert('danger', `Error banning user: ${xhr.responseJSON.error}`);
     },
   });
 }
@@ -181,8 +178,8 @@ function unbanUser(userId) {
         showAlert('success', 'User unbanned successfully.');
         loadUsers();
       },
-      error: function () {
-        showAlert('danger', 'Error unbanning user. Please try again.');
+      error: function (xhr) {
+        showAlert('danger', `Error unbanning user: ${xhr.responseJSON.error}`);
       },
     });
   }
@@ -201,10 +198,7 @@ function promoteToAdmin(userId) {
         loadUsers();
       },
       error: function (xhr) {
-        showAlert(
-          'danger',
-          `Error promoting user to admin: ${xhr.responseJSON.error}`
-        );
+        showAlert('danger', `Error promoting user to admin: ${xhr.responseJSON.error}`);
       },
     });
   }
@@ -223,21 +217,14 @@ function demoteAdmin(userId) {
         loadUsers();
       },
       error: function (xhr) {
-        showAlert(
-          'danger',
-          `Error demoting user from admin: ${xhr.responseJSON.error}`
-        );
+        showAlert('danger', `Error demoting user from admin: ${xhr.responseJSON.error}`);
       },
     });
   }
 }
 
 function deleteUser(userId) {
-  if (
-    confirm(
-      'Are you sure you want to delete this user? This action cannot be undone.'
-    )
-  ) {
+  if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
     $.ajax({
       url: `/api/admin/users/${userId}`,
       method: 'DELETE',
@@ -249,7 +236,7 @@ function deleteUser(userId) {
         loadUsers();
       },
       error: function () {
-        showAlert('danger', 'Error deleting user. Please try again.');
+        showAlert('danger', `Error deleting user: ${xhr.responseJSON.error}`);
       },
     });
   }

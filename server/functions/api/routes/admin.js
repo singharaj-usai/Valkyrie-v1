@@ -390,6 +390,19 @@ router.delete('/games/:id', async (req, res) => {
 router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { ban, banReason } = req.body;
+    const userToBan = await User.findById(req.params.id);
+
+    if (!userToBan) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (userToBan.isAdmin) {
+      return res.status(403).json({ error: 'Cannot ban an admin user.' });
+    }
+
+    if (userToBan._id.toString() === req.user.id) {
+      return res.status(403).json({ error: 'You cannot ban yourself.' });
+    }
 
     if (ban && (!banReason || banReason.trim() === '')) {
       return res.status(400).json({ error: 'Ban reason is required when banning a user.' });
@@ -402,10 +415,6 @@ router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
 
     const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found.' });
-    }
-
     return res.json({ message: ban ? 'User banned successfully.' : 'User unbanned successfully.' });
   } catch (error) {
     console.error('Error updating user ban status:', error);
@@ -414,14 +423,26 @@ router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Delete a user (ONLY USE AS LAST RESORT, THIS IS DESTRUCTIVE)
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
+    const userToDelete = await User.findById(req.params.id);
+
+    if (!userToDelete) {
       return res.status(404).json({ error: 'User not found' });
     }
+
+    if (userToDelete.isAdmin) {
+      return res.status(403).json({ error: 'Cannot delete an admin user.' });
+    }
+
+    if (userToDelete._id.toString() === req.user.id) {
+      return res.status(403).json({ error: 'You cannot delete yourself.' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.error('Error deleting user:', error);
     res.status(500).json({ error: 'Error deleting user' });
   }
 });
