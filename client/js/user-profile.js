@@ -91,7 +91,7 @@ $(document).ready(function () {
     let onlineStatus = user.isOnline
       ? '<span class="text-success">[ Online ]</span>'
       : '<span class="text-muted">[ Offline ]</span>';
-
+  
     if (!isOwnProfile) {
       if (user.isFriend) {
         actionButton =
@@ -111,7 +111,7 @@ $(document).ready(function () {
       actionButton +=
         '<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message</button>';
     }
-
+  
     const userInfoHtml = `
       <div class="panel panel-primary">
         <div class="panel-heading">
@@ -124,34 +124,29 @@ $(document).ready(function () {
           )}">https://www.valk.fun/user-profile?username=${encodeURIComponent(
       user.username
     )}</a></p>
-                    <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
-                         alt="${escapeHtml(user.username)}" 
-                         class="user-avatar">
-                    <div id="blurb-container" style="margin-top: 10px;">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <p id="blurb-text">${
-                                  user.blurb
-                                    ? escapeHtml(user.blurb).replace(
-                                        /\n/g,
-                                        '<br>'
-                                      )
-                                    : 'No blurb set.'
-                                }</p>
-                            </div>
-                        </div>
-                         ${
-                           isOwnProfile
-                             ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
-                             : ''
-                         }
-                    </div>
-                    <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
-                   
-                </div>
-            </div>
-        `;
-
+          <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
+               alt="${escapeHtml(user.username)}" 
+               class="user-avatar">
+          <div id="blurb-container" style="margin-top: 10px;">
+              <div class="panel panel-default">
+                  <div class="panel-body">
+                      <p id="blurb-text">${
+                        user.blurb
+                          ? escapeHtml(user.blurb).replace(/\n/g, '<br>')
+                          : 'No blurb set.'
+                      }</p>
+                  </div>
+              </div>
+               ${
+                 isOwnProfile
+                   ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
+                   : ''
+               }
+          </div>
+          <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
+        </div>
+      </div>
+    `;
     $('#user-info').html(userInfoHtml);
 
     const statisticsHtml = `

@@ -69,6 +69,10 @@ router.get('/my/create', (req, res) =>
 router.get('/my/friends', (req, res) =>
   sendHtmlFile(res, 'pages/my/friends.html')
 );
+
+router.get('/friends/showfriends', (req, res) =>
+  sendHtmlFile(res, 'pages/friends/showfriends.html')
+);
 router.get('/my/messages', (req, res) =>
   sendHtmlFile(res, 'pages/my/messages.html')
 );

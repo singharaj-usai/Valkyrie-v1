@@ -57,16 +57,19 @@ const Friends = {
                               ${this.escapeHtml(friend.username)}
                             </a>
                           </p>
+                          
                         </div>
                       `;
                 });
                 html += '</div>';
 
-                if (friendsWithStatus.length > 6) {
+                if (friends.length > limit) {
                   html += `
-                        <div class="text-center mt-3">
-                          <button id="showMoreFriends" class="btn btn-primary hidden-md hidden-lg">Show More</button>
-                        </div>
+                    <div class="text-center mt-3">
+                      <a href="/friends/showfriends?username=${encodeURIComponent(localStorage.getItem('username'))}" class="btn btn-primary">
+                        Show All Friends
+                      </a>
+                    </div>
                       `;
                 }
               }
