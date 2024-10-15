@@ -495,7 +495,7 @@ $(document).ready(function () {
                     )}
                   </div>
                 </div>
-                <div role="tabpanel" class="tab-pane active" id="shirts">
+                <div role="tabpanel" class="tab-pane" id="shirts">
                   <div class="row" id="user-shirts"></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="pants">
