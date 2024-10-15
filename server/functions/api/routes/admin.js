@@ -5,6 +5,7 @@ const Asset = require('../models/Asset');
 const mongoose = require('mongoose');
 const thumbnailQueue = require('../queues/thumbnailQueue');
 const Game = require('../models/Game');
+const Message = require('../models/Message');
 const ForumPost = require('../models/ForumPost');
 const Reply = require('../models/Reply');
 const isAdmin = require('../middleware/adminAuth');
@@ -422,6 +423,23 @@ router.delete('/users/:id', async (req, res) => {
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Error deleting user' });
+  }
+});
+
+// Get user messages
+router.get('/users/:userId/messages', authenticateToken, async (req, res) => {
+  try {
+    const messages = await Message.find({
+      $or: [{ sender: req.params.userId }, { recipient: req.params.userId }]
+    })
+    .populate('sender', 'username profilePicture')
+    .populate('recipient', 'username profilePicture')
+    .sort({ sentAt: -1 })
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching user messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

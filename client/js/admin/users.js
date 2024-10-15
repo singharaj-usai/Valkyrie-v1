@@ -58,6 +58,8 @@ function displayUsers(users) {
                             <button class="btn btn-sm btn-danger delete-user" data-user-id="${
                               user._id
                             }"><i class="fa fa-trash"></i> Delete User</button>
+
+                            <button class="btn btn-sm btn-info view-messages" data-user-id="${user._id}"><i class="fa fa-envelope"></i> View Messages</button>
                         </div>
                     </div>
                 </div>
@@ -94,6 +96,11 @@ function addUserEventListeners() {
   $('.delete-user').on('click', function () {
     const userId = $(this).data('user-id');
     deleteUser(userId);
+  });
+
+  $('.view-messages').on('click', function () {
+    const userId = $(this).data('user-id');
+    loadUserMessages(userId);
   });
 }
 
@@ -246,6 +253,87 @@ function deleteUser(userId) {
       },
     });
   }
+}
+
+function loadUserMessages(userId) {
+  $.ajax({
+    url: `/api/admin/users/${userId}/messages`,
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    success: function (messages) {
+      displayUserMessages(messages);
+    },
+    error: function () {
+      showAlert('danger', 'Error loading user messages. Please try again.');
+    },
+  });
+}
+function displayUserMessages(messages) {
+  const modal = $(`
+    <div class="modal fade" id="userMessagesModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><i class="fa fa-envelope"></i> User Messages</h4>
+          </div>
+          <div class="modal-body">
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h3 class="panel-title">Message History</h3>
+              </div>
+              <div class="panel-body">
+                <div class="table-responsive">
+                  <table class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th class="text-center" style="width: 20%;">Sender</th>
+                        <th class="text-center" style="width: 20%;">Receiver</th>
+                        <th class="text-center" style="width: 40%;">Message</th>
+                        <th class="text-center" style="width: 20%;">Sent At</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${messages.map(message => `
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                              <img src="${message.sender.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                              <strong>${escapeHtml(message.sender.username)}</strong>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                              <img src="${message.recipient.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                              <strong>${escapeHtml(message.recipient.username)}</strong>
+                            </div>
+                          </td>
+                          <td>${escapeHtml(message.message)}</td>
+                          <td class="text-center"><small><i class="fa fa-clock-o"></i> ${new Date(message.sentAt).toLocaleString()}</small></td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  $('body').append(modal);
+  $('#userMessagesModal').modal('show');
+
+  $('#userMessagesModal').on('hidden.bs.modal', function () {
+    $(this).remove();
+  });
 }
 
 function showAlert(type, message) {
