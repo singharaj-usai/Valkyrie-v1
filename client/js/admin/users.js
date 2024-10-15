@@ -26,42 +26,50 @@ function displayUsers(users) {
   userManagement.empty();
 
   const currentAdminId = localStorage.getItem('userId');
+  const currentAdminLevel = localStorage.getItem('adminLevel');
+
   users.forEach((user) => {
     const panel = $(`
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">${escapeHtml(user.username)}</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div class="user-info">
-                            <p><i class="fa fa-envelope"></i> ${escapeHtml(user.email)}</p>
-                            <p><i class="fa fa-calendar"></i> ${new Date(user.signupDate).toLocaleString()}</p>
-                            <p><i class="fa fa-money"></i> Currency: ${user.currency}</p>
-                            <p>
-                                <span class="label label-${user.isBanned ? 'danger' : 'success'}">
-                                    <i class="fa fa-${user.isBanned ? 'ban' : 'check'}"></i> ${user.isBanned ? 'Banned' : 'Active'}
-                                </span>
-                                <span class="label label-${user.isAdmin ? 'primary' : 'default'}">
-                                    <i class="fa fa-${user.isAdmin ? 'shield' : 'user'}"></i> ${user.isAdmin ? 'Admin' : 'User'}
-                                </span>
-                            </p>
-                        </div>
-                        <div class="user-actions mt-3">
-                            <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}" ${user.isAdmin ? 'disabled' : ''}>
-                                <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
-                            </button>
-                            ${user.isAdmin ? user._id !== currentAdminId ? `<button class="btn btn-sm btn-danger demote-admin" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote from Admin</button>`
-                                  : '<button class="btn btn-sm btn-success" disabled><i class="fa fa-user-circle"></i> Current Admin</button>'
-                                : `<button class="btn btn-sm btn-info promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>`
-                            }
-                            <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}" ${user.isAdmin ? 'disabled' : ''}><i class="fa fa-trash"></i> Delete User</button>
-                            <button class="btn btn-sm btn-info view-messages" data-user-id="${user._id}"><i class="fa fa-envelope"></i> View Messages</button>
-                        </div>
-                    </div>
-                </div>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">${escapeHtml(user.username)}</h3>
+          </div>
+          <div class="panel-body">
+            <div class="user-info">
+              <p><i class="fa fa-envelope"></i> ${escapeHtml(user.email)}</p>
+              <p><i class="fa fa-calendar"></i> ${new Date(user.signupDate).toLocaleString()}</p>
+              <p><i class="fa fa-money"></i> Currency: ${user.currency}</p>
+              <p>
+                <span class="label label-${user.isBanned ? 'danger' : 'success'}">
+                  <i class="fa fa-${user.isBanned ? 'ban' : 'check'}"></i> ${user.isBanned ? 'Banned' : 'Active'}
+                </span>
+                <span class="label label-${user.adminLevel === 'admin' ? 'primary' : user.adminLevel === 'moderator' ? 'info' : 'default'}">
+                  <i class="fa fa-${user.adminLevel === 'admin' ? 'shield' : user.adminLevel === 'moderator' ? 'gavel' : 'user'}"></i> ${user.adminLevel.charAt(0).toUpperCase() + user.adminLevel.slice(1)}
+                </span>
+              </p>
             </div>
-        `);
+            <div class="user-actions mt-3">
+              ${currentAdminLevel === 'admin' ? `
+                <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}" ${user.adminLevel === 'admin' ? 'disabled' : ''}>
+                  <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
+                </button>
+                ${user.adminLevel === 'user' ? `
+                  <button class="btn btn-sm btn-info promote-moderator" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Moderator</button>
+                ` : user.adminLevel === 'moderator' ? `
+                  <button class="btn btn-sm btn-primary promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>
+                ` : ''}
+                ${user.adminLevel !== 'user' && user._id !== currentAdminId ? `
+                  <button class="btn btn-sm btn-danger demote-user" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote User</button>
+                ` : ''}
+                <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}" ${user.adminLevel !== 'user' ? 'disabled' : ''}><i class="fa fa-trash"></i> Delete User</button>
+              ` : ''}
+              <button class="btn btn-sm btn-info view-messages" data-user-id="${user._id}"><i class="fa fa-envelope"></i> View Messages</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
 
     userManagement.append(panel);
   });
@@ -85,9 +93,14 @@ function addUserEventListeners() {
     promoteToAdmin(userId);
   });
 
-  $('.demote-admin').on('click', function () {
+  $('.promote-moderator').on('click', function () {
     const userId = $(this).data('user-id');
-    demoteAdmin(userId);
+    promoteToModerator(userId);
+  });
+
+  $('.demote-user').on('click', function () {
+    const userId = $(this).data('user-id');
+    demoteUser(userId);
   });
 
   $('.delete-user').on('click', function () {
@@ -204,20 +217,39 @@ function promoteToAdmin(userId) {
   }
 }
 
-function demoteAdmin(userId) {
-  if (confirm('Are you sure you want to demote this user from admin?')) {
+function promoteToModerator(userId) {
+  if (confirm('Are you sure you want to promote this user to moderator?')) {
     $.ajax({
-      url: `/api/admin/demote-admin/${userId}`,
+      url: `/api/admin/promote-moderator/${userId}`,
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       success: function () {
-        showAlert('success', 'User demoted from admin successfully.');
+        showAlert('success', 'User promoted to moderator successfully.');
         loadUsers();
       },
       error: function (xhr) {
-        showAlert('danger', `Error demoting user from admin: ${xhr.responseJSON.error}`);
+        showAlert('danger', `Error promoting user to moderator: ${xhr.responseJSON.error}`);
+      },
+    });
+  }
+}
+
+function demoteUser(userId) {
+  if (confirm('Are you sure you want to demote this user?')) {
+    $.ajax({
+      url: `/api/admin/demote/${userId}`,
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      success: function () {
+        showAlert('success', 'User demoted successfully.');
+        loadUsers();
+      },
+      error: function (xhr) {
+        showAlert('danger', `Error demoting user: ${xhr.responseJSON.error}`);
       },
     });
   }

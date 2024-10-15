@@ -21,19 +21,41 @@ router.get('/check-auth', (req, res) => {
   res.json({ isAdmin: true });
 });
 
-// Promote user to admin
-router.post('/promote-admin/:id', authenticateToken, async (req, res) => {
+// Promote moderator
+router.post('/promote-moderator/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     const userToPromote = await User.findById(req.params.id);
     if (!userToPromote) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (userToPromote.isAdmin) {
+    if (userToPromote.adminLevel === 'moderator') {
+      return res.status(400).json({ error: 'User is already a moderator' });
+    }
+
+    userToPromote.adminLevel = 'moderator';
+    await userToPromote.save();
+
+    res.json({ message: 'User promoted to moderator successfully' });
+  } catch (error) {
+    console.error('Error promoting user to moderator:', error);
+    res.status(500).json({ error: 'Error promoting user to moderator' });
+  }
+});
+
+// Promote user to admin
+router.post('/promote-admin/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const userToPromote = await User.findById(req.params.id);
+    if (!userToPromote) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (userToPromote.adminLevel === 'admin') {
       return res.status(400).json({ error: 'User is already an admin' });
     }
 
-    userToPromote.isAdmin = true;
+    userToPromote.adminLevel = 'admin';
     await userToPromote.save();
 
     res.json({ message: 'User promoted to admin successfully' });
@@ -43,28 +65,28 @@ router.post('/promote-admin/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/demote-admin/:id', authenticateToken, async (req, res) => {
+router.post('/demote/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     const userToDemote = await User.findById(req.params.id);
     if (!userToDemote) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (!userToDemote.isAdmin) {
-      return res.status(400).json({ error: 'User is not an admin' });
+    if (userToDemote.adminLevel === 'user') {
+      return res.status(400).json({ error: 'User is already a regular user' });
     }
 
     if (userToDemote._id.toString() === req.user.id) {
       return res.status(400).json({ error: 'You cannot demote yourself' });
     }
 
-    userToDemote.isAdmin = false;
+    userToDemote.adminLevel = 'user';
     await userToDemote.save();
 
-    res.json({ message: 'User demoted from admin successfully' });
+    res.json({ message: 'User demoted successfully' });
   } catch (error) {
-    console.error('Error demoting user from admin:', error);
-    res.status(500).json({ error: 'Error demoting user from admin' });
+    console.error('Error demoting user:', error);
+    res.status(500).json({ error: 'Error demoting user' });
   }
 });
 
@@ -423,15 +445,20 @@ router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Delete a user (ONLY USE AS LAST RESORT, THIS IS DESTRUCTIVE)
-router.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
+router.delete('/users/:id', authenticateToken, async (req, res) => {
   try {
     const userToDelete = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.user.id);
 
     if (!userToDelete) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (userToDelete.isAdmin) {
+    if (currentUser.adminLevel !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can delete users.' });
+    }
+
+    if (userToDelete.adminLevel === 'admin') {
       return res.status(403).json({ error: 'Cannot delete an admin user.' });
     }
 

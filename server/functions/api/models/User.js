@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  adminLevel: {
+    type: String,
+    enum: ['user', 'moderator', 'admin'],
+    default: 'user'
+  },
   userId: {
     type: Number,
     unique: true,
