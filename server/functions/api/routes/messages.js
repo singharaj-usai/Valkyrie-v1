@@ -25,7 +25,7 @@ router.post(
     const { recipient, subject, message } = req.body;
 
     try {
-      const sender = await User.findOne({ username: req.user.username });
+      const sender = await User.findOne({ user: req.user.username });
       if (!sender) {
         return res
           .status(401)
@@ -57,7 +57,7 @@ router.post(
 // Get received messages
 router.get('/received', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ userId: req.user.userId });
     const messages = await Message.find({ recipient: user._id })
       .populate('sender', 'username')
       .sort({ sentAt: -1 });
@@ -72,7 +72,7 @@ router.get('/received', authenticateToken, async (req, res) => {
 // Get sent messages
 router.get('/sent', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ userId: req.user.userId });
     const messages = await Message.find({ sender: user._id })
       .populate('recipient', 'username')
       .sort({ sentAt: -1 });
@@ -93,7 +93,7 @@ router.post('/:id/archive', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Message not found' });
     }
 
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ userId: req.user.userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -125,7 +125,7 @@ router.post('/:id/restore', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Message not found' });
     }
 
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ userId: req.user.userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -151,7 +151,7 @@ router.post('/:id/restore', authenticateToken, async (req, res) => {
 // Get archived messages
 router.get('/archived', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ userId: req.user.userId });
     const messages = await Message.find({
       recipient: user._id,
       isArchived: true,
@@ -172,8 +172,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
   const messageId = req.params.id;
   try {
     const message = await Message.findById(messageId)
-      .populate('sender', 'username')
-      .populate('recipient', 'username');
+      .populate('sender', 'userId')
+      .populate('recipient', 'userId');
 
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
@@ -181,8 +181,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     // Verify that the requester is either the sender or the recipient
     if (
-      message.sender.username !== req.user.username &&
-      message.recipient.username !== req.user.username
+      message.sender.userId !== req.user.userId &&
+      message.recipient.userId !== req.user.userId
     ) {
       return res.status(403).json({ error: 'Access denied' });
     }
