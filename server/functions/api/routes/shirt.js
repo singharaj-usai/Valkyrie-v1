@@ -10,7 +10,7 @@ const Counter = require('../models/Counter');
 const thumbnailQueue = require('../queues/thumbnailQueue');
 const jwt = require('jsonwebtoken');
 const Filter = require('bad-words');
-const crypto = require('crypto'); // Add this line to import the crypto module
+const crypto = require('crypto'); 
 
 const AWS = require('aws-sdk');
 
@@ -44,7 +44,10 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.sendStatus(403);
     }
-    req.user = user;
+    req.user = {
+      _id: user._id,
+      userId: user.userId
+    };
     next();
   });
 };
@@ -66,6 +69,85 @@ async function getNextAssetId() {
   );
   return counter.seq;
 }
+
+
+router.get('/user', authenticateToken, async (req, res) => {
+  try {
+      console.log('Fetching shirts for userId:', req.user.userId);
+      const user = await User.findOne({ userId: req.user.userId }).populate('inventory');
+
+      if (!user) {
+          console.error('User not found for userId:', req.user.userId);
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 4;
+      const skip = (page - 1) * limit;
+
+      // Fetch shirts created by user
+      const createdShirts = await Asset.find({
+          creator: user._id, 
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Created shirts found:', createdShirts.length);
+
+      // Fetch shirts owned by user
+      const ownedShirts = await Asset.find({
+          _id: { $in: user.inventory },
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Owned shirts found:', ownedShirts.length);
+
+      // combine and remove duplicates
+      const allShirts = [...createdShirts, ...ownedShirts];
+      const uniqueShirts = Array.from(
+          new Set(allShirts.map((s) => s._id.toString()))
+      ).map((_id) => allShirts.find((s) => s._id.toString() === _id));
+
+      const totalShirts = uniqueShirts.length;
+      const totalPages = Math.ceil(totalShirts / limit);
+      const paginatedShirts = uniqueShirts.slice(skip, skip + limit);
+
+
+      console.log('Total  shirts:', uniqueShirts.length);
+      console.log('Paginated shirts:', paginatedShirts.length);
+      
+    res.json({
+      shirts: paginatedShirts,
+      currentPage: page,
+      totalPages: totalPages,
+      totalShirts: totalShirts
+    });
+  
+  } catch (error) {
+      console.error('Error fetching user shirts:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+
+router.get('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' }).populate(
+      'creator',
+      'username'
+    );
+    if (!shirt) {
+      return res.status(404).json({ error: 'Shirt not found' });
+    }
+    res.json(shirt);
+  } catch (error) {
+    console.error('Error fetching shirt:', error);
+    res
+      .status(500)
+      .json({ error: 'Error fetching shirt', details: error.message });
+  }
+});
+
 
 router.post(
   '/upload',
@@ -109,19 +191,12 @@ router.post(
     const assetId = await getNextAssetId();
 
     try {
-      const thumbnailUrl = `/uploads/${Date.now()}-${
-        req.files.thumbnail[0].originalname
-      }`;
+      const thumbnailUrl = `/uploads/${Date.now()}-${req.files.thumbnail[0].originalname}`;
       fs.writeFileSync(
-        path.join(
-          __dirname,
-          '../../../../uploads',
-          path.basename(thumbnailUrl)
-        ),
+        path.join(__dirname, '../../../../uploads', path.basename(thumbnailUrl)),
         req.files.thumbnail[0].buffer
       );
 
-      // upload image first
       const s3Key = `shirts/${assetHash}`;
       const assetLocation = `https://c2.rblx18.com/${s3Key}`;
       await s3
@@ -134,11 +209,11 @@ router.post(
         })
         .promise();
 
-      // make a new asset for the image
+      // Create a new asset for the image
       const asset = new Asset({
         assetId: assetId,
         FileLocation: assetLocation,
-        creator: req.user.userId,
+        creator: req.user._id,
         AssetType: 'Image',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -151,15 +226,15 @@ router.post(
 
       await asset.save();
 
-      // get the next asset id for the shirt
+      // Get the next asset id for the shirt
       const shirtassetId = await getNextAssetId();
       const shirtassetHash = generateAssetId();
 
-      // generate xml for shirttemplate
+      // Generate XML for shirttemplate
       const shirtAssetUrl = `http://www.rblx18.com/asset/?id=${assetId}`;
       const shirtAssetXml = generateXml(shirtAssetUrl);
 
-      // upload the xml
+      // Upload the XML
       const shirts3Key = `${shirtassetHash}`;
       const shirtassetLocation = `https://c2.rblx18.com/${shirtassetHash}`;
 
@@ -173,18 +248,17 @@ router.post(
         })
         .promise();
 
-        const isForSale = parseInt(price) > 0 ? 1 : 0;
-
+      const isForSale = parseInt(price) > 0 ? 1 : 0;
       const shirt = new Asset({
         assetId: shirtassetId,
         FileLocation: shirtassetLocation,
-        creator: req.user.userId,
+        creator: req.user._id,
         AssetType: 'Shirt',
         Name: filter.clean(title),
         Description: filter.clean(description),
         ThumbnailLocation: thumbnailUrl,
         Price: parseInt(price),
-        IsForSale: isForSale, //why is there 2 isforsale?
+        IsForSale: isForSale,
         Sales: 0,
         IsPublicDomain: 0,
       });
@@ -193,16 +267,7 @@ router.post(
 
       await thumbnailQueue.addToQueue(shirtassetId, 'Shirt');
 
-      /*const shirt = new Shirt({
-          title: filter.clean(title),
-          description: filter.clean(description),
-          thumbnailUrl,
-          creator: req.user.userId,
-          assetId: assetId
-      });
-
-      await shirt.save();*/
-      await User.findByIdAndUpdate(req.user.userId, {
+      await User.findByIdAndUpdate(req.user._id, {
         $push: { shirts: shirt._id },
       });
 
@@ -357,45 +422,6 @@ router.get('/user/id/:id', authenticateToken, async (req, res) => {
 
 
 
-router.get('/user', authenticateToken, async (req, res) => {
-  try {
-      console.log('Fetching shirts for userId:', req.user.userId);
-      const user = await User.findOne({ userId: req.user.userId }).populate('inventory');
-
-      if (!user) {
-          console.error('User not found for userId:', req.user.userId);
-          return res.status(404).json({ error: 'User not found' });
-      }
-
-      // Fetch shirts created by user
-      const createdShirts = await Asset.find({
-          creator: user._id, // Using ObjectId from User model
-          AssetType: 'Shirt',
-      }).populate('creator', 'username');
-
-      console.log('Created shirts found:', createdShirts.length);
-
-      // Fetch shirts owned by user
-      const ownedShirts = await Asset.find({
-          _id: { $in: user.inventory },
-          AssetType: 'Shirt',
-      }).populate('creator', 'username');
-
-      console.log('Owned shirts found:', ownedShirts.length);
-
-      // combine and remove duplicates
-      const allShirts = [...createdShirts, ...ownedShirts];
-      const uniqueShirts = Array.from(
-          new Set(allShirts.map((s) => s._id.toString()))
-      ).map((_id) => allShirts.find((s) => s._id.toString() === _id));
-
-      console.log('Total  shirts:', uniqueShirts.length);
-      res.json(uniqueShirts);
-  } catch (error) {
-      console.error('Error fetching user shirts:', error);
-      res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-});
 
 router.put('/:shirtId', authenticateToken, async (req, res) => {
   try {
@@ -441,7 +467,6 @@ router.put('/:shirtId', authenticateToken, async (req, res) => {
   }
 });
 
-// New route to update a game
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -473,25 +498,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
     res
       .status(500)
       .json({ error: 'Error updating shirt', details: error.message });
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-    const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' }).populate(
-      'creator',
-      'username'
-    );
-    if (!shirt) {
-      return res.status(404).json({ error: 'Shirt not found' });
-    }
-    res.json(shirt);
-  } catch (error) {
-    console.error('Error fetching shirt:', error);
-    res
-      .status(500)
-      .json({ error: 'Error fetching shirt', details: error.message });
   }
 });
 

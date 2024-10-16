@@ -1,4 +1,3 @@
-// client/js/avatar.js
 $(document).ready(function () {
     initializeAvatarEditor();
     loadUserAvatar();
@@ -7,6 +6,8 @@ $(document).ready(function () {
 function initializeAvatarEditor() {
     loadAvatarsItems();
     setupItemSelection();
+    Pagination();
+
 }
 
 function loadAvatarsItems() {
@@ -16,19 +17,24 @@ function loadAvatarsItems() {
     // loadHats();
 }
 
-function loadShirts() {
+let currentPage = 1;
+let totalPages = 1;
+
+function loadShirts(page = 1) {
     const token = localStorage.getItem('token');
-    console.log('Loading shirts for user');
+    console.log('Loading shirts for user, page:', page);
 
     $.ajax({
-        url: '/api/shirts/user', // Correct server route
+        url: `/api/shirts/user?page=${page}&limit=4`,
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
         },
-        success: function (shirts) {
-            console.log('Shirts loaded successfully:', shirts.length);
-            displayUserShirts(shirts);
+        success: function (res) {
+            console.log('Shirts loaded successfully:', res.shirts.length);
+            displayUserShirts(res.shirts);
+            updatePagination(res.currentPage, res.totalPages);
+            totalPages = res.totalPages;
         },
         error: function (xhr, status, error) {
             console.error('Error fetching shirts:', error);
@@ -64,6 +70,67 @@ function displayUserShirts(shirts) {
             'shirt'
         );
         container.append(shirtHtml);
+    });
+}
+
+
+
+function updatePagination(currentPage, totalPages) {
+    const paginationContainer = $('#pagination-container');
+    paginationContainer.empty();
+
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const paginationHtml = `
+        <ul class="pagination">
+            <li class="${currentPage === 1 ? 'disabled' : ''}">
+                <a href="#" aria-label="Previous" data-page="${currentPage - 1}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            ${generatePageNumbers(currentPage, totalPages)}
+            <li class="${currentPage === totalPages ? 'disabled' : ''}">
+                <a href="#" aria-label="Next" data-page="${currentPage + 1}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    `;
+
+    paginationContainer.html(paginationHtml);
+}
+
+function generatePageNumbers(currentPage, totalPages) {
+    let pageNumbers = '';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers += `
+            <li class="${i === currentPage ? 'active' : ''}">
+                <a href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    return pageNumbers;
+}
+
+function Pagination() {
+    $('#pagination-container').on('click', 'a', function (e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'));
+        if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+            currentPage = page;
+            loadShirts(currentPage);
+        }
     });
 }
 
