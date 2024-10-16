@@ -28,6 +28,8 @@ const userRoutes = require('./functions/api/routes/user');
 const catalogRoutes = require('./functions/api/routes/catalog');
 const forumRoutes = require('./functions/api/routes/forum');
 
+const avatarRoutes = require('./functions/api/routes/avatar');
+
 // Init Expressjs
 const app = express();
 const port = process.env.PORT || 3000;
@@ -179,6 +181,9 @@ app.use('/api', userStatusRoutes);
 app.use('/api', currencyRoutes);
 app.use('/api', searchUsersRoutes);
 app.use('/api/catalog', catalogRoutes);
+
+
+app.use('/api/avatar', avatarRoutes);
 
 app.use('/api', userRoutes);
 

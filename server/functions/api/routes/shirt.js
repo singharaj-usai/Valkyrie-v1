@@ -173,6 +173,8 @@ router.post(
         })
         .promise();
 
+        const isForSale = parseInt(price) > 0 ? 1 : 0;
+
       const shirt = new Asset({
         assetId: shirtassetId,
         FileLocation: shirtassetLocation,
@@ -181,9 +183,8 @@ router.post(
         Name: filter.clean(title),
         Description: filter.clean(description),
         ThumbnailLocation: thumbnailUrl,
-        IsForSale: 0,
         Price: parseInt(price),
-        IsForSale: 1, //why is there 2 isforsale?
+        IsForSale: isForSale, //why is there 2 isforsale?
         Sales: 0,
         IsPublicDomain: 0,
       });
@@ -354,15 +355,45 @@ router.get('/user/id/:id', authenticateToken, async (req, res) => {
   }
 });
 
+
+
 router.get('/user', authenticateToken, async (req, res) => {
   try {
-    const shirts = await Asset.find({
-      creator: req.user.userId,
-      AssetType: 'Shirt',
-    }).sort({ updatedAt: -1 });
-    res.json(shirts);
+      console.log('Fetching shirts for userId:', req.user.userId);
+      const user = await User.findOne({ userId: req.user.userId }).populate('inventory');
+
+      if (!user) {
+          console.error('User not found for userId:', req.user.userId);
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Fetch shirts created by user
+      const createdShirts = await Asset.find({
+          creator: user._id, // Using ObjectId from User model
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Created shirts found:', createdShirts.length);
+
+      // Fetch shirts owned by user
+      const ownedShirts = await Asset.find({
+          _id: { $in: user.inventory },
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Owned shirts found:', ownedShirts.length);
+
+      // combine and remove duplicates
+      const allShirts = [...createdShirts, ...ownedShirts];
+      const uniqueShirts = Array.from(
+          new Set(allShirts.map((s) => s._id.toString()))
+      ).map((_id) => allShirts.find((s) => s._id.toString() === _id));
+
+      console.log('Total  shirts:', uniqueShirts.length);
+      res.json(uniqueShirts);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      console.error('Error fetching user shirts:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 

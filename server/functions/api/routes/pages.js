@@ -70,6 +70,11 @@ router.get('/my/friends', (req, res) =>
   sendHtmlFile(res, 'pages/my/friends.html')
 );
 
+// avatar
+router.get('/my/avatar', (req, res) =>
+  sendHtmlFile(res, 'pages/my/avatar.html')
+);
+
 router.get('/friends/showfriends', (req, res) =>
   sendHtmlFile(res, 'pages/friends/showfriends.html')
 );

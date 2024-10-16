@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar  - Valkyrie</title>
+
+    <!-- Meta Tags -->
+    <meta
+      name="description"
+      content="Customize your Roblox avatar by selecting your purchased items."
+    />
+    <meta
+      name="keywords"
+      content="Valkyrie, avatar editor, Roblox, customization, shirts, pants, hats"
+    />
+    <meta name="author" content="Valkyrie" />
+
+    <!-- Stylesheets -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css"
+      id="theme-stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="icon" href="/images/Valkyrie.ico" type="image/x-icon" />
+
+    <style>
+      #avatar-display {
+        width: 300px;
+        height: 300px;
+        border: 1px solid #ccc;
+        position: relative;
+        margin-bottom: 20px;
+      }
+   
+      .select-item {
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+ 
+      .mannequin {
+        width: 150px;
+        height: 250px;
+        position: relative;
+        margin: 20px auto;
+        }
+
+      .body-part {
+        position: absolute;
+        background-color: #F5D3B3;
+        border: 1px solid #000;
+        cursor: pointer;
+        }
+
+        .body-part:hover {
+            opacity: 0.8;
+        }
+
+        .head {
+            width: 50px;
+            height: 50px;
+            top: 0;
+            left: 50px;
+        }
+
+        .torso {
+            width: 100px;
+            height: 100px;
+            top: 55px;
+            left: 25px;
+        }
+
+        .left-arm, .right-arm {
+            width: 50px;
+            height: 100px;
+            top: 55px;
+        }
+
+        .left-arm {
+            left: -30px;
+        }
+
+        .right-arm {
+            right: -30px;
+        }
+
+        .left-leg, .right-leg {
+            width: 46px;
+            height: 100px;
+            top: 160px;
+        }
+
+        .left-leg {
+            left: 26px;
+        }
+
+        .right-leg {
+            right: 26px;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="loading">Loading...</div>
+    <div id="navbar-container"></div>
+
+    <div id="content-wrapper">
+      <div class="container" style="margin-top: 70px">
+        <h1>Avatar Editor</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-primary avatar-panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Your Avatar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="avatar-display" class="avatar-display">
+                            <img src="/images/avatar-base.png" alt="Avatar Base" class="img-responsive" id="avatar-base" />
+                            <img src="" alt="Avatar Shirt" id="avatar-shirt" />
+                            <img src="" alt="Avatar Pants" id="avatar-pants" />
+                            <img src="" alt="Avatar Hat" id="avatar-hat" />
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Colors</h3>
+                      </div>
+                      <div class="panel-body">
+                        <p>Click a body part to change its color:</p>
+                        <div id="body-colors">
+                          <div class="mannequin">
+                            <div class="body-part head" data-part="head"></div>
+                            <div class="body-part torso" data-part="torso"></div>
+                            <div class="body-part left-arm" data-part="leftArm"></div>
+                            <div class="body-part right-arm" data-part="rightArm"></div>
+                            <div class="body-part left-leg" data-part="leftLeg"></div>
+                            <div class="body-part right-leg" data-part="rightLeg"></div>
+                          </div>
+                        </div>
+                        <input type="color" id="body-color-picker" style="display:none;">
+                      </div>
+                </div>
+            </div>
+
+            <!-- items selection panel -->
+            <div class="col-md-8">
+                <div class="panel panel-primary avatar-panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Customize Your Avatar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#shirts" aria-controls="shirts" role="tab" data-toggle="tab">Shirts</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#pants" aria-controls="pants" role="tab" data-toggle="tab">Pants</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#hats" aria-controls="hats" role="tab" data-toggle="tab">Hats</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" style="margin-top: 20px;">
+                            <div role="tabpanel" class="tab-pane fade active in" id="shirts">
+                                <div id="shirts-container" class="row"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="pants">
+                                <div id="pants-container" class="row"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="hats">
+                                <div id="hats-container" class="row"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary avatar-panel">
+
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Currently Wearing</h3>
+                      </div>
+                      <div class="panel-body">
+                        <div id="currently-wearing" class="row">
+                          <!-- Currently wearing itemsadded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/js/theme-loader.js"></script>
+    <script src="/js/auth/auth.js"></script>
+    <script src="/js/avatar.js"></script>
+  </body>
+</html>
