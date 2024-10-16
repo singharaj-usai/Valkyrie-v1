@@ -91,7 +91,7 @@ $(document).ready(function () {
     let onlineStatus = user.isOnline
       ? '<span class="text-success">[ Online ]</span>'
       : '<span class="text-muted">[ Offline ]</span>';
-  
+
     if (!isOwnProfile) {
       if (user.isFriend) {
         actionButton =
@@ -111,7 +111,7 @@ $(document).ready(function () {
       actionButton +=
         '<button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message</button>';
     }
-  
+
     const userInfoHtml = `
       <div class="panel panel-primary">
         <div class="panel-heading">
@@ -124,29 +124,34 @@ $(document).ready(function () {
           )}">https://www.valk.fun/user-profile?username=${encodeURIComponent(
       user.username
     )}</a></p>
-          <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
-               alt="${escapeHtml(user.username)}" 
-               class="user-avatar">
-          <div id="blurb-container" style="margin-top: 10px;">
-              <div class="panel panel-default">
-                  <div class="panel-body">
-                      <p id="blurb-text">${
-                        user.blurb
-                          ? escapeHtml(user.blurb).replace(/\n/g, '<br>')
-                          : 'No blurb set.'
-                      }</p>
-                  </div>
-              </div>
-               ${
-                 isOwnProfile
-                   ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
-                   : ''
-               }
-          </div>
-          <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
-        </div>
-      </div>
-    `;
+                    <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
+                         alt="${escapeHtml(user.username)}" 
+                         class="user-avatar">
+                    <div id="blurb-container" style="margin-top: 10px;">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <p id="blurb-text">${
+                                  user.blurb
+                                    ? escapeHtml(user.blurb).replace(
+                                        /\n/g,
+                                        '<br>'
+                                      )
+                                    : 'No blurb set.'
+                                }</p>
+                            </div>
+                        </div>
+                         ${
+                           isOwnProfile
+                             ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
+                             : ''
+                         }
+                    </div>
+                    <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
+                   
+                </div>
+            </div>
+        `;
+
     $('#user-info').html(userInfoHtml);
 
     const statisticsHtml = `
@@ -218,38 +223,41 @@ $(document).ready(function () {
 
   function initFriendActions(user) {
     $('#send-friend-request').on('click', function () {
-      sendFriendRequest(user._id);
+      sendFriendRequest(currentUser._id);
     });
 
     $('#accept-friend-request').on('click', function () {
-      acceptFriendRequest(user._id);
+      acceptFriendRequest(currentUser._id);
     });
 
     $('#decline-friend-request').on('click', function () {
-      declineFriendRequest(user._id);
+      declineFriendRequest(currentUser._id);
     });
 
     $('#unfriend').on('click', function () {
-      unfriend(user._id);
+      unfriend(currentUser._id);
     });
+
+
   }
 
-  function checkFriendshipStatus(username) {
+  function checkFriendshipStatus(userId) {
     const token = localStorage.getItem('token');
     $.ajax({
-      url: `/api/friends/friendship-status/${username}`,
+      url: `/api/friends/friendship-status/${userId}`,
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       success: function (response) {
-        fetchUserProfile(username);
+        displayUserProfile(response);
       },
       error: function (xhr, status, error) {
         console.error('Error checking friendship status:', error);
       },
     });
   }
+
 
   function sendFriendRequest(userId) {
     sendAjaxRequest(
@@ -293,7 +301,7 @@ $(document).ready(function () {
       },
       success: function (response) {
         alert(successMessage);
-        checkFriendshipStatus(username);
+        checkFriendshipStatus(userId);
       },
       error: function (xhr, status, error) {
         if (
@@ -310,7 +318,7 @@ $(document).ready(function () {
               (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error')
           );
         }
-        checkFriendshipStatus(username);
+        checkFriendshipStatus(userId);
       },
     });
   }
@@ -614,6 +622,27 @@ $(document).ready(function () {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  /* function updateFriendshipUI(status) {
+    let actionButton = '';
+    if (status.isFriend) {
+      actionButton = '<button id="unfriend" class="btn btn-warning btn-sm"><i class="fa fa-user-times"></i> Unfriend</button>';
+    } else if (status.friendRequestReceived) {
+      actionButton = `
+        <button id="accept-friend-request" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Accept Friend Request</button>
+        <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;"><i class="fa fa-times"></i> Decline Friend Request</button>
+      `;
+    } else if (status.friendRequestSent) {
+      actionButton = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-clock-o"></i> Friend Request Sent</button>';
+    } else {
+      actionButton = `
+        <button id="send-friend-request" class="btn btn-primary btn-sm"><i class="fa fa-user-plus"></i> Send Friend Request</button>
+        <button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message User</button>
+      `;
+    }
+    $('#action-button-container').html(actionButton);
+    initFriendActions();
+  } */
 });
 
 function formatDate(dateString) {

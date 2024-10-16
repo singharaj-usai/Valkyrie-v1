@@ -4,59 +4,40 @@ const authenticateToken = require('../middleware/authenticateToken');
 const User = require('../models/User');
 
 // Send friend request
-router.post(
-  '/send-friend-request/:userId',
-  authenticateToken,
-  async (req, res) => {
-    try {
-      console.log('Authenticated user:', req.user);
-      console.log('Target user ID:', req.params.userId);
+router.post('/send-friend-request/:userId', authenticateToken, async (req, res) => {
+  try {
+    const sender = await User.findOne({ userId: req.user.userId });
+    const receiver = await User.findById(req.params.userId);
 
-      const sender = await User.findById(req.user.userId);
-      const receiver = await User.findById(req.params.userId);
-
-      console.log('Sender:', sender);
-      console.log('Receiver:', receiver);
-
-      if (!sender || !receiver) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-
-      if (sender.friends.includes(receiver._id)) {
-        return res
-          .status(400)
-          .json({ error: 'You are already friends with this user' });
-      }
-
-      if (
-        receiver.friendRequests.includes(sender._id) ||
-        sender.friendRequests.includes(receiver._id)
-      ) {
-        return res.status(400).json({
-          error: 'A friend request already exists between you and this user',
-        });
-      }
-
-      if (sender.sentFriendRequests.includes(receiver._id)) {
-        return res.status(400).json({
-          error: 'You have already sent a friend request to this user',
-        });
-      }
-
-      receiver.friendRequests.push(sender._id);
-      await receiver.save();
-
-      sender.sentFriendRequests.push(receiver._id);
-      await sender.save();
-
-      console.log('Friend request sent successfully');
-      res.json({ message: 'Friend request sent successfully' });
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      res.status(500).json({ error: 'Error sending friend request' });
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: 'User not found' });
     }
+
+    if (sender.friends.some(id => id.equals(receiver._id))) {
+      return res.status(400).json({ error: 'You are already friends with this user' });
+    }
+
+    if (
+      receiver.friendRequests.some(id => id.equals(sender._id)) ||
+      sender.sentFriendRequests.some(id => id.equals(receiver._id))
+    ) {
+      return res.status(400).json({
+        error: 'A friend request already exists between you and this user',
+      });
+    }
+
+    receiver.friendRequests.push(sender._id);
+    sender.sentFriendRequests.push(receiver._id);
+
+    await receiver.save();
+    await sender.save();
+
+    res.json({ message: 'Friend request sent successfully' });
+  } catch (error) {
+    console.error('Error sending friend request:', error);
+    res.status(500).json({ error: 'Error sending friend request' });
   }
-);
+});
 
 // Accept friend request
 router.post(
@@ -64,7 +45,7 @@ router.post(
   authenticateToken,
   async (req, res) => {
     try {
-      const receiver = await User.findById(req.user.userId);
+      const receiver = await User.findOne({ userId: req.user.userId });
       const sender = await User.findById(req.params.userId);
 
       if (!sender || !receiver) {
@@ -99,24 +80,20 @@ router.post(
 
 // Add this new route after the existing friend-related routes
 router.get(
-  '/friendship-status/:username',
+  '/friendship-status/:userId',
   authenticateToken,
   async (req, res) => {
     try {
-      const currentUser = await User.findById(req.user.userId);
+      const currentUser = await User.findById({ userId: req.user.userId });
       const targetUser = await User.findOne({ username: req.params.username });
 
       if (!targetUser) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const isFriend = currentUser.friends.includes(targetUser._id);
-      const friendRequestSent = targetUser.friendRequests.includes(
-        currentUser._id
-      );
-      const friendRequestReceived = currentUser.friendRequests.includes(
-        targetUser._id
-      );
+      const isFriend = currentUser.friends.includes(targetUser.userId);
+      const friendRequestSent = targetUser.friendRequests.includes(currentUser.userId);
+      const friendRequestReceived = currentUser.friendRequests.includes(targetUser.userId);
 
       res.json({
         isFriend,
@@ -133,7 +110,8 @@ router.get(
 // Unfriend
 router.post('/unfriend/:userId', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    
+    const user = await User.findOne({ userId: req.user.userId });
     const friend = await User.findById(req.params.userId);
 
     if (!user || !friend) {
@@ -159,7 +137,7 @@ router.post(
   authenticateToken,
   async (req, res) => {
     try {
-      const receiver = await User.findById(req.user.userId);
+      const receiver = await User.findOne({ userId: req.user.userId });
       const sender = await User.findById(req.params.userId);
 
       if (!receiver || !sender) {
@@ -200,16 +178,12 @@ router.get('/friend-requests', authenticateToken, async (req, res) => {
 // Get friends list
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).populate(
-      'friends',
-      'username'
-    );
+    const user = await User.findById(req.user.userId).populate('friends', 'username');
     res.json(user.friends);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching friends list' });
   }
 });
-
 // Get friends list for a specific user
 router.get('/:username', async (req, res) => {
   try {
