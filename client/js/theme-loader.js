@@ -18,11 +18,12 @@
   applyTheme(theme);
 
   const style = document.createElement('style');
-  style.textContent = 'body { visibility: hidden; background-image: url(https://i.imgur.com/OqvUONC.png); }';
+  style.textContent = 'body { visibility: hidden; }';
   document.head.appendChild(style);
 
   window.addEventListener('load', function () {
     document.head.removeChild(style);
     document.body.style.visibility = 'visible';
+    document.body.style.backgroundImage = "url('https://i.imgur.com/OqvUONC.png')";
   });
 })();
