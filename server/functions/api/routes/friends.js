@@ -165,7 +165,7 @@ router.post(
 // Get friend requests
 router.get('/friend-requests', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).populate(
+    const user = await User.findOne({ userId: req.user.userId }).populate(
       'friendRequests',
       'username'
     );
@@ -178,7 +178,10 @@ router.get('/friend-requests', authenticateToken, async (req, res) => {
 // Get friends list
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).populate('friends', 'username');
+    const user = await User.findOne({ userId: req.user.userId }).populate(
+      'friends',
+      'username'
+    );
     res.json(user.friends);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching friends list' });
