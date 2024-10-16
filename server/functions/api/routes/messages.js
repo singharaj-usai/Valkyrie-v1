@@ -25,7 +25,7 @@ router.post(
     const { recipient, subject, message } = req.body;
 
     try {
-      const sender = await User.findOne({ user: req.user.username });
+      const sender = await User.findOne({ userId: req.user.userId });
       if (!sender) {
         return res
           .status(401)

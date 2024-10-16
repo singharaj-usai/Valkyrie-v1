@@ -185,7 +185,7 @@ $(document).ready(function () {
       showAlert('danger', 'You must be logged in to view messages.');
       return;
     }
-
+  
     $.ajax({
       url: `/api/messages/${messageId}`,
       method: 'GET',
@@ -193,62 +193,39 @@ $(document).ready(function () {
         Authorization: `Bearer ${token}`,
       },
       success: function (message) {
-        // Remove any existing modal to prevent duplicates
         $('#messageModal').remove();
-
-        // Determine if the current user can reply to this message
+  
         const canReply = currentUsername !== message.sender.username;
-
+  
         const formattedMessage = `
-From: ${escapeHtml(message.sender.username)}<br>
-Date: ${new Date(message.sentAt).toLocaleString()}<br><br>
-${escapeHtml(message.message).replace(/\n/g, '<br>')}
+  From: ${escapeHtml(message.sender.username)}<br>
+  Date: ${new Date(message.sentAt).toLocaleString()}<br><br>
+  ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                 `;
-
+  
         const messageHtml = `
                     <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    ${
-                                      canReply
-                                        ? `
-                                    <button type="button" class="btn btn-primary" id="reply-button" style="margin-right: 10px;">Reply</button>
-                                    `
-                                        : ''
-                                    }
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 10px; top: 10px;">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    <h4 class="modal-title" id="messageModalLabel">Message Details</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="messageModalLabel">${escapeHtml(message.subject)}</h4>
                                 </div>
                                 <div class="modal-body">
                                     <p>
-                                        <a href="/user-profile?username=${encodeURIComponent(
-                                          message.sender.username
-                                        )}">
+                                        <a href="/user-profile?username=${encodeURIComponent(message.sender.username)}">
                                             <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
-                                            <strong>From:</strong> ${escapeHtml(
-                                              message.sender.username
-                                            )}
+                                            <strong>From:</strong> ${escapeHtml(message.sender.username)}
                                         </a>
                                     </p>
                                     <p>
-                                        <a href="/user-profile?username=${encodeURIComponent(
-                                          message.recipient.username
-                                        )}">
+                                        <a href="/user-profile?username=${encodeURIComponent(message.recipient.username)}">
                                             <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
-                                            <strong>To:</strong> ${escapeHtml(
-                                              message.recipient.username
-                                            )}
+                                            <strong>To:</strong> ${escapeHtml(message.recipient.username)}
                                         </a>
                                     </p>
-                                    <p><strong>Subject:</strong> ${escapeHtml(
-                                      message.subject
-                                    )}</p>
-                                    <p><strong>Date:</strong> ${new Date(
-                                      message.sentAt
-                                    ).toLocaleString()}</p>
+                                    <p><strong>Subject:</strong> ${escapeHtml(message.subject)}</p>
+                                    <p><strong>Date:</strong> ${new Date(message.sentAt).toLocaleString()}</p>
                                     <hr>
                                     <p>${formattedMessage}</p>
                                     ${
@@ -273,6 +250,11 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                                     }
                                 </div>
                                 <div class="modal-footer">
+                                    ${
+                                      canReply
+                                        ? '<button type="button" class="btn btn-primary" id="reply-button">Reply</button>'
+                                        : ''
+                                    }
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
@@ -281,19 +263,17 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                 `;
         $('body').append(messageHtml);
         $('#messageModal').modal('show');
-
-        // Reply button functionality
+  
         if (canReply) {
           $('#reply-button').on('click', function () {
             $('#reply-form-container').toggle();
           });
-
-          // Reply form submission
+  
           $('#reply-form').on('submit', function (e) {
             e.preventDefault();
             const replyMessage = $('#reply-message').val().trim();
             const includeOriginal = $('#include-original').is(':checked');
-
+  
             if (replyMessage) {
               let fullMessage = replyMessage;
               if (includeOriginal) {
@@ -303,7 +283,7 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                   message.message
                 }`;
               }
-
+  
               $.ajax({
                 url: '/api/messages/send',
                 method: 'POST',
@@ -335,8 +315,7 @@ ${escapeHtml(message.message).replace(/\n/g, '<br>')}
             }
           });
         }
-
-        // Remove modal from DOM when hidden
+  
         $('#messageModal').on('hidden.bs.modal', function () {
           $(this).remove();
         });
