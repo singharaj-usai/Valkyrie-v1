@@ -431,6 +431,7 @@ const App = {
       headers: { Authorization: `Bearer ${token}` },
       success: () => {
         localStorage.removeItem('userId');
+        localStorage.removeItem('adminLevel');
         localStorage.removeItem('username');
         localStorage.removeItem('token');
         localStorage.removeItem('isBanned');

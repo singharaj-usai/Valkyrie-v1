@@ -1,4 +1,5 @@
 function loadUsers() {
+  const currentUserId = localStorage.getItem('userId');
   const contentArea = $('#content-area');
   contentArea.html(
     '<h2 class="text-primary">User Management</h2><div id="user-management" class="row"></div>'
@@ -10,8 +11,8 @@ function loadUsers() {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    success: function (users) {
-      displayUsers(users);
+    success: function (response) {
+      displayUsers(response.users, response.currentAdminLevel, currentUserId);
     },
     error: function () {
       contentArea.html(
@@ -21,12 +22,11 @@ function loadUsers() {
   });
 }
 
-function displayUsers(users) {
+function displayUsers(users, currentAdminLevel) {
   const userManagement = $('#user-management');
   userManagement.empty();
 
   const currentAdminId = localStorage.getItem('userId');
-  const currentAdminLevel = localStorage.getItem('adminLevel');
 
   users.forEach((user) => {
     const panel = $(`
@@ -51,20 +51,20 @@ function displayUsers(users) {
             </div>
             <div class="user-actions mt-3">
               ${currentAdminLevel === 'admin' ? `
-                <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user._id}" data-is-banned="${user.isBanned}" ${user.adminLevel === 'admin' ? 'disabled' : ''}>
+                <button class="btn btn-sm btn-${user.isBanned ? 'success' : 'warning'} ban-user" data-user-id="${user.userId}" data-is-banned="${user.isBanned}" ${user.adminLevel === 'admin' ? 'disabled' : ''}>
                   <i class="fa fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Unban User' : 'Ban User'}
                 </button>
                 ${user.adminLevel === 'user' ? `
-                  <button class="btn btn-sm btn-info promote-moderator" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Moderator</button>
+                  <button class="btn btn-sm btn-info promote-moderator" data-user-id="${user.userId}"><i class="fa fa-level-up"></i> Promote to Moderator</button>
                 ` : user.adminLevel === 'moderator' ? `
-                  <button class="btn btn-sm btn-primary promote-admin" data-user-id="${user._id}"><i class="fa fa-level-up"></i> Promote to Admin</button>
+                  <button class="btn btn-sm btn-primary promote-admin" data-user-id="${user.userId}"><i class="fa fa-level-up"></i> Promote to Admin</button>
                 ` : ''}
-                ${user.adminLevel !== 'user' && user._id !== currentAdminId ? `
-                  <button class="btn btn-sm btn-danger demote-user" data-user-id="${user._id}"><i class="fa fa-level-down"></i> Demote User</button>
+                ${user.adminLevel !== 'user' ? `
+                <button class="btn btn-sm btn-danger demote-user" data-user-id="${user.userId}" ${user.userId == currentAdminId ? 'disabled' : ''}><i class="fa fa-level-down"></i> Demote User</button>
                 ` : ''}
-                <button class="btn btn-sm btn-danger delete-user" data-user-id="${user._id}" ${user.adminLevel !== 'user' ? 'disabled' : ''}><i class="fa fa-trash"></i> Delete User</button>
+                <button class="btn btn-sm btn-danger delete-user" data-user-id="${user.userId}" ${user.adminLevel !== 'user' ? 'disabled' : ''}><i class="fa fa-trash"></i> Delete User</button>
               ` : ''}
-              <button class="btn btn-sm btn-info view-messages" data-user-id="${user._id}"><i class="fa fa-envelope"></i> View Messages</button>
+              <button class="btn btn-sm btn-info view-messages" data-user-id="${user.userId}"><i class="fa fa-envelope"></i> View Messages</button>
             </div>
           </div>
         </div>
@@ -237,6 +237,12 @@ function promoteToModerator(userId) {
 }
 
 function demoteUser(userId) {
+  const currentUserId = localStorage.getItem('userId');
+  if (userId === currentUserId) {
+    showAlert('warning', 'You cannot demote yourself.');
+    return;
+  }
+
   if (confirm('Are you sure you want to demote this user?')) {
     $.ajax({
       url: `/api/admin/demote/${userId}`,
@@ -284,11 +290,12 @@ function loadUserMessages(userId) {
     success: function (messages) {
       displayUserMessages(messages);
     },
-    error: function () {
-      showAlert('danger', 'Error loading user messages. Please try again.');
+    error: function (xhr) {
+      showAlert('danger', `Error loading user messages: ${xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'}`);
     },
   });
 }
+
 function displayUserMessages(messages) {
   const modal = $(`
     <div class="modal fade" id="userMessagesModal" tabindex="-1" role="dialog">
@@ -319,14 +326,14 @@ function displayUserMessages(messages) {
                         <tr>
                           <td>
                             <div class="d-flex align-items-center justify-content-center">
-                              <img src="${message.sender.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
-                              <strong>${escapeHtml(message.sender.username)}</strong>
+                              <img src="${message.sender && message.sender.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                              <strong>${message.sender ? escapeHtml(message.sender.username) : 'Unknown'}</strong>
                             </div>
                           </td>
                           <td>
                             <div class="d-flex align-items-center justify-content-center">
-                              <img src="${message.recipient.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
-                              <strong>${escapeHtml(message.recipient.username)}</strong>
+                              <img src="${message.recipient && message.recipient.profilePicture || 'https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png'}" class="img-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                              <strong>${message.recipient ? escapeHtml(message.recipient.username) : 'Unknown'}</strong>
                             </div>
                           </td>
                           <td>${escapeHtml(message.message)}</td>

@@ -32,13 +32,13 @@ function authenticateToken(req, res, next) {
   jwt.verify(
     token,
     process.env.JWT_SECRET || 'fallback_secret_key_for_development',
-    (err, user) => {
+    (err, decoded) => {
       if (err) {
         console.error('Token verification error:', err);
         return res.sendStatus(403);
       }
       console.log('Decoded user:', user);
-      req.user = user;
+      req.user = { userId: user.userId }; // Ensure userId is a string
       next();
     }
   );
@@ -436,8 +436,7 @@ router.get('/validate-session', async (req, res) => {
       token,
       process.env.JWT_SECRET || 'fallback_secret_key_for_development'
     );
-    const user = await User.findById(decoded.userId);
-
+    const user = await User.findOne({ userId: decoded.userId });
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     }
@@ -565,7 +564,7 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId: user.userId }, // Use custom userId
       process.env.JWT_SECRET || 'fallback_secret_key_for_development',
       { expiresIn: '1d' }
     );
@@ -582,7 +581,7 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
         token,
         message: 'Your account is banned.',
         username: user.username,
-        userId: user._id,
+        userId: user.userId,
         isBanned: true,
         banReason: user.banReason || 'No reason provided',
         redirect: '/banned'
@@ -592,10 +591,12 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
     res.json({
       token,
       username: user.username,
-      userId: user._id,
+      userId: user.userId,
       signupDate: user.signupDate,
       lastLoggedIn: user.lastLoggedIn,
       isBanned: false,
+      adminLevel: user.adminLevel,
+      isAdmin: user.isAdmin,
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -608,7 +609,7 @@ router.post('/login', flexibleCsrfProtection, authLimiter, async (req, res) => {
 // Logout endpoint
 router.post('/logout', flexibleCsrfProtection, async (req, res) => {
   if (req.user) {
-    await User.findByIdAndUpdate(req.user._id, { isOnline: false });
+    await User.findOneAndUpdate({ userId: req.user.userId }, { isOnline: false });
   }
   req.session.destroy((err) => {
     if (err) {
@@ -627,7 +628,7 @@ router.get('/csrf-token', csrfProtection, (req, res) => {
 router.post("/claim-daily-currency", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const user = await User.findById(userId);
+    const user = await User.findById({ userId: userId });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

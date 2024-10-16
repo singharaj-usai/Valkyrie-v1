@@ -7,7 +7,7 @@ const User = require('../models/User');
 router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
-    const currentUser = await User.findById(req.user.userId);
+    const currentUser = await User.findOne(req.user.userId);
     const user = await User.findOne({ username }).select(
       'username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests'
     );
@@ -67,8 +67,8 @@ router.put('/user/blurb', authenticateToken, async (req, res) => {
       .map((line) => line.trim())
       .join('\n');
 
-    const user = await User.findByIdAndUpdate(
-      userId,
+    const user = await User.findOneAndUpdate(
+      { userId: userId },
       { blurb: blurb },
       { new: true }
     );
@@ -90,7 +90,7 @@ router.get('/user-info', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findOne({ userId: userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }

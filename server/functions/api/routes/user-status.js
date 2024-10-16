@@ -6,11 +6,14 @@ const User = require('../models/User');
 // Update user status
 router.post('/update-status', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.user.userId,
+    const user = await User.findOneAndUpdate(
+      { userId: req.user.userId },
       { isOnline: true, lastActiveAt: new Date() },
       { new: true }
     );
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     res.json({
       message: 'Status updated successfully',
       isOnline: user.isOnline,
@@ -32,7 +35,7 @@ router.get('/user-status/:username', async (req, res) => {
       user.isOnline && new Date() - user.lastActiveAt < 5 * 60 * 1000; // 5 minutes
     if (!isOnline && user.isOnline) {
       // Update user status to offline if they haven't been active for 5 minutes
-      await User.findByIdAndUpdate(user._id, { isOnline: false });
+      await User.findOneAndUpdate({ userId: user.userId }, { isOnline: false });
     }
     res.json({ isOnline });
   } catch (error) {

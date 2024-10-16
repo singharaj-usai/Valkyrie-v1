@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 const updateUserStatus = async (req, res, next) => {
   if (req.user) {
-    await User.findByIdAndUpdate(req.user._id, {
+    await User.findOneAndUpdate(req.user.userId, {
       isOnline: true,
       lastActiveAt: new Date(),
     });

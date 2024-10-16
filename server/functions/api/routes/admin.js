@@ -17,14 +17,26 @@ router.use(isAuthenticated);
 router.use(isAdmin);
 
 // Check admin authentication
-router.get('/check-auth', (req, res) => {
-  res.json({ isAdmin: true });
+router.get('/check-auth', isAdmin, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findOne({ userId: userId }).select('isAdmin adminLevel');
+
+    if (user) {
+      res.json({ isAdmin: user.isAdmin, adminLevel: user.adminLevel, userId: user.userId });
+    } else {
+      res.status(404).json({ error: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('Error in /check-auth:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 // Promote moderator
 router.post('/promote-moderator/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const userToPromote = await User.findById(req.params.id);
+    const userToPromote = await User.findOne({ userId: req.params.id });
     if (!userToPromote) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -46,7 +58,7 @@ router.post('/promote-moderator/:id', authenticateToken, isAdmin, async (req, re
 // Promote user to admin
 router.post('/promote-admin/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const userToPromote = await User.findById(req.params.id);
+    const userToPromote = await User.findOne({ userId: req.params.id });
     if (!userToPromote) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -67,7 +79,7 @@ router.post('/promote-admin/:id', authenticateToken, isAdmin, async (req, res) =
 
 router.post('/demote/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const userToDemote = await User.findById(req.params.id);
+    const userToDemote = await User.findOne({ userId: req.params.id });
     if (!userToDemote) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -76,7 +88,7 @@ router.post('/demote/:id', authenticateToken, isAdmin, async (req, res) => {
       return res.status(400).json({ error: 'User is already a regular user' });
     }
 
-    if (userToDemote._id.toString() === req.user.id) {
+    if (userToDemote.userId === req.user.userId) {
       return res.status(400).json({ error: 'You cannot demote yourself' });
     }
 
@@ -349,37 +361,55 @@ router.post('/reset-forum-post-count', authenticateToken, async (req, res) => {
 });
 
 // Get all users
-router.get('/users', authenticateToken, async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
-    const users = await User.find({}, '-password').select('username email signupDate isBanned isAdmin currency');
-    res.json(users);
+    const users = await User.find().select('-password');
+    const currentUser = await User.findOne({ userId: req.user.userId }).select('adminLevel');
+    
+    if (!currentUser) {
+      return res.status(404).json({ error: 'Current user not found' });
+    }
+    
+    res.json({ users, currentAdminLevel: currentUser.adminLevel });
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Error fetching users' });
   }
 });
 
 // ban the user (does not work yet, needs to be worked on more on the server side)
-router.post('/users/:userId/ban', authenticateToken, async (req, res) => {
+router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const { userId } = req.params;
     const { ban, banReason } = req.body;
+    const userToBan = await User.findOne({ userId: req.params.id });
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    if (!userToBan) {
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    user.isBanned = ban;
-    user.banReason = ban ? banReason : null;
-    await user.save();
+    if (userToBan.isAdmin) {
+      return res.status(403).json({ error: 'Cannot ban an admin user.' });
+    }
 
-    res.json({
-      message: ban ? 'User banned successfully' : 'User unbanned successfully',
-    });
+    if (userToBan.userId === req.user.userId) {
+      return res.status(403).json({ error: 'You cannot ban yourself.' });
+    }
+
+    if (ban && (!banReason || banReason.trim() === '')) {
+      return res.status(400).json({ error: 'Ban reason is required when banning a user.' });
+    }
+
+    const updateFields = {
+      isBanned: ban,
+      banReason: ban ? banReason.trim() : null,
+    };
+
+    const user = await User.findOneAndUpdate({ userId: req.params.id }, updateFields, { new: true });
+
+    return res.json({ message: ban ? 'User banned successfully.' : 'User unbanned successfully.' });
   } catch (error) {
-    console.error('Error banning/unbanning user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error updating user ban status:', error);
+    return res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -447,8 +477,8 @@ router.post('/users/:id/ban', authenticateToken, isAdmin, async (req, res) => {
 // Delete a user (ONLY USE AS LAST RESORT, THIS IS DESTRUCTIVE)
 router.delete('/users/:id', authenticateToken, async (req, res) => {
   try {
-    const userToDelete = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.user.id);
+    const userToDelete = await User.findOne({ userId: req.params.id });
+    const currentUser = await User.findOne({ userId: req.user.userId });
 
     if (!userToDelete) {
       return res.status(404).json({ error: 'User not found' });
@@ -462,11 +492,11 @@ router.delete('/users/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Cannot delete an admin user.' });
     }
 
-    if (userToDelete._id.toString() === req.user.id) {
+    if (userToDelete.userId === req.user.userId) {
       return res.status(403).json({ error: 'You cannot delete yourself.' });
     }
 
-    await User.findByIdAndDelete(req.params.id);
+    await User.findOneAndDelete({ userId: req.params.id });
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -475,14 +505,18 @@ router.delete('/users/:id', authenticateToken, async (req, res) => {
 });
 
 // Get user messages
-router.get('/users/:userId/messages', authenticateToken, async (req, res) => {
+router.get('/users/:id/messages', authenticateToken, async (req, res) => {
   try {
+    const user = await User.findOne({ userId: req.params.id });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     const messages = await Message.find({
-      $or: [{ sender: req.params.userId }, { recipient: req.params.userId }]
+      $or: [{ sender: user._id }, { recipient: user._id }]
     })
     .populate('sender', 'username profilePicture')
     .populate('recipient', 'username profilePicture')
-    .sort({ sentAt: -1 })
+    .sort({ sentAt: -1 });
 
     res.json(messages);
   } catch (error) {

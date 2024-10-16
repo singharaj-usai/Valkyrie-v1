@@ -13,15 +13,22 @@ function checkAdminAuth() {
     },
     success: function (response) {
       if (response.isAdmin) {
+        localStorage.setItem('adminLevel', response.adminLevel);
+        if (response.userId) {
+          localStorage.setItem('userId', response.userId);
+        } else {
+          console.error('userId not provided in admin check response');
+        }
         loadDashboard();
       } else {
         alert('You do not have admin privileges.');
         window.location.href = '/';
       }
     },
-    error: function () {
-      alert('Authentication failed. Please log in again.');
-      logout();
+    error: function (xhr) {
+      console.error('Admin auth check failed:', xhr.responseText);
+      alert('Authentication failed. Please try again.');
+      window.location.href = '/login';
     },
   });
 }
