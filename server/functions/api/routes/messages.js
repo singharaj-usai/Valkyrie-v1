@@ -168,31 +168,26 @@ router.get('/archived', authenticateToken, async (req, res) => {
 });
 
 // Get a specific message by ID
-router.get('/:id', authenticateToken, async (req, res) => {
-  const messageId = req.params.id;
-  try {
-    const message = await Message.findById(messageId)
-      .populate('sender', 'userId')
-      .populate('recipient', 'userId');
+router.get(
+  '/:id',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const message = await Message.findById(req.params.id)
+        .populate('sender', 'username')    // Populate sender with username
+        .populate('recipient', 'username'); // Populate recipient with username
 
-    if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found.' });
+      }
+
+      res.json(message);
+    } catch (error) {
+      console.error('Error fetching message:', error);
+      res.status(500).json({ error: 'Internal server error.' });
     }
-
-    // Verify that the requester is either the sender or the recipient
-    if (
-      message.sender.userId !== req.user.userId &&
-      message.recipient.userId !== req.user.userId
-    ) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    res.json(message);
-  } catch (error) {
-    console.error('Error fetching message:', error);
-    res.status(500).json({ error: 'Internal server error' });
   }
-});
+);
 
 // (Optional) Delete a message
 router.delete('/:id', authenticateToken, async (req, res) => {

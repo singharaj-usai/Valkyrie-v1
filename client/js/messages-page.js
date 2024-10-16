@@ -194,15 +194,20 @@ $(document).ready(function () {
       },
       success: function (message) {
         $('#messageModal').remove();
-  
-        const canReply = currentUsername !== message.sender.username;
-  
+      
+        const canReply = type === 'inbox' || type === 'archive';
+      
+        console.log('Received message:', message); // Add this line for debugging
+        console.log('Sender object:', message.sender);
+        console.log('Recipient object:', message.recipient);
+
+      
         const formattedMessage = `
-  From: ${escapeHtml(message.sender.username)}<br>
-  Date: ${new Date(message.sentAt).toLocaleString()}<br><br>
-  ${escapeHtml(message.message).replace(/\n/g, '<br>')}
+        From: ${escapeHtml(message.sender && message.sender.username ? message.sender.username : 'Unknown')}<br>
+      Date: ${new Date(message.sentAt).toLocaleString()}<br><br>
+      ${escapeHtml(message.message).replace(/\n/g, '<br>')}
                 `;
-  
+      
         const messageHtml = `
                     <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel">
                         <div class="modal-dialog" role="document">
@@ -213,48 +218,24 @@ $(document).ready(function () {
                                 </div>
                                 <div class="modal-body">
                                     <p>
-                                        <a href="/user-profile?username=${encodeURIComponent(message.sender.username)}">
+                                        <a href="/user-profile?username=${encodeURIComponent(message.sender ? message.sender.username : 'Unknown')}">
                                             <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
-                                            <strong>From:</strong> ${escapeHtml(message.sender.username)}
+                                            <strong>From:</strong> ${escapeHtml(message.sender ? message.sender.username : 'Unknown')}
                                         </a>
                                     </p>
                                     <p>
-                                        <a href="/user-profile?username=${encodeURIComponent(message.recipient.username)}">
+                                        <a href="/user-profile?username=${encodeURIComponent(message.recipient ? message.recipient.username : 'Unknown')}">
                                             <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="Avatar" class="img-circle" width="32" height="32" style="margin-right: 10px;">
-                                            <strong>To:</strong> ${escapeHtml(message.recipient.username)}
+                                            <strong>To:</strong> ${escapeHtml(message.recipient ? message.recipient.username : 'Unknown')}
                                         </a>
                                     </p>
                                     <p><strong>Subject:</strong> ${escapeHtml(message.subject)}</p>
                                     <p><strong>Date:</strong> ${new Date(message.sentAt).toLocaleString()}</p>
                                     <hr>
                                     <p>${formattedMessage}</p>
-                                    ${
-                                      canReply
-                                        ? `
-                                    <div id="reply-form-container" style="display: none; margin-top: 20px;">
-                                        <form id="reply-form">
-                                            <div class="form-group">
-                                                <label for="reply-message">Reply:</label>
-                                                <textarea class="form-control" id="reply-message" rows="4" maxlength="1000" required></textarea>
-                                            </div>
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" id="include-original" checked> Include original message
-                                                </label>
-                                            </div>
-                                            <button type="submit" class="btn btn-success">Send Reply</button>
-                                        </form>
-                                    </div>
-                                    `
-                                        : ''
-                                    }
                                 </div>
                                 <div class="modal-footer">
-                                    ${
-                                      canReply
-                                        ? '<button type="button" class="btn btn-primary" id="reply-button">Reply</button>'
-                                        : ''
-                                    }
+                                    ${canReply ? '<button type="button" class="btn btn-primary" id="reply-button">Reply</button>' : ''}
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
@@ -263,27 +244,68 @@ $(document).ready(function () {
                 `;
         $('body').append(messageHtml);
         $('#messageModal').modal('show');
-  
+      
         if (canReply) {
           $('#reply-button').on('click', function () {
-            $('#reply-form-container').toggle();
+            const replyFormHtml = `
+              <div id="reply-form-container" style="margin-top: 20px;">
+                <form id="reply-form">
+                  <div class="form-group">
+                    <label for="reply-message">Reply:</label>
+                    <textarea class="form-control" id="reply-message" rows="4" maxlength="1000" required></textarea>
+                  </div>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="include-original" checked> Include original message
+                    </label>
+                  </div>
+                  <button type="submit" class="btn btn-success">Send Reply</button>
+                </form>
+              </div>
+            `;
+            $('.modal-body').append(replyFormHtml);
+            $('#reply-button').prop('disabled', true);
           });
-  
-          $('#reply-form').on('submit', function (e) {
+      
+          $('body').on('submit', '#reply-form', function (e) {
             e.preventDefault();
             const replyMessage = $('#reply-message').val().trim();
             const includeOriginal = $('#include-original').is(':checked');
-  
+          
             if (replyMessage) {
               let fullMessage = replyMessage;
               if (includeOriginal) {
-                fullMessage += `\n\n--- Original Message ---\nFrom: ${escapeHtml(
-                  message.sender.username
-                )} on ${new Date(message.sentAt).toLocaleString()}\n${
-                  message.message
-                }`;
+                const senderUsername = message.sender && message.sender.username ? message.sender.username : 'Unknown';
+                fullMessage += `\n\n--- Original Message ---\nFrom: ${escapeHtml(senderUsername)} on ${new Date(message.sentAt).toLocaleString()}\n${escapeHtml(message.message)}`;
               }
-  
+          
+              // Truncate the message if it's too long
+              if (fullMessage.length > 1000) {
+                fullMessage = fullMessage.substring(0, 997) + '...';
+              }
+          
+              // Truncate the subject if it's too long
+              let subject = `Re: ${message.subject}`;
+              if (subject.length > 100) {
+                subject = subject.substring(0, 97) + '...';
+              }
+          
+              // Use the sender's username as the recipient for the reply
+              const recipient = message.sender && message.sender.username ? message.sender.username : null;
+          
+              console.log('Sending reply:', { recipient, subject, message: fullMessage });
+          
+              if (!recipient) {
+                showAlert('danger', 'Invalid recipient. Unable to send reply.');
+                return;
+              }
+
+              const token = localStorage.getItem('token');
+              if (!token) {
+                showAlert('danger', 'You must be logged in to send a reply.');
+                return;
+              }
+          
               $.ajax({
                 url: '/api/messages/send',
                 method: 'POST',
@@ -292,15 +314,17 @@ $(document).ready(function () {
                   'Content-Type': 'application/json',
                 },
                 data: JSON.stringify({
-                  recipient: message.sender.username,
-                  subject: `Re: ${message.subject}`,
+                  recipient: recipient,
+                  subject: subject,
                   message: fullMessage,
                 }),
                 success: function (response) {
                   showAlert('success', 'Reply sent successfully.');
                   $('#reply-form')[0].reset();
-                  $('#reply-form-container').hide();
+                  $('#reply-form-container').remove();
+                  $('#reply-button').prop('disabled', false);
                   $('#messageModal').modal('hide');
+                  loadMessages(type);
                 },
                 error: function (xhr) {
                   const errorMsg =
@@ -308,6 +332,10 @@ $(document).ready(function () {
                       ? xhr.responseJSON.error
                       : 'Failed to send reply.';
                   showAlert('danger', errorMsg);
+                  console.error('Error details:', xhr.responseJSON);
+                  if (xhr.responseJSON && xhr.responseJSON.details) {
+                    console.error('Validation errors:', xhr.responseJSON.details);
+                  }
                 },
               });
             } else {
@@ -315,7 +343,7 @@ $(document).ready(function () {
             }
           });
         }
-  
+      
         $('#messageModal').on('hidden.bs.modal', function () {
           $(this).remove();
         });
