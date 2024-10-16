@@ -67,6 +67,85 @@ async function getNextAssetId() {
   return counter.seq;
 }
 
+
+router.get('/user', authenticateToken, async (req, res) => {
+  try {
+      console.log('Fetching shirts for userId:', req.user.userId);
+      const user = await User.findOne({ userId: req.user.userId }).populate('inventory');
+
+      if (!user) {
+          console.error('User not found for userId:', req.user.userId);
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 4;
+      const skip = (page - 1) * limit;
+
+      // Fetch shirts created by user
+      const createdShirts = await Asset.find({
+          creator: user._id, 
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Created shirts found:', createdShirts.length);
+
+      // Fetch shirts owned by user
+      const ownedShirts = await Asset.find({
+          _id: { $in: user.inventory },
+          AssetType: 'Shirt',
+      }).populate('creator', 'username');
+
+      console.log('Owned shirts found:', ownedShirts.length);
+
+      // combine and remove duplicates
+      const allShirts = [...createdShirts, ...ownedShirts];
+      const uniqueShirts = Array.from(
+          new Set(allShirts.map((s) => s._id.toString()))
+      ).map((_id) => allShirts.find((s) => s._id.toString() === _id));
+
+      const totalShirts = uniqueShirts.length;
+      const totalPages = Math.ceil(totalShirts / limit);
+      const paginatedShirts = uniqueShirts.slice(skip, skip + limit);
+
+
+      console.log('Total  shirts:', uniqueShirts.length);
+      console.log('Paginated shirts:', paginatedShirts.length);
+      
+    res.json({
+      shirts: paginatedShirts,
+      currentPage: page,
+      totalPages: totalPages,
+      totalShirts: totalShirts
+    });
+  
+  } catch (error) {
+      console.error('Error fetching user shirts:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+
+router.get('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' }).populate(
+      'creator',
+      'username'
+    );
+    if (!shirt) {
+      return res.status(404).json({ error: 'Shirt not found' });
+    }
+    res.json(shirt);
+  } catch (error) {
+    console.error('Error fetching shirt:', error);
+    res
+      .status(500)
+      .json({ error: 'Error fetching shirt', details: error.message });
+  }
+});
+
+
 router.post(
   '/upload',
   authenticateToken,
@@ -193,20 +272,11 @@ router.post(
 
       await thumbnailQueue.addToQueue(shirtassetId, 'Shirt');
 
-      /*const shirt = new Shirt({
-          title: filter.clean(title),
-          description: filter.clean(description),
-          thumbnailUrl,
-          creator: req.user.userId,
-          assetId: assetId
-      });
-
-      await shirt.save();*/
-      await User.findByIdAndUpdate(req.user.userId, {
+      await User.findByIdAndUpdate(req.user._id, {
         $push: { shirts: shirt._id },
       });
 
-      res.status(201).json({ shirtId: shirt._id, assetId: shirt.assetId });
+      res.status(201).json({ shirtId: shirt.assetId, assetId: shirt.assetId });
     } catch (error) {
       console.error('Error saving shirt:', error);
       res
@@ -503,7 +573,7 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     const createdShirts = await Asset.find({
-      creator: user._id,
+      creator: user.userId, // Use userId (Number)
       AssetType: 'Shirt',
     }).sort({ createdAt: -1 });
     const ownedShirts = await Asset.find({
@@ -514,12 +584,28 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
     const uniqueShirts = Array.from(
       new Set(allShirts.map((s) => s._id.toString()))
     ).map((_id) => allShirts.find((s) => s._id.toString() === _id));
-    res.json(uniqueShirts);
+
+    // Fetch all unique creators
+    const creatorIds = uniqueShirts.map(shirt => shirt.creator);
+    const creators = await User.find({ userId: { $in: creatorIds } });
+    const creatorMap = {};
+    creators.forEach(user => {
+      creatorMap[user.userId] = user.username;
+    });
+
+    // Append username to each shirt
+    const shirtsWithUsernames = uniqueShirts.map(shirt => ({
+      ...shirt.toObject(),
+      creatorUsername: creatorMap[shirt.creator] || 'Unknown',
+    }));
+
+    res.json(shirtsWithUsernames);
   } catch (error) {
     console.error('Error fetching user shirts:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 // Function to generate a unique asset ID
 function generateAssetId() {
   const timestamp = Date.now().toString(36);
