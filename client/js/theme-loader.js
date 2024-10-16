@@ -18,7 +18,7 @@
   applyTheme(theme);
 
   const style = document.createElement('style');
-  style.textContent = 'body { visibility: hidden; }';
+  style.textContent = 'body { visibility: hidden; background-image: url(https://i.imgur.com/OqvUONC.png); }';
   document.head.appendChild(style);
 
   window.addEventListener('load', function () {
