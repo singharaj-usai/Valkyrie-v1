@@ -7,7 +7,7 @@ const User = require('../models/User');
 router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
-    const currentUser = await User.findOne(req.user.userId);
+    const currentUser = await User.findOne({ userId: req.user.userId });
     const user = await User.findOne({ username }).select(
       'username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests'
     );
@@ -16,9 +16,9 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const isFriend = currentUser.friends.includes(user._id);
-    const friendRequestSent = user.friendRequests.includes(currentUser._id);
-    const friendRequestReceived = currentUser.friendRequests.includes(user._id);
+    const isFriend = currentUser.friends.includes(user.userId);
+    const friendRequestSent = user.friendRequests.includes(currentUser.userId);
+    const friendRequestReceived = currentUser.friendRequests.includes(user.userId);
 
     const userObject = user.toObject();
     delete userObject.friendRequests;
