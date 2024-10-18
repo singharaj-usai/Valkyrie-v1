@@ -41,7 +41,7 @@ function displayShirts(shirts) {
     }" style="max-height: 150px;">
                         <hr>
                         <p><strong>Creator:</strong> ${
-                          shirt.creator ? shirt.creator.username : 'Unknown'
+                          shirt.creator && shirt.creator.username ? shirt.creator.username : 'Unknown'
                         }</p>
                         <p><strong>Price:</strong> ${shirt.Price} currency</p>
                         <p><strong>For Sale:</strong> ${

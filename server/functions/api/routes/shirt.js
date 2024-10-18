@@ -56,6 +56,7 @@ router.get('/', async (req, res) => {
     const shirts = await Shirt.find().populate('creator', 'username');
     res.json(shirts);
   } catch (error) {
+    console.error('Error fetching shirts:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -186,6 +187,12 @@ router.post(
       });
     }
 
+    const user = await User.findOne({ userId: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+
     const assetHash = generateAssetId();
     const assetId = await getNextAssetId();
 
@@ -212,7 +219,7 @@ router.post(
       const asset = new Asset({
         assetId: assetId,
         FileLocation: assetLocation,
-        creator: req.user.userId,
+        creator: user._id, // Use the user's ObjectId here
         AssetType: 'Image',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -251,7 +258,7 @@ router.post(
       const shirt = new Asset({
         assetId: shirtassetId,
         FileLocation: shirtassetLocation,
-        creator: req.user.userId,
+        creator: user._id, // Use the user's ObjectId here
         AssetType: 'Shirt',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -301,9 +308,9 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 router.get('/catalog', async (req, res) => {
   try {
-    const shirts = await Asset.find({ AssetType: 'Shirt', IsForSale: 1 }).sort({
-      createdAt: -1,
-    });
+    const shirts = await Asset.find({ AssetType: 'Shirt', IsForSale: 1 })
+      .populate('creator', 'username')
+      .sort({ createdAt: -1 })
     res.json(shirts);
   } catch (error) {
     console.error('Error fetching catalog shirts:', error);
@@ -401,11 +408,11 @@ router.get('/user/id/:id', authenticateToken, async (req, res) => {
     const createdShirts = await Asset.find({
       creator: userId,
       AssetType: 'Shirt',
-    }).sort({ createdAt: -1 });
+    }).populate('creator', 'username').sort({ createdAt: -1 });
     const ownedShirts = await Asset.find({
       _id: { $in: user.inventory },
       AssetType: 'Shirt',
-    }).sort({ createdAt: -1 });
+    }).populate('creator', 'username').sort({ createdAt: -1 });
     const allShirts = [...createdShirts, ...ownedShirts];
     const uniqueShirts = Array.from(
       new Set(allShirts.map((s) => s._id.toString()))

@@ -27,35 +27,22 @@ function displayGames(games) {
 
   games.forEach((game) => {
     gamesList.append(`
-            <div class="col-md-4 col-sm-6 mb-4">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">${escapeHtml(game.title)}</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div style="width: 100%; padding-top: 56.25%; position: relative; overflow: hidden;">
-                            <img src="${
-                              game.thumbnailUrl ||
-                              '/images/default-game-thumbnail.png'
-                            }" alt="${escapeHtml(
-      game.title
-    )} thumbnail" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+      <div class="col-md-4 col-sm-6 mb-4">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">${escapeHtml(game.title)}</h3>
+                </div>
+                  <div class="panel-body">
+                    <div style="width: 100%; padding-top: 56.25%; position: relative; overflow: hidden;">
+                      <img src="${game.thumbnailUrl || '/images/default-game-thumbnail.png'}" alt="${escapeHtml(game.title)} thumbnail" class="img-responsive" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
                         </div>
-                        <p><strong>Creator:</strong> ${escapeHtml(
-                          game.creator.username
-                        )}</p>
-                        <p><strong>Created:</strong> ${new Date(
-                          game.createdAt
-                        ).toLocaleString()}</p>
-                        <p><strong>Description:</strong> ${escapeHtml(
-                          game.description || 'No description provided.'
-                        )}</p>
+                        <p><strong>Creator:</strong> ${escapeHtml(game.creator.username)}</p>
+                        <p><strong>Created:</strong> ${new Date(game.createdAt).toLocaleString()}</p>
+                        <p><strong>Description:</strong> ${escapeHtml(game.description || 'No description provided.')}</p>
                     </div>
                     <div class="panel-footer">
-                        <button class="btn btn-danger btn-block delete-game" data-game-id="${
-                          game._id
-                        }">
-                            <i class="glyphicon glyphicon-trash"></i> Delete Game
+                        <button class="btn btn-danger btn-block delete-game" data-game-id="${game._id}">
+                          <i class="glyphicon glyphicon-trash"></i> Delete Game
                         </button>
                     </div>
                 </div>

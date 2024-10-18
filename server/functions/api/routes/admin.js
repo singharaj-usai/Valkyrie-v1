@@ -115,32 +115,6 @@ router.get('/assets/recent', authenticateToken, async (req, res) => {
   }
 });
 
-// redraw the specific asset
-router.post('/assets/:id/redraw', authenticateToken, async (req, res) => {
-  const assetId = req.params.id;
-
-  try {
-    const asset = await Asset.findById(assetId).populate('creator', 'username');
-    if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
-    }
-
-    if (asset.AssetType === 'Image') {
-      return res.status(400).json({ error: 'Image assets cannot be redrawn' });
-    }
-
-    try {
-      await thumbnailQueue.addToQueue(asset.assetId, asset.AssetType);
-      res.json({ message: 'Asset redraw queued successfully' });
-    } catch (queueError) {
-      console.error('Error adding to thumbnail queue:', queueError);
-      res.status(500).json({ error: 'Error queuing asset redraw' });
-    }
-  } catch (error) {
-    console.error('Error processing asset redraw:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 // get the asset by id
 router.get('/assets/:id', authenticateToken, async (req, res) => {
@@ -179,6 +153,34 @@ router.get('/assets/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// redraw the specific asset
+router.post('/assets/:id/redraw', authenticateToken, async (req, res) => {
+  const assetId = req.params.id;
+
+  try {
+    const asset = await Asset.findById(assetId).populate('creator', 'username');
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+
+    if (asset.AssetType === 'Image') {
+      return res.status(400).json({ error: 'Image assets cannot be redrawn' });
+    }
+
+    try {
+      await thumbnailQueue.addToQueue(asset.assetId, asset.AssetType);
+      res.json({ message: 'Asset redraw queued successfully' });
+    } catch (queueError) {
+      console.error('Error adding to thumbnail queue:', queueError);
+      res.status(500).json({ error: 'Error queuing asset redraw' });
+    }
+  } catch (error) {
+    console.error('Error processing asset redraw:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // update asset
 router.put('/assets/:id', authenticateToken, async (req, res) => {
