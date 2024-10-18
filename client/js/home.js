@@ -11,7 +11,7 @@ $(document).ready(function () {
         Authorization: `Bearer ${token}`,
       },
       success: function (response) {
-        $('#profile-username').text(`Welcome, ${username}!`);
+        $('#profile-username').text(`Welcome, ${username}`);
         fetchUserBlurb();
         fetchFriendsList();
         fetchAndDisplayGames();
