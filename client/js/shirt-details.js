@@ -15,42 +15,47 @@ function loadShirtDetails(shirtId) {
       console.error('Error fetching shirt details:', error);
       console.error('Status:', status);
       console.error('Response:', xhr.responseText);
-      $('#shirt-details').html(
-        '<p>Error loading shirt details. Please try again later.</p>'
-      );
+      $('#shirt-details').html('<p>Error loading shirt details. Please try again later.</p>');
     },
   });
 }
 
 function displayShirtDetails(shirt) {
   const shirtDetailsContainer = $('#shirt-details');
-  const isOwner = shirt.creator._id === localStorage.getItem('userId');
   const detailsHtml = `
-        <div class="col-md-6">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">${shirt.Name}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-md-6">
             <div class="thumbnail">
-                <img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" class="img-responsive">
+              <img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" class="img-responsive">
             </div>
-        </div>
-        <div class="col-md-6">
-            <h1>${shirt.Name}</h1>
-            <p class="lead">By <a href="/user-profile?username=${encodeURIComponent(shirt.creator.username)}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></p>
+          </div>
+          <div class="col-md-6">
+            <h4>Created by <a href="/user-profile?username=${encodeURIComponent(shirt.creator.username)}">${shirt.creator ? shirt.creator.username : 'Unknown'}</a></h4>
             <hr>
             <div class="well">
-                <h3>Description</h3>
-                <p>${shirt.Description}</p>
+              <h4>Description</h4>
+              <p>${shirt.Description}</p>
             </div>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Shirt Details</h3>
-                </div>
-                <div class="panel-body">
-                    <p><strong>Price:</strong> ${shirt.Price} currency</p>
-                    <p><strong>For Sale:</strong> ${shirt.IsForSale ? 'Yes' : 'No'}</p>
-                </div>
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <h3 class="panel-title">Shirt Details</h3>
+              </div>
+              <div class="panel-body">
+                <p><strong>Price:</strong> ${shirt.Price} currency</p>
+                <p><strong>For Sale:</strong> ${shirt.IsForSale ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>'}</p>
+              </div>
             </div>
-            <div id="purchase-section"></div>
+            <div id="purchase-section" class="text-center"></div>
+          </div>
         </div>
-    `;
+      </div>
+    </div>
+  `;
   shirtDetailsContainer.html(detailsHtml);
 
   checkOwnership(shirt._id);

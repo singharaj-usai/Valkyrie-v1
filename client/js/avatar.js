@@ -134,8 +134,7 @@ function Pagination() {
     });
 }
 
-function generateItemHtml(name, imageSrc, creator, price, id, type) {
-    const priceDisplay = price === 0 ? 'Free' : `$${price}`;
+function generateItemHtml(name, imageSrc, creator, id, type) {
     return `
         <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 text-center mb-3">
             <div class="item-card center-block" data-id="${id}" data-type="${type}">
@@ -145,7 +144,6 @@ function generateItemHtml(name, imageSrc, creator, price, id, type) {
                 <div class="caption">
                     <h4 class="text-center">${name}</h4>
                     <p class="text-center"><b>Creator:</b> ${creator}</p>
-                    <p class="text-center"><b>Price:</b> ${priceDisplay}</p>
                     <button class="btn btn-primary wear-item" data-id="${id}" data-type="${type}">Wear</button>
                 </div>
             </div>
