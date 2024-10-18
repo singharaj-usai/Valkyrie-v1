@@ -324,7 +324,7 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       _id: req.params.id,
       AssetType: 'Shirt',
       IsForSale: 1,
-    });
+    }).populate('creator', 'userId');
     if (!shirt) {
       return res.status(404).json({ error: 'Shirt not found or not for sale' });
     }
@@ -342,7 +342,8 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Insufficient funds' });
     }
 
-    const seller = await User.findOne({ userId: shirt.creator });    if (!seller) {
+    const seller = await User.findOne({ userId: shirt.creator.userId });    
+    if (!seller) {
       return res.status(404).json({ error: 'Shirt creator not found' });
     }
 
