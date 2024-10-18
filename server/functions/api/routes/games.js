@@ -187,7 +187,7 @@ router.post(
       const asset = new Asset({
         assetId: assetId,
         FileLocation: AssetLocation,
-        creator: req.user.userId,
+        creator: req.user._id,
         AssetType: 'Place',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -206,7 +206,7 @@ router.post(
         thumbnailUrl,
         //rbxlFile: rbxlKey, no longer needed
         assetId,
-        creator: req.user.userId,
+        creator: req.user._id,
         genre,
         maxPlayers: parseInt(maxPlayers, 10),
         year: parseInt(year, 10),
