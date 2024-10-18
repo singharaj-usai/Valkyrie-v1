@@ -201,6 +201,7 @@ function wearItem(type, itemId) {
             updateCurrentlyWearing(type, response.avatar[type]);
             updateWearButton(type, itemId, true);
             showAlert('success', `Wore your ${type} successfully.`);
+           // saveAvatarSelection(type, itemId);
         },
         error: function (xhr, status, error) {
             console.error(`Error wearing ${type}:`, error);
@@ -235,6 +236,7 @@ function updateCurrentlyWearing(type, item) {
     const container = $('#currently-wearing');
     container.find(`[data-type="${type}"]`).remove();
 
+    if (item && item.ThumbnailLocation && item.Name) {
     const itemHtml = `
         <div class="col-xs-12 col-sm-6 col-md-4" data-type="${type}">
             <div class="panel panel-default">
@@ -251,6 +253,7 @@ function updateCurrentlyWearing(type, item) {
     `;
 
     container.append(itemHtml);
+    }
 }
 
 function removeItem(type) {
@@ -270,6 +273,7 @@ function removeItem(type) {
             $(`#currently-wearing [data-type="${type}"]`).remove();
             updateWearButton(type, null, false);
             showAlert('info', `Unwore your ${type}.`);
+           // saveAvatarSelection(type, null);
         },
         error: function (xhr, status, error) {
             console.error('Error unwearing item:', error);
@@ -296,7 +300,7 @@ function loadUserAvatar() {
             Authorization: `Bearer ${token}`,
         },
         success: function (avatar) {
-            if (avatar.shirtId) {
+            if (avatar.shirt && avatar.shirt._id) {
                 wearItem('shirt', avatar.shirtId);
         }
         },
@@ -324,7 +328,7 @@ function saveAvatarSelection(type, itemId) {
         success: function (response) {
             console.log('Avatar updated successfully:', response);
             if (itemId) {
-                updateAvatarDisplay(type, response.avatar[`${type}Id`]);
+                updateAvatarDisplay(type, response.avatar[type]);
                 updateCurrentlyWearing(type, response.avatar);
                 updateWearButton(type, itemId, true);
                 showAlert('success', `Wore your ${type} successfully.`);
@@ -386,13 +390,4 @@ function showAlert(type, message) {
     $('#avatar-container').prepend(alertHtml);
 }
 
-$(document).on('click', '.remove-item', function() {
-    const type = $(this).data('type');
-    removeItem(type);
-});
 
-function removeItem(type) {
-    $(`#avatar-${type}`).attr('src', '');
-    $(`#currently-wearing [data-type="${type}"]`).remove();
-    saveAvatarSelection(type, null);
-}

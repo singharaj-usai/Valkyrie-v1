@@ -67,7 +67,7 @@ router.put('/', authenticateToken, async (req, res) => {
                         _id: itemId,
                         creator: user._id,
                         AssetType: 'Shirt'
-                    });
+                    }).populate('creator', 'username');
 
                     if (!inventoryItem && !createdShirt) {
                         console.error('Shirt not in user inventory or not created by user:', itemId);
@@ -75,7 +75,7 @@ router.put('/', authenticateToken, async (req, res) => {
                     }
 
                     console.log('Setting shirt:', itemId);
-                    user.avatar.shirt = inventoryItem;
+                    user.avatar.shirt = createdShirt || inventoryItem;
                 } else {
                     console.log('Unwearing shirt');
                     user.avatar.shirt = null;
