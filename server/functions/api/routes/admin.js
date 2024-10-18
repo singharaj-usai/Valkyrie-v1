@@ -120,7 +120,7 @@ router.post('/assets/:id/redraw', authenticateToken, async (req, res) => {
   const assetId = req.params.id;
 
   try {
-    const asset = await Asset.findById(assetId);
+    const asset = await Asset.findById(assetId).populate('creator', 'username');
     if (!asset) {
       return res.status(404).json({ error: 'Asset not found' });
     }
@@ -211,6 +211,9 @@ router.put('/assets/:id', authenticateToken, async (req, res) => {
     asset.Description = Description;
     asset.Price = Price;
     await asset.save();
+
+    // Populate creator before sending  response
+    asset = await Asset.findById(asset._id).populate('creator', 'username');
 
     res.json(asset);
   } catch (error) {

@@ -169,12 +169,12 @@ function displayRecentAssets(assets) {
 			<tbody>
 			  ${assets.map((asset) => `
 				  <tr>
-					  <td>${asset.assetId}</td>
-					  <td>${asset.Name}</td>
-					  <td>${asset.AssetType}</td>
-					  <td>${asset.creator.username}</td>
-					  <td>${asset.Price}</td>
-					  <td>${asset.Sales}</td>
+					<td>${asset.assetId || 'N/A'}</td>
+					<td>${asset.Name || 'N/A'}</td>
+					<td>${asset.AssetType || 'N/A'}</td>
+					<td>${asset.creator && asset.creator.username ? asset.creator.username : 'Unknown'}</td>
+					<td>${asset.Price !== undefined ? asset.Price : 'N/A'}</td>
+					<td>${asset.Sales !== undefined ? asset.Sales : 'N/A'}</td>
 					  <td>
 						  <button class="btn btn-warning btn-xs edit-asset" data-asset-id="${asset._id}">Edit</button>
 						  <button class="btn btn-danger btn-xs delete-asset" data-asset-id="${asset._id}">Delete</button>
