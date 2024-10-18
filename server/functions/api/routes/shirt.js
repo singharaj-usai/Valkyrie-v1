@@ -379,7 +379,7 @@ router.get('/check-ownership/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Shirt not found' });
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findOne({ userId: req.user.userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
