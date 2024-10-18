@@ -589,7 +589,7 @@ $(document).ready(function () {
       const shirtHtml = generateItemHtml(
         shirt.Name,
         shirt.ThumbnailLocation,
-        shirt.creator.username,
+        shirt.creator ? shirt.creator.username : 'Unknown',
         shirt.Price
       );
       shirtsContainer.append(shirtHtml);

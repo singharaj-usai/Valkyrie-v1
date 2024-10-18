@@ -22,13 +22,13 @@ function displayPlacesPanel(user) {
     `;
 
   $('#user-places-panel').html(placesHtml);
-  fetchUserPlaces(user.username);
+  fetchUserPlaces(user.userId);
 }
 
-function fetchUserPlaces(username) {
+function fetchUserPlaces(userId) {
   const token = localStorage.getItem('token');
   $.ajax({
-    url: `/api/games/user/${username}`,
+    url: `/api/games/user/${userId}`,
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -64,66 +64,50 @@ function displayPlaces(places, category) {
 
   places.forEach((place, index) => {
     const placeHtml = `
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#user-places-${category}" href="#collapse-${category}-${index}">
-                ${escapeHtml(place.title)}
-              </a>
-            </h4>
-          </div>
-          <div id="collapse-${category}-${index}" class="panel-collapse collapse ${
-      index === 0 ? 'in' : ''
-    }">
-            <div class="panel-body">
-              <div class="row">
-                <div class="col-xs-12 col-sm-6">
-                  <a href="/game?id=${place._id}">
-                    <img src="${
-                      place.thumbnailUrl
-                        ? place.thumbnailUrl.startsWith('http')
-                          ? place.thumbnailUrl
-                          : '/' + place.thumbnailUrl.replace(/^\//, '')
-                        : '/images/placeholder-image.jpg'
-                    }" alt="${escapeHtml(
-      place.title
-    )}" class="img-responsive" style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
-                  </a>
-                  <a href="/game?id=${
-                    place._id
-                  }" class="btn btn-success btn-block" style="margin-top: 10px;">Play</a>
-                </div>
-                <div class="col-xs-12 col-sm-6">
-                  <p><strong>Genre:</strong> ${escapeHtml(
-                    place.genre || 'Not specified'
-                  )}</p>
-                  <p><strong>Max Players:</strong> ${
-                    place.maxPlayers || 'Not specified'
-                  }</p>
-                  <p>
-                    <strong>Year:</strong>
-                    ${
-                      place.year
-                        ? `<span class="badge" style="background-color: #337ab7;">${place.year}</span>`
-                        : '<span class="badge" style="background-color: #d9534f;">No Year</span>'
-                    }
-                  </p>
-                  <p><strong>Last Updated:</strong> ${new Date(
-                    place.updatedAt
-                  ).toLocaleDateString()}</p>
-                </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#user-places-${category}" href="#collapse-${category}-${index}">
+              ${escapeHtml(place.title)}
+            </a>
+          </h4>
+        </div>
+        <div id="collapse-${category}-${index}" class="panel-collapse collapse ${index === 0 ? 'in' : ''}">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-xs-12 col-sm-6">
+                <a href="/game?id=${place._id}">
+                  <img src="${place.thumbnailUrl ? place.thumbnailUrl.startsWith('http') ? place.thumbnailUrl : '/' + place.thumbnailUrl.replace(/^\//, '') : '/images/placeholder-image.jpg'}" 
+                       alt="${escapeHtml(place.title)}" 
+                       class="img-responsive" 
+                       style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
+                </a>
+                <a href="/game?id=${place._id}" class="btn btn-success btn-block" style="margin-top: 10px;">Play</a>
               </div>
-              <div class="row" style="margin-top: 15px;">
-                <div class="col-xs-12">
-                  <div class="well well-sm">
-                    <p>${escapeHtml(place.description)}</p>
-                  </div>
+              <div class="col-xs-12 col-sm-6">
+                <p><strong>Genre:</strong> ${escapeHtml(place.genre || 'Not specified')}</p>
+                <p><strong>Max Players:</strong> ${place.maxPlayers || 'Not specified'}</p>
+                <p>
+                  <strong>Year:</strong>
+                  ${place.year
+                    ? `<span class="badge" style="background-color: #337ab7;">${place.year}</span>`
+                    : '<span class="badge" style="background-color: #d9534f;">No Year</span>'
+                  }
+                </p>
+                <p><strong>Last Updated:</strong> ${new Date(place.updatedAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 15px;">
+              <div class="col-xs-12">
+                <div class="well well-sm">
+                  <p>${escapeHtml(place.description)}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      `;
+      </div>
+    `;
     placesContainer.append(placeHtml);
   });
 }

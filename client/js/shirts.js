@@ -12,11 +12,17 @@ function loadShirts() {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    success: function (shirts) {
-      displayShirts(shirts);
+    success: function (response) {
+      if (response.shirts && Array.isArray(response.shirts)) {
+        displayShirts(response.shirts);
+      } else {
+        console.error('Invalid response format:', response);
+        showError('Error: Invalid response format from the server.');
+      }
     },
     error: function (xhr, status, error) {
       console.error('Error fetching shirts:', error);
+      showError('Error fetching shirts. Please try again later.');
     },
   });
 }
@@ -31,41 +37,46 @@ function displayShirts(shirts) {
   }
 
   const table = $(`
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Thumbnail</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Asset ID</th>
-                    <th>Price</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    `);
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Thumbnail</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Asset ID</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  `);
 
   const tableBody = table.find('tbody');
 
   shirts.forEach((shirt) => {
     const row = $(`
-            <tr>
-                <td><img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" style="max-width: 50px; max-height: 50px;"></td>
-                <td>${shirt.Name}</td>
-                <td>${shirt.Description.substring(0, 50)}${shirt.Description.length > 50 ? '...' : ''}</td>
-                <td>${shirt.assetId}</td>
-                <td>${shirt.Price}</td>
-                <td>
-                    <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
-                </td>
-            </tr>
-        `);
+      <tr>
+        <td><img src="${shirt.ThumbnailLocation}" alt="${shirt.Name}" style="max-width: 50px; max-height: 50px;"></td>
+        <td>${shirt.Name}</td>
+        <td>${shirt.Description.substring(0, 50)}${shirt.Description.length > 50 ? '...' : ''}</td>
+        <td>${shirt.assetId}</td>
+        <td>${shirt.Price}</td>
+        <td>
+          <button class="btn btn-primary btn-sm edit-shirt" data-shirt-id="${shirt._id}">Edit</button>
+        </td>
+      </tr>
+    `);
     tableBody.append(row);
   });
 
   shirtsContainer.append(table);
+}
+
+function showError(message) {
+  const errorContainer = $('#error-container');
+  errorContainer.html(`<div class="alert alert-danger">${message}</div>`);
 }
 
 function setupShirtToggler() {
@@ -122,7 +133,7 @@ function saveShirtChanges() {
   const shirtData = {
     title: title,
     description: description,
-    price: price,
+    price: parseInt(price, 10)
   };
 
   $.ajax({
@@ -139,8 +150,12 @@ function saveShirtChanges() {
     },
     error: function (xhr, status, error) {
       console.error('Error updating shirt:', error);
+      let errorMessage = 'Error updating shirt';
+      if (xhr.responseJSON && xhr.responseJSON.error) {
+        errorMessage += ': ' + xhr.responseJSON.error;
+      }
       $('#shirt-error-message')
-        .text('Error updating shirt: ' + xhr.responseJSON.error)
+        .text(errorMessage)
         .removeClass('hidden');
     },
   });

@@ -67,6 +67,49 @@ async function getNextAssetId() {
   return counter.seq;
 }
 
+
+
+router.get('/user/:userId', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findOne({ userId: userId });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const games = await Game.find({ creator: user._id }).sort({
+      createdAt: -1,
+    }).populate('creator', 'username userId');
+    
+    res.json(games);
+  } catch (error) {
+    console.error('Error fetching user games:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const game = await Game.findOne({ _id: id, AssetType: 'Place' }).populate(
+      'creator',
+      'username userId'
+    );
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.json(game);
+  } catch (error) {
+    console.error('Error fetching game:', error);
+    res
+      .status(500)
+      .json({ error: 'Error fetching game', details: error.message });
+  }
+});
+
+
+
 router.post(
   '/upload',
   authenticateToken,
@@ -218,17 +261,19 @@ router.get('/user', authenticateToken, async (req, res) => {
 });
 
 // New route to update a game
-router.put(
-  '/:id',
-  authenticateToken,
-  upload.single('thumbnail'),
-  async (req, res) => {
+router.put('/:id', authenticateToken, upload.single('thumbnail'), async (req, res) => {
     try {
       const { id } = req.params;
       const { title, description, genre, maxPlayers, year } = req.body;
 
+      // Find the user first
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      } 
+
       // Check if the game exists and belongs to the current user
-      const game = await Game.findOne({ _id: id, creator: req.user.userId });
+      const game = await Game.findOne({ _id: id, creator: user._id });
       if (!game) {
         return res.status(404).json({
           error: 'Game not found or you do not have permission to edit it',
@@ -247,7 +292,7 @@ router.put(
       if (req.file) {
         // Delete the old thumbnail file
         if (game.thumbnailUrl) {
-          const oldThumbnailPath = path.join(
+          const oldThumbnailPath = path.join( 
             __dirname,
             '../../../../uploads',
             path.basename(game.thumbnailUrl)
@@ -278,40 +323,7 @@ router.put(
   }
 );
 
-router.get('/:id', authenticateToken, async (req, res) => {
-  try {
-    const game = await Game.findById(req.params.id).populate(
-      'creator',
-      'username'
-    );
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-    res.json(game);
-  } catch (error) {
-    console.error('Error fetching game:', error);
-    res
-      .status(500)
-      .json({ error: 'Error fetching game', details: error.message });
-  }
-});
 
-router.get('/user/:username', authenticateToken, async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await User.findOne({ username: username });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    const games = await Game.find({ creator: user._id }).sort({
-      createdAt: -1,
-    });
-    res.json(games);
-  } catch (error) {
-    console.error('Error fetching user games:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 // Function to generate a unique asset ID
 function generateAssetId() {

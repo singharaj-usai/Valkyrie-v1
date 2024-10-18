@@ -45,7 +45,6 @@ const authenticateToken = (req, res, next) => {
       return res.sendStatus(403);
     }
     req.user = {
-      _id: user._id,
       userId: user.userId
     };
     next();
@@ -134,7 +133,7 @@ router.get('/:id', async (req, res) => {
     const id = req.params.id;
     const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' }).populate(
       'creator',
-      'username'
+      'username userId'
     );
     if (!shirt) {
       return res.status(404).json({ error: 'Shirt not found' });
@@ -213,7 +212,7 @@ router.post(
       const asset = new Asset({
         assetId: assetId,
         FileLocation: assetLocation,
-        creator: req.user._id,
+        creator: req.user.userId,
         AssetType: 'Image',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -252,7 +251,7 @@ router.post(
       const shirt = new Asset({
         assetId: shirtassetId,
         FileLocation: shirtassetLocation,
-        creator: req.user._id,
+        creator: req.user.userId,
         AssetType: 'Shirt',
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -323,7 +322,7 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Shirt not found or not for sale' });
     }
 
-    const buyer = await User.findById(req.user.userId);
+    const buyer = await User.findOne({ userId: req.user.userId });
     if (!buyer) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -336,8 +335,7 @@ router.post('/purchase/:id', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Insufficient funds' });
     }
 
-    const seller = await User.findById(shirt.creator);
-    if (!seller) {
+    const seller = await User.findOne({ userId: shirt.creator });    if (!seller) {
       return res.status(404).json({ error: 'Shirt creator not found' });
     }
 
@@ -441,8 +439,13 @@ router.put('/:shirtId', authenticateToken, async (req, res) => {
       });
     }
 
+    const user = await User.findOne({ userId: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const updatedShirt = await Asset.findOneAndUpdate(
-      { _id: shirtId, creator: req.user.userId, AssetType: 'Shirt' },
+      { _id: shirtId, creator: user._id, AssetType: 'Shirt' },
       {
         Name: filter.clean(title),
         Description: filter.clean(description),
@@ -463,30 +466,30 @@ router.put('/:shirtId', authenticateToken, async (req, res) => {
     console.error('Error updating shirt:', error);
     res
       .status(500)
-      .json({ error: 'An error occurred while updating the shirt' });
+      .json({ error: 'An error occurred while updating the shirt', details: error.message });
   }
 });
 
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description, price } = req.body;
 
     // Check if the shirt exists and belongs to the current user
-    const shirt = await Asset.findOne({
-      _id: id,
-      AssetType: 'Shirt',
-      creator: req.user.userId,
-    });
+    const shirt = await Asset.findOne({ _id: id, AssetType: 'Shirt' });
+
     if (!shirt) {
-      return res.status(404).json({
-        error: 'Shirt not found or you do not have permission to edit it',
-      });
+      return res.status(404).json({ error: 'Shirt not found' });
+    }
+
+    if (shirt.creator.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'You are not authorized to update this shirt' });
     }
 
     // Update shirt details
     shirt.title = filter.clean(title);
     shirt.description = filter.clean(description);
+    shirt.price = price;
     shirt.updatedAt = new Date();
 
     // Save the updated shirt

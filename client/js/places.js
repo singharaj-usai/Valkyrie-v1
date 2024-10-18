@@ -30,8 +30,10 @@ $(document).ready(function () {
 
   function fetchUserGames() {
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
     $.ajax({
-      url: '/api/games/user',
+      url: `/api/games/user/${userId}`,
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -239,7 +241,11 @@ $(document).ready(function () {
       },
       success: function (response) {
         $('#editGameModal').modal('hide');
-        fetchUserGames(); // Refresh the games list
+        showSuccess('Game updated successfully');
+        setTimeout(() => {
+          fetchUserGames(); // Refresh the games list
+        }, 1000);
+
       },
       error: function (xhr, status, error) {
         let errorMessage = 'Error updating game: ';

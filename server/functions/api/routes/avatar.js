@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // Get current avatar
 router.get('/', authenticateToken, async (req, res) => {
