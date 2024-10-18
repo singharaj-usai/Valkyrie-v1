@@ -550,10 +550,9 @@ $(document).ready(function () {
     // Load user's shirts
     loadUserShirts(user._id);
 
-    // Initialize Bootstrap tabs
+    //  Bootstrap tabs
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-      // You can add logic here to load items dynamically if needed
-      //   console.log('Tab switched to: ' + $(e.target).attr('href'));
+
     });
   }
 
@@ -565,7 +564,7 @@ $(document).ready(function () {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       success: function (shirts) {
-        displayUserShirts(shirts);
+        displayUserShirts(shirts, userId);
       },
       error: function (xhr, status, error) {
         console.error('Error fetching user shirts:', error);
@@ -576,7 +575,7 @@ $(document).ready(function () {
     });
   }
 
-  function displayUserShirts(shirts) {
+  function displayUserShirts(shirts, userId) {
     const shirtsContainer = $('#user-shirts');
     shirtsContainer.empty();
 
@@ -590,7 +589,8 @@ $(document).ready(function () {
         shirt.Name,
         shirt.ThumbnailLocation,
         shirt.creator ? shirt.creator.username : 'Unknown',
-        shirt.Price
+        shirt.Price,
+        shirt.creator && shirt.creator._id === userId ? 'Created' : 'Owned'
       );
       shirtsContainer.append(shirtHtml);
     });

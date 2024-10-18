@@ -19,7 +19,6 @@ function loadAvatarsItems() {
 
 let currentPage = 1;
 let totalPages = 1;
-
 function loadShirts(page = 1) {
     const token = localStorage.getItem('token');
     console.log('Loading shirts for user, page:', page);
@@ -31,7 +30,7 @@ function loadShirts(page = 1) {
             Authorization: `Bearer ${token}`,
         },
         success: function (res) {
-            console.log('Shirts loaded successfully:', res.shirts.length);
+            console.log('Shirts loaded successfully:', res.shirts);
             displayUserShirts(res.shirts);
             updatePagination(res.currentPage, res.totalPages);
             totalPages = res.totalPages;
@@ -55,9 +54,21 @@ function displayUserShirts(shirts) {
         return;
     }
 
+    // Get the user ID from local storage
+    const token = localStorage.getItem('token');
+    let currentUserId = null;
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            currentUserId = payload.userId;
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
+    }
+
     console.log('Displaying shirts:', shirts.length);
     shirts.forEach((shirt) => {
-        if (!shirt || !shirt.Name || !shirt.ThumbnailLocation) {
+        if (!shirt || !shirt.Name || !shirt.FileLocation) {
             console.error('Invalid shirt object:', shirt);
             return;
         }
@@ -65,14 +76,14 @@ function displayUserShirts(shirts) {
             shirt.Name,
             shirt.ThumbnailLocation,
             shirt.creator ? shirt.creator.username : 'Unknown',
-            shirt.Price,
             shirt._id,
-            'shirt'
+            'shirt',
+            shirt.creator && shirt.creator._id === currentUserId ? 'Created' : 'Owned'
+
         );
         container.append(shirtHtml);
     });
 }
-
 
 
 function updatePagination(currentPage, totalPages) {
@@ -134,7 +145,7 @@ function Pagination() {
     });
 }
 
-function generateItemHtml(name, imageSrc, creator, id, type) {
+function generateItemHtml(name, imageSrc, creator, id, type, ownership) {
     return `
         <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 text-center mb-3">
             <div class="item-card center-block" data-id="${id}" data-type="${type}">
@@ -144,6 +155,7 @@ function generateItemHtml(name, imageSrc, creator, id, type) {
                 <div class="caption">
                     <h4 class="text-center">${name}</h4>
                     <p class="text-center"><b>Creator:</b> ${creator}</p>
+                    <p class="text-center"><b>Status:</b> ${ownership}</p>
                     <button class="btn btn-primary wear-item" data-id="${id}" data-type="${type}">Wear</button>
                 </div>
             </div>
@@ -152,47 +164,65 @@ function generateItemHtml(name, imageSrc, creator, id, type) {
 }
 
 function setupItemSelection() {
-    $(document).on('click', '.select-item', function () {
+    $(document).on('click', '.wear-item', function () {
         const type = $(this).data('type');
         const itemId = $(this).data('id');
-        wearItem(type, itemId);
-        saveAvatarSelection(type, itemId);
+        const isWearing = $(this).hasClass('btn-success');
+        
+        if (isWearing) {
+            removeItem(type);
+        } else {
+            wearItem(type, itemId);
+        }
+    });
+
+    $(document).on('click', '.remove-item', function () {
+        const type = $(this).data('type');
+        removeItem(type);
     });
 }
 
 function wearItem(type, itemId) {
     const token = localStorage.getItem('token');
-    let apiUrl = '';
 
-    switch (type) {
-        case 'shirt':
-            apiUrl = `/api/shirts/${itemId}`;
-            break;
-        // Add cases for 'pants' and 'hat' when made
-        default:
-            return;
-    }
+    console.log(`Attempting to wear ${type} with ID: ${itemId}`);
 
     $.ajax({
-        url: apiUrl,
-        method: 'GET',
+        url: '/api/avatar',
+        method: 'PUT',
         headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
-        success: function (item) {
-            updateAvatarDisplay(type, item.thumbnailUrl); // item.ThumbnailLocation
-            updateCurrentlyWearing(type, item);
+        data: JSON.stringify({ type, itemId }),
+        success: function (response) {
+            console.log('Avatar updated successfully:', response);
+            updateAvatarDisplay(type, response.avatar[type]);
+            updateCurrentlyWearing(type, response.avatar[type]);
+            updateWearButton(type, itemId, true);
+            showAlert('success', `Wore your ${type} successfully.`);
         },
         error: function (xhr, status, error) {
-            console.error(`Error fetching ${type}:`, error);
+            console.error(`Error wearing ${type}:`, error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            let errorMessage = `Error wearing ${type}. Please try again later.`;
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage = xhr.responseJSON.error;
+            }
+            showAlert('danger', errorMessage);
         },
     });
 }
 
-function updateAvatarDisplay(type, imageUrl) {
+function updateAvatarDisplay(type, item) {
     switch (type) {
         case 'shirt':
-            $('#avatar-shirt').attr('src', imageUrl);
+            if (item && item.ThumbnailLocation) {
+                $('#avatar-shirt').attr('src', item.ThumbnailLocation);
+            } else {
+                $('#avatar-shirt').attr('src', ''); 
+            }
             break;
         // Add cases for 'pants' and 'hat' when i makethem
         default:
@@ -203,25 +233,58 @@ function updateAvatarDisplay(type, imageUrl) {
 
 function updateCurrentlyWearing(type, item) {
     const container = $('#currently-wearing');
-    const existingItem = container.find(`[data-type="${type}"]`);
-    
-    if (existingItem.length) {
-        existingItem.remove();
-    }
+    container.find(`[data-type="${type}"]`).remove();
 
     const itemHtml = `
-        <div class="col-xs-6 col-sm-3" data-type="${type}">
-            <div class="thumbnail">
-                <img src="${item.ThumbnailLocation}" alt="${item.Name}" class="img-responsive">
-                <div class="caption">
-                    <h5>${item.Name}</h5>
-                    <button class="btn btn-danger btn-sm remove-item" data-type="${type}">Remove</button>
+        <div class="col-xs-12 col-sm-6 col-md-4" data-type="${type}">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+                </div>
+                <div class="panel-body">
+                    <img src="${item.ThumbnailLocation}" alt="${item.Name}" class="img-responsive center-block" style="max-height: 100px;">
+                    <h5 class="text-center">${item.Name}</h5>
+                    <button class="btn btn-danger btn-block remove-item" data-type="${type}">Remove</button>
                 </div>
             </div>
         </div>
     `;
 
     container.append(itemHtml);
+}
+
+function removeItem(type) {
+    const token = localStorage.getItem('token');
+
+    $.ajax({
+        url: '/api/avatar',
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        data: JSON.stringify({ type: type, itemId: null }), // Indicate unwearing
+        success: function (response) {
+            console.log('Avatar updated successfully.');
+            $(`#avatar-${type}`).attr('src', '');
+            $(`#currently-wearing [data-type="${type}"]`).remove();
+            updateWearButton(type, null, false);
+            showAlert('info', `Unwore your ${type}.`);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error unwearing item:', error);
+            showAlert('danger', 'Error unwearing the item. Please try again later.');
+        },
+    });
+}
+
+function updateWearButton(type, itemId, isWearing) {
+    const wearButton = $(`.wear-item[data-type="${type}"]`);
+    wearButton.removeClass('btn-success').addClass('btn-primary').text('Wear');
+
+    if (isWearing && itemId) {
+        wearButton.removeClass('btn-primary').addClass('btn-success').text('Wearing');
+    }
 }
 
 function loadUserAvatar() {
@@ -246,29 +309,37 @@ function loadUserAvatar() {
 
 function saveAvatarSelection(type, itemId) {
     const token = localStorage.getItem('token');
-    const avatarData = {};
-
-    switch (type) {
-        case 'shirt':
-            avatarData.shirtId = itemId;
-            break;
-        default:
-            return;
-    }
+    const avatarData = { type, itemId };
+    console.log(`Saving avatar selection: ${type}, ID: ${itemId}`);
 
     $.ajax({
         url: '/api/avatar',
         method: 'PUT',
-        data: JSON.stringify(avatarData),
         contentType: 'application/json',
         headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
+        data: JSON.stringify(avatarData),
         success: function (response) {
-            console.log('Avatar updated successfully.');
+            console.log('Avatar updated successfully:', response);
+            if (itemId) {
+                updateAvatarDisplay(type, response.avatar[`${type}Id`]);
+                updateCurrentlyWearing(type, response.avatar);
+                updateWearButton(type, itemId, true);
+                showAlert('success', `Wore your ${type} successfully.`);
+            } else {
+                $(`#avatar-${type}`).attr('src', '');
+                $(`#currently-wearing [data-type="${type}"]`).remove();
+                updateWearButton(type, null, false);
+                showAlert('info', `Unwore your ${type}.`);
+            }
         },
         error: function (xhr, status, error) {
             console.error('Error updating avatar:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            showAlert('danger', `Error wearing ${type}. Please try again later.`);
         },
     });
 }
@@ -301,6 +372,18 @@ function setupBodyColors() {
 
 function updateBodyColor(part, color) {
     // to do
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            ${message}
+        </div>
+    `;
+    $('#avatar-container').prepend(alertHtml);
 }
 
 $(document).on('click', '.remove-item', function() {

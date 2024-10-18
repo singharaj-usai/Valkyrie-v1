@@ -274,7 +274,10 @@ router.post(
       await thumbnailQueue.addToQueue(shirtassetId, 'Shirt');
 
       await User.findByIdAndUpdate(req.user._id, {
-        $push: { shirts: shirt._id },
+        $push: { 
+          shirts: shirt._id,
+          inventory: shirt._id
+        },
       });
 
       res.status(201).json({ shirtId: shirt._id, assetId: shirt.assetId });
