@@ -17,10 +17,16 @@ function loadAvatarsItems() {
     // loadHats();
 }
 
+function getCurrentlyWornShirtId() {
+    const currentlyWearing = $('#currently-wearing [data-type="shirt"]');
+    return currentlyWearing.length > 0 ? currentlyWearing.data('id') : null;
+}
+
 let currentPage = 1;
 let totalPages = 1;
 function loadShirts(page = 1) {
     const token = localStorage.getItem('token');
+    const currentlyWornShirtId = getCurrentlyWornShirtId();
     console.log('Loading shirts for user, page:', page);
 
     $.ajax({
@@ -31,7 +37,7 @@ function loadShirts(page = 1) {
         },
         success: function (res) {
             console.log('Shirts loaded successfully:', res.shirts);
-            displayUserShirts(res.shirts);
+            displayUserShirts(res.shirts, currentlyWornShirtId);
             updatePagination(res.currentPage, res.totalPages);
             totalPages = res.totalPages;
         },
@@ -44,7 +50,7 @@ function loadShirts(page = 1) {
     });
 }
 
-function displayUserShirts(shirts) {
+function displayUserShirts(shirts, currentlyWornShirtId) {
     const container = $('#shirts-container');
     container.empty();
 
@@ -72,14 +78,15 @@ function displayUserShirts(shirts) {
             console.error('Invalid shirt object:', shirt);
             return;
         }
+        const isWearing = shirt._id === currentlyWornShirtId;
         const shirtHtml = generateItemHtml(
             shirt.Name,
             shirt.ThumbnailLocation,
             shirt.creator ? shirt.creator.username : 'Unknown',
             shirt._id,
             'shirt',
-            shirt.creator && shirt.creator._id === currentUserId ? 'Created' : 'Owned'
-
+            shirt.creator && shirt.creator._id === currentUserId ? 'Created' : 'Owned',
+            isWearing
         );
         container.append(shirtHtml);
     });
@@ -137,15 +144,15 @@ function generatePageNumbers(currentPage, totalPages) {
 function Pagination() {
     $('#pagination-container').on('click', 'a', function (e) {
         e.preventDefault();
-        const page = parseInt($(this).data('page'));
-        if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+        const page = $(this).data('page');
+        if (page >= 1 && page <= totalPages) {
             currentPage = page;
             loadShirts(currentPage);
         }
     });
 }
 
-function generateItemHtml(name, imageSrc, creator, id, type, ownership) {
+function generateItemHtml(name, imageSrc, creator, id, type, ownership, isWearing) {
     return `
         <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 text-center mb-3">
             <div class="item-card center-block" data-id="${id}" data-type="${type}">
@@ -156,7 +163,9 @@ function generateItemHtml(name, imageSrc, creator, id, type, ownership) {
                     <h4 class="text-center">${name}</h4>
                     <p class="text-center"><b>Creator:</b> ${creator}</p>
                     <p class="text-center"><b>Status:</b> ${ownership}</p>
-                    <button class="btn btn-primary wear-item" data-id="${id}" data-type="${type}">Wear</button>
+                    <button class="btn btn-block wear-item ${isWearing ? 'btn-success' : 'btn-primary'}" data-id="${id}" data-type="${type}">
+                        ${isWearing ? 'Wearing' : 'Wear'}
+                    </button>
                 </div>
             </div>
         </div>
@@ -201,7 +210,9 @@ function wearItem(type, itemId) {
             updateCurrentlyWearing(type, response.avatar[type]);
             updateWearButton(type, itemId, true);
             showAlert('success', `Wore your ${type} successfully.`);
-           // saveAvatarSelection(type, itemId);
+            $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
+            $(`.wear-item[data-id="${itemId}"]`).removeClass('btn-primary').addClass('btn-success').text('Wearing');
+        
         },
         error: function (xhr, status, error) {
             console.error(`Error wearing ${type}:`, error);
@@ -212,6 +223,32 @@ function wearItem(type, itemId) {
                 errorMessage = xhr.responseJSON.error;
             }
             showAlert('danger', errorMessage);
+        },
+    });
+}
+
+function removeItem(type) {
+    const token = localStorage.getItem('token');
+
+    $.ajax({
+        url: '/api/avatar',
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        data: JSON.stringify({ type: type, itemId: null }), // Indicate unwearing
+        success: function (response) {
+            console.log('Avatar updated successfully.');
+            $(`#avatar-${type}`).attr('src', '');
+            $(`#currently-wearing [data-type="${type}"]`).remove();
+            updateWearButton(type, null, false);
+            showAlert('info', `Unwore your ${type}.`);
+            $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
+        },
+        error: function (xhr, status, error) {
+            console.error('Error unwearing item:', error);
+            showAlert('danger', 'Error unwearing the item. Please try again later.');
         },
     });
 }
@@ -230,6 +267,7 @@ function updateAvatarDisplay(type, item) {
             break;
     }
 }
+
 
 
 function updateCurrentlyWearing(type, item) {
@@ -256,38 +294,13 @@ function updateCurrentlyWearing(type, item) {
     }
 }
 
-function removeItem(type) {
-    const token = localStorage.getItem('token');
-
-    $.ajax({
-        url: '/api/avatar',
-        method: 'PUT',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        data: JSON.stringify({ type: type, itemId: null }), // Indicate unwearing
-        success: function (response) {
-            console.log('Avatar updated successfully.');
-            $(`#avatar-${type}`).attr('src', '');
-            $(`#currently-wearing [data-type="${type}"]`).remove();
-            updateWearButton(type, null, false);
-            showAlert('info', `Unwore your ${type}.`);
-           // saveAvatarSelection(type, null);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error unwearing item:', error);
-            showAlert('danger', 'Error unwearing the item. Please try again later.');
-        },
-    });
-}
-
 function updateWearButton(type, itemId, isWearing) {
-    const wearButton = $(`.wear-item[data-type="${type}"]`);
-    wearButton.removeClass('btn-success').addClass('btn-primary').text('Wear');
+    const wearButtons = $(`.wear-item[data-type="${type}"]`);
+    wearButtons.removeClass('btn-success').addClass('btn-primary').text('Wear');
 
     if (isWearing && itemId) {
-        wearButton.removeClass('btn-primary').addClass('btn-success').text('Wearing');
+        const wearingButton = wearButtons.filter(`[data-id="${itemId}"]`);
+        wearingButton.removeClass('btn-primary').addClass('btn-success').text('Wearing');
     }
 }
 
