@@ -7,6 +7,9 @@ const Asset = require('../models/Asset');
 
 // Get current avatar
 router.get('/', authenticateToken, async (req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     try {
         console.log('Fetching avatar for userId:', req.user.userId);
         const user = await User.findOne({ userId: req.user.userId }).select('avatar');
