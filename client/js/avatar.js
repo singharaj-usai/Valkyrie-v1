@@ -38,8 +38,6 @@ function loadShirts(page = 1) {
         success: function (res) {
             console.log('Shirts loaded successfully:', res.shirts);
             displayUserShirts(res.shirts, currentlyWornShirtId);
-            updateCurrentlyWearing(res.shirts.type, res.shirts);
-            updateWearButton(res.shirts.type, res.shirts, true);
             updatePagination(res.currentPage, res.totalPages);
             totalPages = res.totalPages;
         },
