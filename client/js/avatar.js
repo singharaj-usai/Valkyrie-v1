@@ -313,7 +313,7 @@ function loadUserAvatar() {
             Authorization: `Bearer ${token}`,
         },
         success: function (avatar) {
-            if (avatar.shirt && avatar.shirt._id) {
+            if (avatar.shirt) {
                 wearItem('shirt', avatar.shirtId);
         }
         },
