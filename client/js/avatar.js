@@ -313,7 +313,10 @@ function loadUserAvatar() {
             Authorization: `Bearer ${token}`,
         },
         success: function (avatar) {
-            wearItem('shirt', avatar.shirtId);
+            if (avatar.shirt && avatar.shirt._id) {
+                console.log("bro");
+                wearItem('shirt', avatar.shirtId);
+        }
         },
         error: function (xhr, status, error) {
             console.error('Error loading avatar:', error);
