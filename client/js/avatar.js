@@ -306,6 +306,7 @@ function updateWearButton(type, itemId, isWearing) {
 
 function loadUserAvatar() {
     const token = localStorage.getItem('token');
+    console.log("hahaahsha");
     $.ajax({
         url: '/api/avatar',
         method: 'GET',
