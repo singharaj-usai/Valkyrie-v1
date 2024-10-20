@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema({
   verificationToken: {
     type: String,
   },
+  avatar: {
+        shirt: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        pants: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        hat: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        gear: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        heads: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        face: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null },
+        tshirts: { type: mongoose.Schema.Types.ObjectId, ref: 'Asset', default: null }
+  },
   signupDate: {
     type: Date,
     default: () => moment().tz('America/New_York').toDate(),
