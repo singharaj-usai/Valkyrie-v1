@@ -368,7 +368,16 @@ router.post('/reset-forum-post-count', authenticateToken, async (req, res) => {
 // Get all users
 router.get('/users', async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const { search, sortBy, sortOrder } = req.query;
+    const query = search ? { username: new RegExp(search, 'i') } : {};
+    const sort = {};
+    if (sortBy) {
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    }
+
+    const users = await User.find(query)
+      .select('-password')
+      .sort(sort);
     const currentUser = await User.findOne({ userId: req.user.userId }).select('adminLevel');
     
     if (!currentUser) {

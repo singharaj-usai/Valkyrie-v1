@@ -1,21 +1,89 @@
+let currentSearch = '';
+let currentSortBy = 'username';
+let currentSortOrder = 'asc';
+
+// Update the loadUsers function
 function loadUsers() {
   const currentUserId = localStorage.getItem('userId');
   const contentArea = $('#content-area');
-  contentArea.html(
-    '<h2 class="text-primary">User Management</h2><div id="user-management" class="row"></div>'
-  );
+  contentArea.html(`
+    <h2 class="text-primary">User Management</h2>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" id="user-search" class="form-control" placeholder="Search users...">
+          <span class="input-group-btn">
+            <button class="btn btn-primary" type="button" id="search-btn">
+              <i class="fa fa-search"></i> Search
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group">
+          <select id="sort-by" class="form-control">
+            <option value="username">Username</option>
+            <option value="email">Email</option>
+            <option value="signupDate">Signup Date</option>
+            <option value="currency">Currency</option>
+          </select>
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="sort-order-btn">
+              <i class="fa fa-sort-alpha-asc"></i> Sort
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div id="user-management" class="row"></div>
+  `);
 
+  // Add event listeners for search and sort
+  $('#search-btn').on('click', performSearch);
+  $('#user-search').on('keyup', function(e) {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+  $('#sort-by').on('change', performSort);
+  $('#sort-order-btn').on('click', toggleSortOrder);
+
+  fetchUsers();
+}
+
+function performSearch() {
+  currentSearch = $('#user-search').val().trim();
+  fetchUsers();
+}
+
+function performSort() {
+  currentSortBy = $('#sort-by').val();
+  fetchUsers();
+}
+
+function toggleSortOrder() {
+  currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+  $('#sort-order-btn i').toggleClass('fa-sort-alpha-asc fa-sort-alpha-desc');
+  fetchUsers();
+}
+
+function fetchUsers() {
   $.ajax({
     url: '/api/admin/users',
     method: 'GET',
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
+    data: {
+      search: currentSearch,
+      sortBy: currentSortBy,
+      sortOrder: currentSortOrder
+    },
     success: function (response) {
-      displayUsers(response.users, response.currentAdminLevel, currentUserId);
+      displayUsers(response.users, response.currentAdminLevel);
     },
     error: function () {
-      contentArea.html(
+      $('#user-management').html(
         '<div class="alert alert-danger" role="alert">Error loading users.</div>'
       );
     },
@@ -28,6 +96,11 @@ function displayUsers(users, currentAdminLevel) {
 
   const currentAdminId = localStorage.getItem('userId');
 
+  if (users.length === 0) {
+    userManagement.html('<div class="col-md-12"><div class="alert alert-info" role="alert">No users found.</div></div>');
+    return;
+  }
+
   users.forEach((user) => {
     const panel = $(`
       <div class="col-md-6 col-lg-4 mb-4">
@@ -37,9 +110,9 @@ function displayUsers(users, currentAdminLevel) {
           </div>
           <div class="panel-body">
             <div class="user-info">
-              <p><i class="fa fa-envelope"></i> ${escapeHtml(user.email)}</p>
-              <p><i class="fa fa-calendar"></i> ${new Date(user.signupDate).toLocaleString()}</p>
-              <p><i class="fa fa-money"></i> Currency: ${user.currency}</p>
+              <p><i class="fa fa-envelope"></i><b> Email:</b> ${escapeHtml(user.email)}</p>
+              <p><i class="fa fa-calendar"></i><b> Signup Date:</b> ${new Date(user.signupDate).toLocaleString()}</p>
+              <p><i class="fa fa-money"></i><b> Currency:</b> ${user.currency}</p>
               <p>
                 <span class="label label-${user.isBanned ? 'danger' : 'success'}">
                   <i class="fa fa-${user.isBanned ? 'ban' : 'check'}"></i> ${user.isBanned ? 'Banned' : 'Active'}

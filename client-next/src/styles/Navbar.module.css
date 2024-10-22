@@ -1,0 +1,23 @@
+.userSubmenu {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 1029;
+  border-top: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.navbarNav {
+  float: none;
+}
+
+.navbarNav > li {
+  float: none;
+  display: inline-block;
+}
+
+.navbarNav > li > a {
+  padding-top: 15px;
+}

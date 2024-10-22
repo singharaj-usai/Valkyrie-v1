@@ -210,6 +210,8 @@ function wearItem(type, itemId) {
             updateCurrentlyWearing(type, response.avatar[type]);
             updateWearButton(type, itemId, true);
             showAlert('success', `Wore your ${type} successfully.`);
+            saveAvatarSelection(type, itemId);
+
             $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
             $(`.wear-item[data-id="${itemId}"]`).removeClass('btn-primary').addClass('btn-success').text('Wearing');
         
@@ -244,6 +246,8 @@ function removeItem(type) {
             $(`#currently-wearing [data-type="${type}"]`).remove();
             updateWearButton(type, null, false);
             showAlert('info', `Unwore your ${type}.`);
+            saveAvatarSelection(type, null);
+
             $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
         },
         error: function (xhr, status, error) {
@@ -314,8 +318,10 @@ function loadUserAvatar() {
         },
         success: function (avatar) {
             if (avatar.shirt && avatar.shirt._id) {
-                wearItem('shirt', avatar.shirtId);
-        }
+                updateAvatarDisplay('shirt', avatar.shirt);
+                updateCurrentlyWearing('shirt', avatar.shirt);
+                updateWearButton('shirt', avatar.shirt._id, true);
+            }
         },
         error: function (xhr, status, error) {
             console.error('Error loading avatar:', error);
@@ -342,7 +348,7 @@ function saveAvatarSelection(type, itemId) {
             console.log('Avatar updated successfully:', response);
             if (itemId) {
                 updateAvatarDisplay(type, response.avatar[type]);
-                updateCurrentlyWearing(type, response.avatar);
+                updateCurrentlyWearing(type, response.avatar[type]);
                 updateWearButton(type, itemId, true);
                 showAlert('success', `Wore your ${type} successfully.`);
             } else {
@@ -356,7 +362,7 @@ function saveAvatarSelection(type, itemId) {
             console.error('Error updating avatar:', error);
             console.error('Status:', status);
             console.error('Response:', xhr.responseText);
-            showAlert('danger', `Error wearing ${type}. Please try again later.`);
+            showAlert('danger', `Error ${itemId ? 'wearing' : 'unwearing'} ${type}. Please try again later.`);
         },
     });
 }
