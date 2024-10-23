@@ -310,6 +310,7 @@ function updateWearButton(type, itemId, isWearing) {
 
 function loadUserAvatar() {
     const token = localStorage.getItem('token');
+    console.log("hahaahsha");
     $.ajax({
         url: '/api/avatar',
         method: 'GET',
@@ -318,10 +319,8 @@ function loadUserAvatar() {
         },
         success: function (avatar) {
             if (avatar.shirt && avatar.shirt._id) {
-                updateAvatarDisplay('shirt', avatar.shirt);
-                updateCurrentlyWearing('shirt', avatar.shirt);
-                updateWearButton('shirt', avatar.shirt._id, true);
-            }
+                wearItem('shirt', avatar.shirtId);
+        }
         },
         error: function (xhr, status, error) {
             console.error('Error loading avatar:', error);
