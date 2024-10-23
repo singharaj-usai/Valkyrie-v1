@@ -34,30 +34,18 @@ const Friends = {
                 html += '<div class="row" id="friendsContainer">';
                 friendsWithStatus.slice(0, 6).forEach((friend, index) => {
                   html += `
-                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 text-center mb-3 friend-item ${
-                          index >= 6 ? 'hidden-xs hidden-sm' : ''
-                        }">
-                          <a href="/user-profile?username=${encodeURIComponent(
-                            friend.username
-                          )}" title="${this.escapeHtml(friend.username)}">
-                            <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png"
-                                 alt="${this.escapeHtml(friend.username)}" 
-                                 class="img-circle" 
-                                 style="width: 100px; height: 100px; background-color: #f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 text-center mb-3 friend-item ${index >= 6 ? 'hidden-xs hidden-sm' : ''}">
+                          <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${this.escapeHtml(friend.username)}">
+                            <img src="https://www.nicepng.com/png/full/146-1466409_roblox-bacon-hair-png-roblox-bacon-hair-head.png" alt="${this.escapeHtml(friend.username)}" class="img-circle" style="width: 100px; height: 100px; background-color: #f5f5f5;">
                           </a>
                           <p class="mt-2">
-                            <a href="/user-profile?username=${encodeURIComponent(
-                              friend.username
-                            )}" title="${this.escapeHtml(friend.username)}">
-                              <span class="friend-status ${
-                                friend.isOnline ? 'text-success' : 'text-danger'
-                              }">
+                            <a href="/user-profile?username=${encodeURIComponent(friend.username)}" title="${this.escapeHtml(friend.username)}">
+                              <span class="friend-status ${friend.isOnline ? 'text-success' : 'text-danger'}">
                                 <i class="bi bi-circle-fill"></i>
                               </span>
                               ${this.escapeHtml(friend.username)}
                             </a>
                           </p>
-                          
                         </div>
                       `;
                 });
@@ -66,7 +54,7 @@ const Friends = {
                 if (friends.length > limit) {
                   html += `
                     <div class="text-center mt-3">
-                      <a href="/friends/showfriends?username=${encodeURIComponent(localStorage.getItem('username'))}" class="btn btn-primary">
+                      <a href="/friends/showfriends?username=${encodeURIComponent(username)}" class="btn btn-primary">
                         Show All Friends
                       </a>
                     </div>
