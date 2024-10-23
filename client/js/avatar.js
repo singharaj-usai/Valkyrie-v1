@@ -1,6 +1,7 @@
 $(document).ready(function () {
     initializeAvatarEditor();
     loadUserAvatar();
+    setupItemSelection();
 });
 
 function initializeAvatarEditor() {
@@ -209,8 +210,9 @@ function wearItem(type, itemId) {
             updateAvatarDisplay(type, response.avatar[type]);
             updateCurrentlyWearing(type, response.avatar[type]);
             updateWearButton(type, itemId, true);
-            showAlert('success', `Wore your ${type} successfully.`);
-            saveAvatarSelection(type, itemId);
+            saveRender();
+            showAlert('success', `${type.charAt(0).toUpperCase() + type.slice(1)} equipped successfully`);
+          //  saveAvatarSelection(type, itemId);
 
             $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
             $(`.wear-item[data-id="${itemId}"]`).removeClass('btn-primary').addClass('btn-success').text('Wearing');
@@ -226,6 +228,33 @@ function wearItem(type, itemId) {
             }
             showAlert('danger', errorMessage);
         },
+    });
+}
+
+function saveRender() {
+    const avatarDisplay = $('#avatar-display');
+    const renderData = {
+        shirt: $('#avatar-shirt').attr('src'),
+        // Add other avatar elements here when implemented
+    };
+
+    const token = localStorage.getItem('token');
+    
+    $.ajax({
+        url: '/api/avatar/render',
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(renderData),
+        success: function (response) {
+            console.log('Render saved successfully:', response);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error saving render:', error);
+            showAlert('danger', 'Error saving avatar render. Please try again later.');
+        }
     });
 }
 
@@ -245,8 +274,9 @@ function removeItem(type) {
             $(`#avatar-${type}`).attr('src', '');
             $(`#currently-wearing [data-type="${type}"]`).remove();
             updateWearButton(type, null, false);
+            saveRender();
             showAlert('info', `Unwore your ${type}.`);
-            saveAvatarSelection(type, null);
+           // saveAvatarSelection(type, null);
 
             $('.wear-item').removeClass('btn-success').addClass('btn-primary').text('Wear');
         },
@@ -258,16 +288,23 @@ function removeItem(type) {
 }
 
 function updateAvatarDisplay(type, item) {
+    const avatarContainer = $('#avatar-display');
+    
     switch (type) {
         case 'shirt':
             if (item && item.ThumbnailLocation) {
-                $('#avatar-shirt').attr('src', item.ThumbnailLocation);
+                $('#avatar-shirt').attr('src', item.ThumbnailLocation)
+                    .removeClass('hidden')
+                    .css({
+                        'max-width': '100%',
+                        'height': 'auto',
+                        'display': 'block',
+                        'margin': '0 auto'
+                    });
             } else {
-                $('#avatar-shirt').attr('src', ''); 
+                $('#avatar-shirt').attr('src', '/images/default-shirt.png')
+                    .addClass('hidden');
             }
-            break;
-        // Add cases for 'pants' and 'hat' when i makethem
-        default:
             break;
     }
 }
@@ -279,22 +316,28 @@ function updateCurrentlyWearing(type, item) {
     container.find(`[data-type="${type}"]`).remove();
 
     if (item && item.ThumbnailLocation && item.Name) {
-    const itemHtml = `
-        <div class="col-xs-12 col-sm-6 col-md-4" data-type="${type}">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                </div>
-                <div class="panel-body">
-                    <img src="${item.ThumbnailLocation}" alt="${item.Name}" class="img-responsive center-block" style="max-height: 100px;">
-                    <h5 class="text-center">${item.Name}</h5>
-                    <button class="btn btn-danger btn-block remove-item" data-type="${type}">Remove</button>
+        const itemHtml = `
+            <div class="col-xs-12 col-sm-6 col-md-4" data-type="${type}" data-id="${item._id}">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+                    </div>
+                    <div class="panel-body text-center">
+                        <img src="${item.ThumbnailLocation}" 
+                             alt="${item.Name}" 
+                             class="img-responsive center-block" 
+                             style="max-height: 100px;">
+                        <h5 class="text-center mt-2">${item.Name}</h5>
+                        <button class="btn btn-danger btn-block remove-item" 
+                                data-type="${type}" 
+                                data-id="${item._id}">
+                            Remove
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-
-    container.append(itemHtml);
+        `;
+        container.append(itemHtml);
     }
 }
 
@@ -310,60 +353,134 @@ function updateWearButton(type, itemId, isWearing) {
 
 function loadUserAvatar() {
     const token = localStorage.getItem('token');
-    console.log("hahaahsha");
+    if (!token) {
+        console.error('No token found');
+        return;
+    }
+
     $.ajax({
         url: '/api/avatar',
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
         },
-        success: function (avatar) {
-            if (avatar.shirt && avatar.shirt._id) {
-                wearItem('shirt', avatar.shirtId);
-        }
+        success: function (response) {
+            console.log('Avatar data received:', response);
+            if (response && response.avatar) {
+                // Update the avatar display
+                updateAvatarDisplay('shirt', response.avatar.shirt);
+                updateCurrentlyWearing('shirt', response.avatar.shirt);
+                
+                if (response.avatar.shirt) {
+                    updateWearButton('shirt', response.avatar.shirt._id, true);
+                    // Store the current state in localStorage
+                    localStorage.setItem('currentAvatar', JSON.stringify(response.avatar));
+                }
+            }
+
+            // Load and display the rendered avatar
+            if (response.avatarRender && response.avatarRender.shirt) {
+                $('#avatar-display').attr('src', response.avatarRender.shirt)
+                    .removeClass('hidden')
+                    .css({
+                        'max-width': '100%',
+                        'height': 'auto',
+                        'display': 'block',
+                        'margin': '0 auto'
+                    });
+                localStorage.setItem('avatarRender', JSON.stringify(response.avatarRender));
+            }
         },
         error: function (xhr, status, error) {
-            console.error('Error loading avatar:', error);
-            $('#avatar-display').html('<div class="alert alert-danger">Error loading avatar. Please try again later.</div>');
-        },
+            console.error('Error loading avatar:', {
+                error: error,
+                status: status,
+                response: xhr.responseText
+            });
+            showAlert('danger', 'Error loading avatar. Please try again later.');
+        }
     });
 }
 
 function saveAvatarSelection(type, itemId) {
     const token = localStorage.getItem('token');
     const avatarData = { type, itemId };
-    console.log(`Saving avatar selection: ${type}, ID: ${itemId}`);
+    console.log('Saving avatar selection:', avatarData);
 
     $.ajax({
         url: '/api/avatar',
         method: 'PUT',
-        contentType: 'application/json',
         headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         data: JSON.stringify(avatarData),
         success: function (response) {
-            console.log('Avatar updated successfully:', response);
-            if (itemId) {
-                updateAvatarDisplay(type, response.avatar[type]);
-                updateCurrentlyWearing(type, response.avatar[type]);
-                updateWearButton(type, itemId, true);
-                showAlert('success', `Wore your ${type} successfully.`);
-            } else {
-                $(`#avatar-${type}`).attr('src', '');
-                $(`#currently-wearing [data-type="${type}"]`).remove();
-                updateWearButton(type, null, false);
-                showAlert('info', `Unwore your ${type}.`);
+            console.log('Avatar update response:', response);
+            
+            if (response.avatar && response.avatarRender) {
+                // Store the updated state
+                localStorage.setItem('currentAvatar', JSON.stringify(response.avatar));
+                localStorage.setItem('avatarRender', JSON.stringify(response.avatarRender));
+
+                if (itemId) {
+                    updateAvatarDisplay(type, response.avatar[type]);
+                    updateCurrentlyWearing(type, response.avatar[type]);
+                    updateWearButton(type, itemId, true);
+                    
+                    // Update the rendered avatar display
+                    if (response.avatarRender.shirt) {
+                        $('#avatar-display').attr('src', response.avatarRender.shirt)
+                            .removeClass('hidden');
+                    }
+                    showAlert('success', `Wore your ${type} successfully.`);
+                } else {
+                    $(`#avatar-${type}`).attr('src', '');
+                    $(`#currently-wearing [data-type="${type}"]`).remove();
+                    updateWearButton(type, null, false);
+                    $('#avatar-display').addClass('hidden');
+                    showAlert('info', `Unwore your ${type}.`);
+                }
             }
         },
         error: function (xhr, status, error) {
-            console.error('Error updating avatar:', error);
-            console.error('Status:', status);
-            console.error('Response:', xhr.responseText);
+            console.error('Error updating avatar:', {
+                error: error,
+                status: status,
+                response: xhr.responseText
+            });
             showAlert('danger', `Error ${itemId ? 'wearing' : 'unwearing'} ${type}. Please try again later.`);
-        },
+        }
     });
+}
+
+function restoreAvatarState() {
+    const savedAvatar = localStorage.getItem('currentAvatar');
+    const savedRender = localStorage.getItem('avatarRender');
+    
+    if (savedAvatar) {
+        const avatar = JSON.parse(savedAvatar);
+        if (avatar.shirt) {
+            updateAvatarDisplay('shirt', avatar.shirt);
+            updateCurrentlyWearing('shirt', avatar.shirt);
+            updateWearButton('shirt', avatar.shirt._id, true);
+        }
+    }
+
+    if (savedRender) {
+        const render = JSON.parse(savedRender);
+        if (render.shirt) {
+            $('#avatar-display').attr('src', render.shirt)
+                .removeClass('hidden')
+                .css({
+                    'max-width': '100%',
+                    'height': 'auto',
+                    'display': 'block',
+                    'margin': '0 auto'
+                });
+        }
+    }
 }
 
 // basic body colors set up  for seven
@@ -409,3 +526,41 @@ function showAlert(type, message) {
 }
 
 
+function loadRenderedAvatar() {
+    const token = localStorage.getItem('token');
+    
+    $.ajax({
+        url: '/api/avatar/render',
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+        },
+        success: function(response) {
+            if (response && response.avatarRender) {
+                if (response.avatarRender.shirt) {
+                    $('#avatar-shirt').attr('src', response.avatarRender.shirt)
+                        .removeClass('hidden')
+                        .css({
+                            'max-width': '100%',
+                            'height': 'auto',
+                            'display': 'block',
+                            'margin': '0 auto'
+                        });
+                }
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading rendered avatar:', error);
+        }
+    });
+}
+
+// Update the document ready function
+$(document).ready(function () {
+    initializeAvatarEditor();
+    loadUserAvatar();
+    loadRenderedAvatar();
+    setupItemSelection();
+    restoreAvatarState();
+});

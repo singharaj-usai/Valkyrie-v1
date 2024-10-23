@@ -204,7 +204,7 @@ $(document).ready(function () {
                             <div class="card-body text-center p-3">
                                 <h4><i class="bi bi-discord"></i> Discord</h4>
                                 <p>Join our Discord server and talk to people in our community!</p>
-                                <a target="_blank" href="https://discord.gg/rpRz3mhuBz" class="btn btn-primary mt-2">Join Discord</a>
+                                <a target="_blank" href="https://discord.gg/rpRz3mhuBz" class="btn btn-info mt-2">Join Discord</a>
                             </div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ $(document).ready(function () {
                             <div class="card-body text-center p-3">
                                 <h4><i class="bi bi-twitter"></i> Twitter</h4>
                                 <p>We tweet whenever we post a video, and may even hint at some upcoming events on our Twitter.</p>
-                                <a target="_blank" href="https://twitter.com/Omrbobbilly" class="btn btn-info mt-2">Follow Us</a>
+                                <a target="_blank" href="https://twitter.com/Omrbobbilly" class="btn btn-primary mt-2">Follow Us</a>
                             </div>
                         </div>
                     </div>

@@ -15,43 +15,34 @@ $(document).ready(function () {
   function fetchUserProfile(username) {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.error('No token found in localStorage');
-      $('#user-profile').html(
-        '<p>You are not logged in. Please <a href="/login">login</a> to view profiles.</p>'
-      );
-      return;
+        console.error('No token found in localStorage');
+        $('#user-profile').html('<p>You are not logged in. Please <a href="/login">login</a> to view profiles.</p>');
+        return;
     }
     $.ajax({
-      url: `/api/user/${username}`,
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      success: function (user) {
-        currentUser = user;
-        fetchUserStatus(username).then((isOnline) => {
-          user.isOnline = isOnline;
-
-          fetchForumPostCount(user._id).then((postCount) => {
-            user.forumPostCount = postCount;
-
-            displayUserProfile(user);
-          });
-        });
-        document.getElementById(
-          'profile-title'
-        ).textContent = `${user.username}'s Profile - Valkyrie`;
-      },
-      error: function (xhr, status, error) {
-        console.error('Error fetching user profile:', xhr.responseText);
-        console.error('Status:', status);
-        console.error('Error:', error);
-        $('#user-profile').html(
-          '<p>Error fetching user profile. Please try again. If the problem persists, please <a href="/login">login</a> again.</p>'
-        );
-      },
+        url: `/api/user/${username}`,
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        success: function (user) {
+            console.log('User profile data received:', user); // Add this line
+            currentUser = user;
+            fetchUserStatus(username).then((isOnline) => {
+                user.isOnline = isOnline;
+                fetchForumPostCount(user._id).then((postCount) => {
+                    user.forumPostCount = postCount;
+                    displayUserProfile(user);
+                });
+            });
+            document.getElementById('profile-title').textContent = `${user.username}'s Profile - Valkyrie`;
+        },
+        error: function (xhr, status, error) {
+            console.error('Error fetching user profile:', xhr.responseText);
+            $('#user-profile').html('<p>Error fetching user profile. Please try again.</p>');
+        },
     });
-  }
+}
 
   function fetchUserStatus(username) {
     return new Promise((resolve, reject) => {
@@ -86,6 +77,11 @@ $(document).ready(function () {
   }
 
   function displayUserProfile(user) {
+    console.log('Displaying profile for user:', {
+      userId: user.userId,
+      hasAvatarRender: !!user.avatarRender,
+      avatarRenderDetails: user.avatarRender
+  });
     const isOwnProfile = user.username === localStorage.getItem('username');
     let actionButton = '';
     let onlineStatus = user.isOnline
@@ -119,40 +115,31 @@ $(document).ready(function () {
         </div>
         <div class="panel-body text-center">
           <p>${onlineStatus}</p>
-          <p><a href="https://www.valk.fun/user-profile?username=${encodeURIComponent(
-            user.username
-          )}">https://www.valk.fun/user-profile?username=${encodeURIComponent(
-      user.username
-    )}</a></p>
-                    <img src="https://kids.kiddle.co/images/6/6e/Roblox_Default_Male_Avatar.png" 
-                         alt="${escapeHtml(user.username)}" 
-                         class="user-avatar">
-                    <div id="blurb-container" style="margin-top: 10px;">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <p id="blurb-text">${
-                                  user.blurb
-                                    ? escapeHtml(user.blurb).replace(
-                                        /\n/g,
-                                        '<br>'
-                                      )
-                                    : 'No blurb set.'
-                                }</p>
-                            </div>
-                        </div>
-                         ${
-                           isOwnProfile
-                             ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>'
-                             : ''
-                         }
-                    </div>
-                    <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
-                   
-                </div>
+          <p><a href="https://www.valk.fun/user-profile?username=${encodeURIComponent(user.username)}">https://www.valk.fun/user-profile?username=${encodeURIComponent(user.username)}</a></p>
+            <div id="profile-avatar">
+              <!-- Avatar will be loaded here -->
             </div>
-        `;
+            <div id="blurb-container" style="margin-top: 10px;">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <p id="blurb-text">${user.blurb ? escapeHtml(user.blurb).replace(/\n/g, '<br>') : 'No blurb set.'}</p>
+              </div>
+            </div>
+            ${isOwnProfile ? '<button id="edit-blurb" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Blurb</button>' : ''}
+          </div>
+          <div id="action-button-container" style="margin-top: 10px;">${actionButton}</div>
+        </div>
+      </div>
+    `;
 
     $('#user-info').html(userInfoHtml);
+    
+    if (user.userId) {
+        loadUserAvatar(user.userId);
+    } else {
+        console.error('No userId found in user object:', user);
+        $('#profile-avatar').html('<div class="alert alert-danger">Unable to load avatar: Missing user ID</div>');
+    }
 
     const statisticsHtml = `
     <div class="panel panel-primary" style="margin-top: 20px;">
@@ -574,6 +561,49 @@ $(document).ready(function () {
       },
     });
   }
+
+  
+
+
+  function loadUserAvatar(userId) {
+    if (!userId) {
+        console.error('No userId provided to loadUserAvatar');
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    $.ajax({
+        url: `/api/avatar/render/${userId}`,
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        success: function(response) {
+            console.log('Avatar response:', response);
+            if (response && response.avatarRender && response.avatarRender.shirt) {
+                $('#profile-avatar').html(`
+                    <img src="${response.avatarRender.shirt}" 
+                         alt="User Avatar" 
+                         class="img-responsive center-block"
+                         style="max-width: 197px; height: auto;"
+                         onerror="console.error('Failed to load avatar image:', this.src)">
+                `);
+            } else {
+                console.warn('No avatar render data found');
+                $('#profile-avatar').html('<div class="alert alert-info">No avatar available</div>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading user avatar:', {
+                status: status,
+                error: error,
+                response: xhr.responseText,
+                userId: userId
+            });
+            $('#profile-avatar').html('<div class="alert alert-danger">Error loading avatar</div>');
+        }
+    });
+}
 
   function displayUserShirts(shirts, userId) {
     const shirtsContainer = $('#user-shirts');

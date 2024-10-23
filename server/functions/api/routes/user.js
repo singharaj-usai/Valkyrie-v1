@@ -7,33 +7,62 @@ const User = require('../models/User');
 router.get('/user/:username', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
+    console.log('Fetching profile for username:', username);
+    
     const currentUser = await User.findOne({ userId: req.user.userId });
-    const user = await User.findOne({ username }).select(
-      'username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests'
-    );
+    if (!currentUser) {
+      console.error('Current user not found:', req.user.userId);
+      return res.status(404).json({ error: 'Current user not found' });
+    }
+
+    const user = await User.findOne({ username })
+      .select('username userId signupDate lastLoggedIn blurb friendRequests friends sentFriendRequests avatarRender')
+      .lean();
 
     if (!user) {
+      console.error('Target user not found:', username);
       return res.status(404).json({ error: 'User not found' });
     }
+
+    console.log('User found:', {
+      userId: user.userId,
+      hasAvatarRender: !!user.avatarRender,
+      avatarRenderDetails: user.avatarRender
+    });
 
     const isFriend = currentUser.friends.includes(user.userId);
     const friendRequestSent = user.friendRequests.includes(currentUser.userId);
     const friendRequestReceived = currentUser.friendRequests.includes(user.userId);
 
-    const userObject = user.toObject();
-    delete userObject.friendRequests;
-    delete userObject.friends;
-    delete userObject.sentFriendRequests;
+    delete user.friendRequests;
+    delete user.friends;
+    delete user.sentFriendRequests;
 
-    res.json({
-      ...userObject,
+    const responseData = {
+      ...user,
       isFriend,
       friendRequestSent,
       friendRequestReceived,
+    };
+
+    console.log('Sending profile response:', {
+      userId: responseData.userId,
+      hasAvatarRender: !!responseData.avatarRender,
+      avatarRenderDetails: responseData.avatarRender
     });
+
+    res.json(responseData);
   } catch (error) {
-    console.error('User profile error:', error);
-    res.status(500).json({ error: 'Error fetching user profile' });
+    console.error('User profile error:', {
+      error: error.message,
+      stack: error.stack,
+      username: req.params.username,
+      userId: req.user.userId
+    });
+    res.status(500).json({ 
+      error: 'Error fetching user profile',
+      details: error.message
+    });
   }
 });
 
@@ -104,6 +133,38 @@ router.get('/user-info', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching user info:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/:userId/avatar', async (req, res) => {
+  try {
+    console.log('Fetching avatar for userId:', req.params.userId);
+    
+    const user = await User.findOne({ userId: req.params.userId });
+    if (!user) {
+      console.error('User not found for avatar request:', req.params.userId);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log('Avatar data found:', {
+      userId: user.userId,
+      hasAvatarRender: !!user.avatarRender,
+      avatarRenderDetails: user.avatarRender
+    });
+
+    res.json({ 
+      avatarRender: user.avatarRender 
+    });
+  } catch (error) {
+    console.error('Error fetching user avatar render:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.params.userId
+    });
+    res.status(500).json({ 
+      error: 'Internal server error', 
+      details: error.message 
+    });
   }
 });
 
