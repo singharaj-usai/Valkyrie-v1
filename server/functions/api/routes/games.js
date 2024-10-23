@@ -92,22 +92,21 @@ router.get('/user/:userId', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const id = req.params.id;
-    const game = await Game.findOne({ _id: id, AssetType: 'Place' }).populate(
-      'creator',
-      'username userId'
-    );
+    const game = await Game.findById(id).populate('creator', 'username userId');
+    
     if (!game) {
       return res.status(404).json({ error: 'Game not found' });
     }
+    
     res.json(game);
   } catch (error) {
     console.error('Error fetching game:', error);
-    res
-      .status(500)
-      .json({ error: 'Error fetching game', details: error.message });
+    res.status(500).json({ 
+      error: 'Error fetching game', 
+      details: error.message 
+    });
   }
 });
-
 
 
 router.post(
