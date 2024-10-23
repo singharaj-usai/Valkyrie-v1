@@ -80,20 +80,20 @@ router.post(
 
 // Add this new route after the existing friend-related routes
 router.get(
-  '/friendship-status/:userId',
+  '/friendship-status/:username',
   authenticateToken,
   async (req, res) => {
     try {
-      const currentUser = await User.findById({ userId: req.user.userId });
+      const currentUser = await User.findOne({ userId: req.user.userId });
       const targetUser = await User.findOne({ username: req.params.username });
 
       if (!targetUser) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const isFriend = currentUser.friends.includes(targetUser.userId);
-      const friendRequestSent = targetUser.friendRequests.includes(currentUser.userId);
-      const friendRequestReceived = currentUser.friendRequests.includes(targetUser.userId);
+      const isFriend = currentUser.friends.some(id => id.equals(targetUser._id));
+      const friendRequestSent = targetUser.friendRequests.some(id => id.equals(currentUser._id));
+      const friendRequestReceived = currentUser.friendRequests.some(id => id.equals(targetUser._id));
 
       res.json({
         isFriend,

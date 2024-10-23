@@ -26,17 +26,27 @@ $(document).ready(function () {
             Authorization: `Bearer ${token}`,
         },
         success: function (user) {
+          if (!user || !user.username) {
+            console.error('Invalid user data received:', user);
+            $('#user-profile').html('<p>Error: Invalid user data received.</p>');
+            return;
+        }
             console.log('User profile data received:', user); // Add this line
             currentUser = user;
-            fetchUserStatus(username).then((isOnline) => {
-                user.isOnline = isOnline;
-                fetchForumPostCount(user._id).then((postCount) => {
-                    user.forumPostCount = postCount;
-                    displayUserProfile(user);
-                });
-            });
-            document.getElementById('profile-title').textContent = `${user.username}'s Profile - Valkyrie`;
-        },
+            updateFriendshipUI({
+              isFriend: user.isFriend,
+              friendRequestSent: user.friendRequestSent,
+              friendRequestReceived: user.friendRequestReceived
+          });
+          fetchUserStatus(username).then((isOnline) => {
+              user.isOnline = isOnline;
+              fetchForumPostCount(user._id).then((postCount) => {
+                  user.forumPostCount = postCount;
+                  displayUserProfile(user);
+              });
+          });
+          document.getElementById('profile-title').textContent = `${user.username}'s Profile - Valkyrie`;
+      },
         error: function (xhr, status, error) {
             console.error('Error fetching user profile:', xhr.responseText);
             $('#user-profile').html('<p>Error fetching user profile. Please try again.</p>');
@@ -77,6 +87,12 @@ $(document).ready(function () {
   }
 
   function displayUserProfile(user) {
+    if (!user || !user.username) {
+      console.error('Invalid user data:', user);
+      $('#user-info').html('<div class="alert alert-danger">Error loading user profile. Invalid user data.</div>');
+      return;
+    }
+    
     console.log('Displaying profile for user:', {
       userId: user.userId,
       hasAvatarRender: !!user.avatarRender,
@@ -237,6 +253,9 @@ $(document).ready(function () {
         Authorization: `Bearer ${token}`,
       },
       success: function (response) {
+        currentUser.isFriend = response.isFriend;
+        currentUser.friendRequestSent = response.friendRequestSent;
+        currentUser.friendRequestReceived = response.friendRequestReceived;
         displayUserProfile(response);
       },
       error: function (xhr, status, error) {
@@ -250,7 +269,8 @@ $(document).ready(function () {
     sendAjaxRequest(
       '/api/friends/send-friend-request/' + userId,
       'POST',
-      'Friend request sent successfully'
+      'Friend request sent successfully',
+      currentUser.username
     );
   }
 
@@ -258,7 +278,8 @@ $(document).ready(function () {
     sendAjaxRequest(
       '/api/friends/accept-friend-request/' + userId,
       'POST',
-      'Friend request accepted'
+      'Friend request accepted',
+      currentUser.username
     );
   }
 
@@ -266,7 +287,8 @@ $(document).ready(function () {
     sendAjaxRequest(
       '/api/friends/decline-friend-request/' + userId,
       'POST',
-      'Friend request declined'
+      'Friend request declined',
+      currentUser.username
     );
   }
 
@@ -274,11 +296,12 @@ $(document).ready(function () {
     sendAjaxRequest(
       '/api/friends/unfriend/' + userId,
       'POST',
-      'Unfriended successfully'
+      'Unfriended successfully',
+      currentUser.username
     );
   }
 
-  function sendAjaxRequest(url, method, successMessage) {
+  function sendAjaxRequest(url, method, successMessage, userId) {
     const token = localStorage.getItem('token');
     $.ajax({
       url: url,
@@ -291,19 +314,10 @@ $(document).ready(function () {
         checkFriendshipStatus(userId);
       },
       error: function (xhr, status, error) {
-        if (
-          xhr.responseJSON &&
-          xhr.responseJSON.error ===
-            'You have already received a friend request from this user'
-        ) {
-          alert(
-            'You have already received a friend request from this user. Please check your friend requests.'
-          );
+        if (xhr.responseJSON && xhr.responseJSON.error === 'You have already received a friend request from this user') {
+          alert('You have already received a friend request from this user. Please check your friend requests.');
         } else {
-          alert(
-            'Error: ' +
-              (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error')
-          );
+          alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
         }
         checkFriendshipStatus(userId);
       },
@@ -315,9 +329,7 @@ $(document).ready(function () {
       const blurbContainer = $('#blurb-container');
       blurbContainer.html(`
                 <h4>Edit About Me</h4>
-                <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(
-                  currentBlurb || ''
-                )}</textarea>
+                <textarea id="blurb-textarea" class="form-control" rows="3" maxlength="500">${escapeHtml(currentBlurb || '')}</textarea>
                 <p id="char-count">0/500</p>
                 <button id="save-blurb" class="btn btn-success btn-sm mt-2">Save</button>
                 <button id="cancel-blurb" class="btn btn-secondary btn-sm mt-2">Cancel</button>
@@ -645,6 +657,7 @@ $(document).ready(function () {
   }
 
   function escapeHtml(unsafe) {
+    if (!unsafe) return '';
     return unsafe
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -653,26 +666,57 @@ $(document).ready(function () {
       .replace(/'/g, '&#039;');
   }
 
-  /* function updateFriendshipUI(status) {
+function updateFriendshipUI(status) {
     let actionButton = '';
+    
+    // Check if viewing own profile
+    const profileUsername = $('#profile-username').data('username');
+    const currentUsername = localStorage.getItem('username');
+    
+    if (profileUsername === currentUsername) {
+        return; // Don't show any friendship buttons on own profile
+    }
+
     if (status.isFriend) {
-      actionButton = '<button id="unfriend" class="btn btn-warning btn-sm"><i class="fa fa-user-times"></i> Unfriend</button>';
+        actionButton = `
+            <button id="unfriend" class="btn btn-warning btn-sm">
+                <i class="fa fa-user-times"></i> Unfriend
+            </button>
+            <button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">
+                <i class="fa fa-envelope"></i> Message User
+            </button>
+        `;
     } else if (status.friendRequestReceived) {
-      actionButton = `
-        <button id="accept-friend-request" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Accept Friend Request</button>
-        <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;"><i class="fa fa-times"></i> Decline Friend Request</button>
-      `;
+        actionButton = `
+            <button id="accept-friend-request" class="btn btn-success btn-sm">
+                <i class="fa fa-check"></i> Accept Friend Request
+            </button>
+            <button id="decline-friend-request" class="btn btn-danger btn-sm" style="margin-left: 10px;">
+                <i class="fa fa-times"></i> Decline Friend Request
+            </button>
+        `;
     } else if (status.friendRequestSent) {
-      actionButton = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-clock-o"></i> Friend Request Sent</button>';
+        actionButton = `
+            <button class="btn btn-secondary btn-sm" disabled>
+                <i class="fa fa-clock-o"></i> Friend Request Sent
+            </button>
+            <button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">
+                <i class="fa fa-envelope"></i> Message User
+            </button>
+        `;
     } else {
-      actionButton = `
-        <button id="send-friend-request" class="btn btn-primary btn-sm"><i class="fa fa-user-plus"></i> Send Friend Request</button>
-        <button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;"><i class="fa fa-envelope"></i> Message User</button>
-      `;
+        actionButton = `
+            <button id="send-friend-request" class="btn btn-primary btn-sm">
+                <i class="fa fa-user-plus"></i> Send Friend Request
+            </button>
+            <button id="message-user" class="btn btn-info btn-sm" style="margin-left: 10px;">
+                <i class="fa fa-envelope"></i> Message User
+            </button>
+        `;
     }
     $('#action-button-container').html(actionButton);
     initFriendActions();
-  } */
+}
 });
 
 function formatDate(dateString) {

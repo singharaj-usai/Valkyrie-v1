@@ -30,9 +30,9 @@ router.get('/user/:username', authenticateToken, async (req, res) => {
       avatarRenderDetails: user.avatarRender
     });
 
-    const isFriend = currentUser.friends.includes(user.userId);
-    const friendRequestSent = user.friendRequests.includes(currentUser.userId);
-    const friendRequestReceived = currentUser.friendRequests.includes(user.userId);
+    const isFriend = currentUser.friends.some(id => id.equals(user._id));
+    const friendRequestSent = user.friendRequests.some(id => id.equals(currentUser._id));
+    const friendRequestReceived = currentUser.friendRequests.some(id => id.equals(user._id));
 
     delete user.friendRequests;
     delete user.friends;

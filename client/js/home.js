@@ -12,6 +12,7 @@ $(document).ready(function () {
       },
       success: function (response) {
         $('#profile-username').text(`Welcome, ${username}`);
+        loadUserAvatar();
         fetchUserBlurb();
         fetchFriendsList();
         fetchAndDisplayGames();
@@ -43,6 +44,70 @@ $(document).ready(function () {
       },
     });
   }
+
+  function loadUserAvatar() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    
+    if (!token || !userId) {
+        console.error('Missing token or userId');
+        return;
+    }
+
+    $.ajax({
+        url: '/api/avatar',
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+        },
+        success: function(response) {
+            console.log('Avatar data received:', response);
+            if (response && response.avatarRender && response.avatarRender.shirt) {
+                const avatarHtml = `
+                            <img src="${response.avatarRender.shirt}" 
+                                 alt="User Avatar" 
+                                 class="img-responsive center-block"
+                                 style="max-width: 197px; height: auto;"
+                                 onerror="this.onerror=null; console.error('Failed to load avatar image:', this.src);">
+     
+                `;
+                $('#avatar-container').html(avatarHtml);
+            } else {
+                $('#avatar-container').html(`
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">My Avatar</h3>
+                        </div>
+                        <div class="panel-body text-center">
+                            <p>No avatar configured yet.</p>
+                            <a href="/avatar" class="btn btn-primary">Create Avatar</a>
+                        </div>
+                    </div>
+                `);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading avatar:', {
+                error: error,
+                status: status,
+                response: xhr.responseText,
+                userId: userId
+            });
+            $('#avatar-container').html(`
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Error Loading Avatar</h3>
+                    </div>
+                    <div class="panel-body text-center">
+                        <p>Unable to load avatar. Please try again later.</p>
+                        <a href="/avatar" class="btn btn-primary">Go to Avatar Page</a>
+                    </div>
+                </div>
+            `);
+        }
+    });
+}
 
   function displayBlurb(blurb) {
     const blurbHtml = `
@@ -148,35 +213,22 @@ $(document).ready(function () {
               </div>
               <div class="panel-body">
                   <div class="row">
-                      ${games
-                        .slice(0, 4)
-                        .map(
-                          (game) => `
+                      ${games.slice(0, 4).map((game) => `
                           <div class="col-md-3 col-sm-6 mb-4">
                               <div class="thumbnail" style="position: relative;">
-                              ${
-                                game.year
-                                  ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">${game.year}</span>`
-                                  : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'
-                              }
+                              ${game.year ? `<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #337ab7;">
+                              ${game.year}</span>` : '<span class="badge" style="position: absolute; top: 10px; left: 10px; z-index: 1; background-color: #d9534f;">No Year</span>'}
                                   <a href="/game?id=${game._id}">
-                                <img src="${game.thumbnailUrl}" alt="${
-                            game.title
-                          }" class="embed-responsive-item">
+                                <img src="${game.thumbnailUrl}" alt="${game.title}" class="embed-responsive-item">
                                       <div class="caption">
-                                        <h4><a href="/game?id=${game._id}">${
-                            game.title
-                          }</a></h4>
-                                        <p>Creator: <a href="/user-profile?username=${encodeURIComponent(
-                                          game.creator.username
-                                        )}">${game.creator.username}</a></p>
+                                        <h4><a href="/game?id=${game._id}">${game.title}</a></h4>
+                                        <p>Creator: <a href="/user-profile?username=${encodeURIComponent(game.creator.username)}">${game.creator.username}</a></p>
                                       </div>
                                   </a>
                               </div>
                           </div>
                       `
-                        )
-                        .join('')}
+                      ).join('')}
                   </div>
                   <div class="text-center">
                       <a href="/games" class="btn btn-primary">View All Games</a>
