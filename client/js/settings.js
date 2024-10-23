@@ -14,7 +14,7 @@ $(document).ready(function () {
 });
 
 function loadUserSettings() {
-  const theme = localStorage.getItem('theme') || 'cosmo';
+  const theme = localStorage.getItem('theme') || 'paper';
   $('#theme-select').val(theme);
   applyTheme(theme);
 
@@ -41,7 +41,7 @@ function applyTheme(theme) {
   themeStylesheet.href = `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/${theme}/bootstrap.min.css`;
 
   // Update CSS variable for user-submenu top position
-  let submenuTop = '50px'; // Default value
+  let submenuTop = '68px'; // Default value
   if (theme === 'cyborg') {
     submenuTop = '50px'; // Adjust this value as needed for the Cyborg theme
   }
