@@ -19,8 +19,6 @@
       { "src": "/api/verify-secret-key", "dest": "/server/server.js" }
     ],
     "env": {
-        "MONGODB_URI": "@mongodb-uri",
-        "JWT_SECRET": "@jwt-secret",
-        "SESSION_SECRET": "@session-secret"
-      }
+      "MAINTENANCE_MODE": "false"
+    }
   }
