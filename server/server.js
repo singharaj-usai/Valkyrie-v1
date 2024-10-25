@@ -201,7 +201,7 @@ app.use(
 // Serve static files from the images directory
 app.use(
   '/images',
-  express.static(path.join(__dirname, '../images'), {
+  express.static(path.join(__dirname, '../public/images'), {
     setHeaders: (res, path) => {
       res.set('X-Content-Type-Options', 'nosniff');
     },
