@@ -1,0 +1,28 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "client-next/**",
+        "use": "@vercel/next"
+      },
+      {
+        "src": "server/server.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "server/server.js"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "client-next/$1"
+      }
+    ],
+    "env": {
+      "MONGODB_URI": "@mongodb-uri",
+      "JWT_SECRET": "@jwt-secret",
+      "SESSION_SECRET": "@session-secret"
+    }
+  }
