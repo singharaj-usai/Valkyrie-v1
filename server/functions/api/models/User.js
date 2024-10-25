@@ -167,6 +167,14 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: null
     },
+    pants: {
+      type: String,
+      default: null
+    },
+    displayUrl: {
+      type: String,
+      default: null
+  },
     lastUpdated: {
       type: Date,
       default: Date.now

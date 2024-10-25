@@ -191,6 +191,52 @@ router.put('/', authenticateToken, async (req, res) => {
                     };
                 }
                 break;
+
+                case 'pants':
+                    if (itemId) {
+                        const pantsAsset = await Asset.findOne({
+                            _id: itemId,
+                            AssetType: 'Pants',
+                            $or: [
+                                { _id: { $in: user.inventory } },
+                                { creator: user._id }
+                            ]
+                        });
+            
+                        if (!pantsAsset) {
+                            console.error('Pants not accessible:', {
+                                userId: req.user.userId,
+                                pantsId: itemId
+                            });
+                            return res.status(400).json({ 
+                                error: 'Pants not in inventory or not created by user'
+                            });
+                        }
+            
+                        console.log('Wearing pants:', {
+                            userId: req.user.userId,
+                            pantsId: itemId,
+                            pantsDetails: {
+                                name: pantsAsset.Name,
+                                imageUrl: pantsAsset.imageUrl
+                            }
+                        });
+            
+                        user.avatar.pants = pantsAsset;
+                        user.avatarRender = {
+                            ...user.avatarRender,
+                            pants: pantsAsset.imageUrl,
+                            lastUpdated: new Date()
+                        };
+                    } else {
+                        user.avatar.pants = null;
+                        user.avatarRender = {
+                            ...user.avatarRender,
+                            pants: null,
+                            lastUpdated: new Date()
+                        };
+                    }
+                    break;
         }
 
         await user.save();

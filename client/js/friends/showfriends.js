@@ -42,7 +42,7 @@ $(document).ready(function () {
       }
   
       const panel = $('<div class="panel panel-primary"></div>');
-      const panelHeading = $('<div class="panel-heading"><h3 class="panel-title">All Friends</h3></div>');
+      const panelHeading = $('<div class="panel-heading"><h3 class="panel-title">' + username + '\'s Friends</h3></div>');
       const panelBody = $('<div class="panel-body"></div>');
       const row = $('<div class="row"></div>');
   

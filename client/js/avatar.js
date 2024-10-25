@@ -562,5 +562,4 @@ $(document).ready(function () {
     loadUserAvatar();
     loadRenderedAvatar();
     setupItemSelection();
-    restoreAvatarState();
 });
