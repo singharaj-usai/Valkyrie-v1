@@ -2,27 +2,25 @@
     "version": 2,
     "builds": [
       {
-        "src": "client-next/**",
-        "use": "@vercel/next"
+        "src": "server/server.js",
+        "use": "@vercel/node@3.0.0"
       },
       {
-        "src": "server/server.js",
-        "use": "@vercel/node"
+        "src": "client/**",
+        "use": "@vercel/static"
       }
     ],
     "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "server/server.js"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "client-next/$1"
-      }
+      { "src": "/images/(.*)", "dest": "/client/images/$1" },
+      { "src": "/js/(.*)", "dest": "/client/js/$1" },
+      { "src": "/css/(.*)", "dest": "/client/css/$1" },
+      { "src": "/api/(.*)", "dest": "/server/server.js" },
+      { "src": "/(.*)", "dest": "/server/server.js" },
+      { "src": "/api/verify-secret-key", "dest": "/server/server.js" }
     ],
     "env": {
-      "MONGODB_URI": "@mongodb-uri",
-      "JWT_SECRET": "@jwt-secret",
-      "SESSION_SECRET": "@session-secret"
-    }
+        "MONGODB_URI": "@mongodb-uri",
+        "JWT_SECRET": "@jwt-secret",
+        "SESSION_SECRET": "@session-secret"
+      }
   }

@@ -13,7 +13,9 @@
     "dev": "nodemon server/server.js",
     "dev:maintenance": "cross-env MAINTENANCE_MODE=true nodemon server/server.js",
     "build": "echo 'No build script needed'",
-
+    "vercel-build": "echo 'Build step not required'",
+    "deploy": "vercel",
+    
     "create-admin": "node server/scripts/createAdmin.js",
     "reset-user-ids": "node server/scripts/resetUserIds.js",
     "generate-test-users": "node server/scripts/generateTestUsers.js",
