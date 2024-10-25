@@ -15,7 +15,6 @@
     "build": "echo 'No build script needed'",
     "vercel-build": "echo 'Build step not required'",
     "deploy": "vercel",
-    
     "create-admin": "node server/scripts/createAdmin.js",
     "reset-user-ids": "node server/scripts/resetUserIds.js",
     "generate-test-users": "node server/scripts/generateTestUsers.js",
@@ -68,6 +67,7 @@
     "nodemon": "^3.1.4",
     "prettier": "^2.1.2",
     "tidy-html5": "^0.1.1",
+    "vercel": "^37.12.1",
     "webpack-manifest-plugin": "^5.0.0"
   }
 }
