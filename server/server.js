@@ -310,11 +310,11 @@ app.use((req, res, next) => {
 });
 
 // Call this function after the server starts
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, async () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', async () => {
+  console.log(`Server running at http://0.0.0.0:${port}`);
+  if (process.env.NODE_ENV !== 'production') {
     await resetUserIdsIfNeeded();
-  });
-}
+  }
+});
 
 module.exports = app;
