@@ -1,80 +1,80 @@
 #!/bin/bash
 
-# Create a new droplet
-echo "Creating new droplet..."
-doctl compute droplet create valkyrie-app \
-    --image ubuntu-22-04-x64 \
-    --size s-1vcpu-1gb \
-    --region nyc1 \
-    --ssh-keys $DO_SSH_KEY_FINGERPRINT
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-# Get the droplet IP
-DROPLET_IP=$(doctl compute droplet get valkyrie-app --format PublicIPv4 --no-header)
+# Install Node.js 18.x
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-# Wait for SSH to be available
-until ssh -o StrictHostKeyChecking=no root@$DROPLET_IP 'exit'; do
-    echo "Waiting for SSH..."
-    sleep 5
-done
+# Install PM2 and Nginx
+sudo npm install -g pm2
+sudo apt install -y nginx
 
-# Setup the server
-ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'ENDSSH'
-    # Update system
-    apt update && apt upgrade -y
+# Create app directory
+sudo mkdir -p /var/www/valkyrie
+sudo chown -R $USER:$USER /var/www/valkyrie
 
-    # Install Node.js 18.x
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-    apt install -y nodejs
+# Clone repository (replace with your repo URL)
+git clone https://github.com/singharaj-usai/my-project.git /var/www/valkyrie
 
-    # Install PM2
-    npm install -g pm2
+# Install dependencies
+cd /var/www/valkyrie
+npm install
 
-    # Install Nginx
-    apt install -y nginx
-
-    # Create app directory
-    mkdir -p /var/www/valkyrie
-    cd /var/www/valkyrie
-
-    # Clone your repository
-    git clone https://github.com/yourusername/your-repo.git .
-
-    # Install dependencies
-    npm install
-
-    # Setup PM2 ecosystem file
-    cat > ecosystem.config.js << 'EOF'
-module.exports = {
-  apps: [{
-    name: 'valkyrie',
-    script: 'server/server.js',
-    instances: 'max',
-    exec_mode: 'cluster',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 3000
-    }
-  }]
-}
+# Create .env file
+cat > .env << EOF
+NODE_ENV=production
+PORT=3000
+MAINTENANCE_MODE=false
+MONGODB_URI=mongodb+srv://usais:fast12@cluster0.isaat.mongodb.net/
+SESSION_SECRET=your_session_secret_here
+MAINTENANCE_SECRET_KEY=mrbobbillyssecretkey
+ENCRYPTION_KEY=BTFXRj0jrxSbaTKOj+aUVw3wPBIFKCx2/qveUxaIErJuVNDEXz9wvXmPuYAInkUS
+UPLOAD_ACCESS_KEY=518484
+MAILCHIMP_API_KEY=8bdf84c00e127f26802a94474aa96bdf-us17
+MAILCHIMP_SERVER_PREFIX=https://us17.admin.mailchimp.com/
+MAILCHIMP_LIST_ID=bee92a5a1e
+EMAIL_USERNAME=support@alphablox.net
+EMAIL_FROM_NAME=Alphablox Support
+GOOGLE_CLIENT_ID=914198737416-ib8t5ejpv3kidadqlmi0q3dap9g10eih.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_REFRESH_TOKEN=1//04SMY1UGhY3HMCgYIARAAGAQSNwF-L9IrAavadS_tNXtDaHhBQhTcOuD0fo38j-jJ4AzWx7MsoOdc9fXoApn5VTeTc559W0PN7Zw
+GOOGLE_REDIRECT_URI=https://developers.google.com/oauthplayground
+AWS_ACCESS_KEY_ID=AKIAQ4J5YFDU7HIC2XMC
+AWS_SECRET_ACCESS_KEY=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
+AWS_REGION=us-east-2
+AWS_S3_BUCKET_NAME=c2.rblx18.com
+BASE_URL=www.valk.fun
+EMAIL_USER=djjd22938@gmail.com
+EMAIL_PASS=iazx mivw xuhi ixcq
+CLOUDFLARE_SECRET_KEY=0x4AAAAAAAw6-naWF42EyvhyITGX4NRuBqc
 EOF
 
-    # Setup Nginx configuration
-    cat > /etc/nginx/sites-available/valkyrie << 'EOF'
+# Setup Nginx
+sudo tee /etc/nginx/sites-available/valkyrie << EOF
 server {
     listen 80;
-    server_name valk.fun www.valk.fun;
+    server_name alphablox.net www.alphablox.net;
 
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        proxy_connect_timeout 600;
+        proxy_send_timeout 600;
+        proxy_read_timeout 600;
+        send_timeout 600;
     }
 
-    location /images/ {
-        alias /var/www/valkyrie/images/;
+    location /static/ {
+        alias /var/www/valkyrie/public/;
         expires 30d;
         add_header Cache-Control "public, no-transform";
     }
@@ -83,35 +83,19 @@ server {
         alias /var/www/valkyrie/uploads/;
         client_max_body_size 50M;
     }
-
-    location /socket.io/ {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
 }
 EOF
 
-    # Enable the site
-    ln -s /etc/nginx/sites-available/valkyrie /etc/nginx/sites-enabled/
-    rm /etc/nginx/sites-enabled/default
+# Enable site and remove default
+sudo ln -sf /etc/nginx/sites-available/valkyrie /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
 
-    # Create necessary directories
-    mkdir -p uploads images
-    chmod 755 uploads images
+# Test and restart Nginx
+sudo nginx -t && sudo systemctl restart nginx
 
-    # Start the application with PM2
-    pm2 start ecosystem.config.js
-    pm2 save
-    pm2 startup
-
-    # Install SSL certificate
-    apt install -y certbot python3-certbot-nginx
-    certbot --nginx -d valk.fun -d www.valk.fun --non-interactive --agree-tos --email your-email@example.com
-
-    # Restart Nginx
-    systemctl restart nginx
-ENDSSH
-
-echo "Deployment complete! Your app is running at $DROPLET_IP"
+# Start application with PM2
+cd /var/www/valkyrie
+pm2 delete all
+NODE_ENV=production PORT=3000 MAINTENANCE_MODE=false pm2 start server/server.js --name "valkyrie"
+pm2 save
+pm2 startup
