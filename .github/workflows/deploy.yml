@@ -1,20 +1,21 @@
-# Create this file in your repo: .github/workflows/deploy.yml
 name: Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # or 'master' if that's your main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Digital Ocean
-        uses: appleboy/ssh-action@master
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.HOST }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/valkyrie
-            ./deploy.sh
+            git pull
+            npm install
+            pm2 reload all || pm2 start server/server.js --name "valkyrie"
