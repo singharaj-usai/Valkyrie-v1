@@ -1,28 +1,21 @@
-name: Deploy Site via Git
+name: Deploy
 
 on:
   push:
-    branches:
-      - main # Run this workflow whenever code is pushed to the main branch
+    branches: [ main ]  # or 'master' if that's your main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Step 2: SSH into the VPS and pull the latest code
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v0.1.9
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.VPS_IP }} # Your VPS IP address stored as a secret
-          username: ${{ secrets.VPS_USER }} # Your VPS user stored as a secret
-          key: ${{ secrets.SSH_PRIVATE_KEY }} # Your SSH private key stored as a secret
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd Valkyrie/Valk.Website/AlphaBloxWeb        # Navigate to your project directory
-            git pull origin main        # Pull the latest code from GitHub
-            npm install                 # Install any new dependencies
-            docker-compose up --build -d app         # Stop running app not webserver
+            cd /var/www/valkyrie
+            git pull
+            npm install
+            pm2 reload all || pm2 start server/server.js --name "valkyrie"

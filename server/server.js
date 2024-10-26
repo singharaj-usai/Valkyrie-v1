@@ -262,10 +262,10 @@ app.post('/api/verify-secret-key', (req, res) => {
   }
 });
 
-const uploadsDir =
-  process.env.NODE_ENV === 'production'
-    ? '/tmp/uploads' // Use /tmp in production (Vercel)
-    : path.join(__dirname, '../uploads'); // Use local path in development
+const uploadsDir = process.env.NODE_ENV === 'production' 
+  ? '/var/data/uploads'  // Render's persistent storage path
+  : path.join(__dirname, '../uploads');
+
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
