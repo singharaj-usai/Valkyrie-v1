@@ -121,7 +121,7 @@ async function connectToDatabase() {
       console.log('Connected to MongoDB');
     } catch (error) {
       console.error('Error connecting to database:', error);
-      throw error;
+      setTimeout(connectToDatabase, 5000);
     }
   }
 }
@@ -189,14 +189,7 @@ app.use('/api', userRoutes);
 
 app.use('/video', express.static(path.join(__dirname, '../video')));
 // Serve static files from the client directory
-app.use(
-  '/',
-  (req, res, next) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    next();
-  },
-  express.static(path.join(__dirname, '../client'))
-);
+app.use(express.static(path.join(__dirname, '../client')));
 
 // Serve static files from the images directory
 app.use(
@@ -312,8 +305,14 @@ app.use((req, res, next) => {
 // Call this function after the server starts
 app.listen(port, '0.0.0.0', async () => {
   console.log(`Server running at http://0.0.0.0:${port}`);
-  if (process.env.NODE_ENV !== 'production') {
-    await resetUserIdsIfNeeded();
+  console.log('Environment:', process.env.NODE_ENV);
+  try {
+    await connectToDatabase();
+    if (process.env.NODE_ENV !== 'production') {
+      await resetUserIdsIfNeeded();
+    }
+  } catch (error) {
+    console.error('Startup error:', error);
   }
 });
 
