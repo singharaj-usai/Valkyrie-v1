@@ -255,7 +255,7 @@ app.post('/api/verify-secret-key', (req, res) => {
   }
 });
 
-const uploadsDir = process.env.NODE_ENV === 'production' 
+/* const uploadsDir = process.env.NODE_ENV === 'production' 
   ? '/var/data/uploads'  // Render's persistent storage path
   : path.join(__dirname, '../uploads');
 
@@ -263,7 +263,7 @@ const uploadsDir = process.env.NODE_ENV === 'production'
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-
+ */
 //app.use('/uploads', express.static(uploadsDir));
 
 async function resetUserIdsIfNeeded() {
